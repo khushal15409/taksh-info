@@ -198,8 +198,8 @@ function updateHeader() {
 
 // ---------- Layout ----------
 function navTab(href, icon, label, active, tint = "bg-orange-100 text-brand-600") {
-    return `<a href="${href}" ${active ? 'aria-current="page"' : ""} class="nav-tab group flex items-center justify-center gap-3 px-4 py-2.5 rounded-2xl text-sm transition-all duration-200 ${active ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white font-extrabold shadow-md shadow-orange-300/50" : "bg-white border border-orange-100 text-gray-700 font-bold hover:border-brand-500/50 hover:text-brand-600 hover:-translate-y-0.5 hover:shadow-md"}">
-        <span class="w-8 h-8 rounded-xl flex items-center justify-center transition ${active ? "bg-white/20 text-white" : tint + " group-hover:scale-110"}"><i data-lucide="${icon}" class="w-4 h-4"></i></span>
+    return `<a href="${href}" ${active ? 'aria-current="page"' : ""} class="nav-tab group flex items-center justify-center gap-2 sm:gap-3 px-2 sm:px-4 py-2.5 rounded-2xl text-xs min-[400px]:text-sm leading-tight text-center transition-all duration-200 ${active ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white font-extrabold shadow-md shadow-orange-300/50" : "bg-white border border-orange-100 text-gray-700 font-bold hover:border-brand-500/50 hover:text-brand-600 hover:-translate-y-0.5 hover:shadow-md"}">
+        <span class="hidden min-[400px]:flex w-8 h-8 shrink-0 rounded-xl items-center justify-center transition ${active ? "bg-white/20 text-white" : tint + " group-hover:scale-110"}"><i data-lucide="${icon}" class="w-4 h-4"></i></span>
         <span>${label}</span></a>`;
 }
 
@@ -219,8 +219,8 @@ function renderHeader() {
     host.innerHTML = `
     <div id="coming-soon" class="${bannerHidden ? "hidden" : ""} coming-soon-banner text-center text-white text-xs sm:text-sm font-bold tracking-wide py-2.5 px-10 relative z-50">
         <span class="mr-1">🚀</span><span class="uppercase tracking-widest">Coming Soon</span>
-        <span class="mx-2 text-yellow-300">•</span>
-        <span class="font-medium text-orange-100">TakshAllInOne is launching shortly. Stay tuned for the festive launch!</span>
+        <span class="mx-2 text-yellow-300 hidden sm:inline">•</span>
+        <span class="font-medium text-orange-100 hidden sm:inline">TakshAllInOne is launching shortly. Stay tuned for the festive launch!</span>
         <button data-close-banner class="absolute right-3 top-1/2 -translate-y-1/2 text-orange-200 hover:text-white w-6 h-6" aria-label="Dismiss">✕</button>
     </div>
 
@@ -242,7 +242,7 @@ function renderHeader() {
         <div class="max-w-7xl mx-auto px-4 lg:px-8 py-3 flex flex-wrap lg:flex-nowrap items-center gap-x-4 gap-y-3">
 
             <a href="${url("home")}" class="flex items-center shrink-0" aria-label="TakshAllInOne - Home">
-                <img src="${ROOT}assets/img/logo.png" alt="Taksh - All in one Ecommerce, Logistics & Services" class="h-12 sm:h-14 w-auto">
+                <img src="${ROOT}assets/img/logo.png" alt="Taksh - All in one Ecommerce, Logistics & Services" class="h-9 min-[360px]:h-10 sm:h-14 w-auto">
             </a>
 
             <button data-open-location class="hidden xl:flex items-center gap-2 text-left bg-orange-50/60 hover:bg-orange-100/80 px-3 py-2 rounded-xl border border-orange-200/60 transition shrink-0">
@@ -262,16 +262,16 @@ function renderHeader() {
                 <div id="search-popup" class="hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-2 max-h-96 overflow-y-auto"></div>
             </form>
 
-            <div class="flex items-center gap-2 sm:gap-3 ml-auto lg:ml-0 shrink-0">
-                <a href="${url("notifications")}" class="relative p-2.5 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-brand-600 transition" aria-label="Notifications">
+            <div class="flex items-center gap-0.5 sm:gap-3 ml-auto lg:ml-0 shrink-0">
+                <a href="${url("notifications")}" class="relative p-2 sm:p-2.5 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-brand-600 transition" aria-label="Notifications">
                     <i data-lucide="bell" class="w-6 h-6"></i>
                     <span id="hdr-notif-dot" class="absolute top-2 right-2 w-2.5 h-2.5 bg-brand-500 rounded-full ring-2 ring-white"></span>
                 </a>
-                <a href="${url("wishlist")}" class="relative p-2.5 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-brand-600 transition" aria-label="Wishlist">
+                <a href="${url("wishlist")}" class="relative p-2 sm:p-2.5 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-brand-600 transition" aria-label="Wishlist">
                     <i data-lucide="heart" class="w-6 h-6"></i>
                     <span id="hdr-wish-count" class="absolute -top-0.5 -right-0.5 bg-gray-900 text-white text-[10px] font-bold min-w-[20px] h-5 px-1 rounded-full flex items-center justify-center border-2 border-white">0</span>
                 </a>
-                <a href="${url("cart")}" class="flex items-center gap-3 bg-gradient-to-r from-brand-500 to-brand-600 text-white px-3 sm:px-4 py-2.5 rounded-2xl shadow-md hover:shadow-lg hover:brightness-105 transition active:scale-95">
+                <a href="${url("cart")}" class="flex items-center gap-3 bg-gradient-to-r from-brand-500 to-brand-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl mx-1 sm:mx-0 shadow-md hover:shadow-lg hover:brightness-105 transition active:scale-95">
                     <div class="relative">
                         <i data-lucide="shopping-cart" class="w-5 h-5"></i>
                         <span id="hdr-cart-count" class="absolute -top-2 -right-2 bg-yellow-400 text-gray-900 text-[10px] font-extrabold min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center shadow">0</span>
@@ -281,8 +281,8 @@ function renderHeader() {
                         <div id="hdr-cart-total" class="text-xs font-extrabold">₹0</div>
                     </div>
                 </a>
-                <a href="${url("profile")}" class="hidden md:flex items-center gap-2 pl-3 border-l border-gray-200 hover:opacity-80 transition">
-                    <div class="w-9 h-9 rounded-xl bg-orange-100 border-2 border-brand-500/40 text-brand-600 font-bold flex items-center justify-center">${esc(Store.state.profile.name.charAt(0).toUpperCase())}</div>
+                <a href="${url("profile")}" class="flex items-center gap-2 sm:pl-3 sm:border-l border-gray-200 hover:opacity-80 transition" aria-label="My Account">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-orange-100 border-2 border-brand-500/40 text-brand-600 font-bold flex items-center justify-center">${esc(Store.state.profile.name.charAt(0).toUpperCase())}</div>
                     <div class="hidden lg:block text-left leading-tight">
                         <div class="text-xs font-bold text-gray-800">${esc(Store.state.profile.name)}</div>
                         <div class="text-[10px] text-gray-400 font-medium">My Account</div>

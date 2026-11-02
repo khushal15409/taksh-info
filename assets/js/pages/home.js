@@ -15,21 +15,21 @@ ready(() => {
 function initHero() {
     const hero = qs("#hero");
     hero.innerHTML = HERO_SLIDES.map((s, i) => `
-        <div class="hero-slide ${i === 0 ? "is-active" : ""} bg-gradient-to-r ${s.bg} text-white p-8 lg:p-12 flex items-center">
+        <div class="hero-slide ${i === 0 ? "is-active" : ""} bg-gradient-to-r ${s.bg} text-white p-5 pb-12 sm:p-8 sm:pb-12 md:pl-16 lg:p-12 lg:pl-16 flex items-center">
             <div class="absolute -right-10 -bottom-10 w-96 h-96 bg-yellow-300/20 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute right-6 lg:right-16 top-1/2 -translate-y-1/2 text-[110px] lg:text-[190px] opacity-25 lg:opacity-40 select-none pointer-events-none">${s.emoji}</div>
+            <div class="absolute right-6 lg:right-16 top-1/2 -translate-y-1/2 text-[90px] sm:text-[130px] lg:text-[190px] opacity-15 sm:opacity-25 lg:opacity-40 select-none pointer-events-none">${s.emoji}</div>
             <div class="relative z-10 max-w-xl space-y-4">
                 <span class="inline-flex bg-black/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold text-yellow-300 border border-yellow-300/30">${s.badge}</span>
-                <h1 class="text-3xl lg:text-5xl font-festive font-extrabold leading-tight">${s.title}</h1>
+                <h1 class="text-2xl sm:text-3xl lg:text-5xl font-festive font-extrabold leading-tight">${s.title}</h1>
                 <p class="text-orange-50 text-sm lg:text-base font-medium">${s.text}</p>
                 <div class="pt-2 flex flex-wrap gap-3">
-                    <a href="${url(s.cta.page, s.cta.params, s.cta.hash)}" class="bg-white text-brand-600 font-extrabold px-6 py-3 rounded-2xl shadow-lg hover:bg-orange-50 transition hover:-translate-y-0.5">${s.cta.label}</a>
-                    <a href="${url(s.cta2.page, s.cta2.params, s.cta2.hash)}" class="bg-black/30 backdrop-blur-md border border-white/40 font-bold px-6 py-3 rounded-2xl hover:bg-black/40 transition">${s.cta2.label}</a>
+                    <a href="${url(s.cta.page, s.cta.params, s.cta.hash)}" class="bg-white text-brand-600 font-extrabold px-5 sm:px-6 py-2.5 sm:py-3 text-sm rounded-2xl shadow-lg hover:bg-orange-50 transition hover:-translate-y-0.5">${s.cta.label}</a>
+                    <a href="${url(s.cta2.page, s.cta2.params, s.cta2.hash)}" class="bg-black/30 backdrop-blur-md border border-white/40 font-bold px-5 sm:px-6 py-2.5 sm:py-3 text-sm rounded-2xl hover:bg-black/40 transition">${s.cta2.label}</a>
                 </div>
             </div>
         </div>`).join("") + `
-        <button data-hero="prev" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center z-20 backdrop-blur" aria-label="Previous"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
-        <button data-hero="next" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center z-20 backdrop-blur" aria-label="Next"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+        <button data-hero="prev" class="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center z-20 backdrop-blur" aria-label="Previous"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+        <button data-hero="next" class="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center z-20 backdrop-blur" aria-label="Next"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
         <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">${HERO_SLIDES.map((_, i) => `<button data-dot="${i}" class="hero-dot ${i === 0 ? "is-active" : ""}" aria-label="Slide ${i + 1}"></button>`).join("")}</div>`;
 
     const slides = qsa(".hero-slide", hero), dots = qsa(".hero-dot", hero);
@@ -51,13 +51,29 @@ function initHero() {
 }
 
 function renderCategories() {
-    qs("#categories-grid").innerHTML = CATEGORIES.map(c => {
+    const track = qs("#categories-grid");
+    track.innerHTML = CATEGORIES.map(c => {
         const n = PRODUCTS.filter(p => p.cat === c.id).length;
-        return `<a href="${url("listing", { cat: c.id })}" class="group bg-white p-4 rounded-2xl border border-gray-100 ${c.ring} text-center hover:shadow-md transition">
+        return `<a href="${url("listing", { cat: c.id })}" class="group snap-start flex-none w-[118px] sm:w-[136px] lg:w-[144px] bg-white p-4 rounded-2xl border border-gray-100 ${c.ring} text-center hover:shadow-md transition">
             <div class="w-16 h-16 mx-auto rounded-full ${c.tint} flex items-center justify-center text-3xl mb-2 group-hover:scale-110 transition">${c.emoji}</div>
             <div class="text-xs font-bold text-gray-800 leading-tight">${c.name}</div>
             <div class="text-[10px] text-gray-400 mt-0.5">${n} items</div></a>`;
     }).join("");
+
+    const step = () => Math.max(160, track.clientWidth * 0.8);
+    const atEnd = () => track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
+    const next = () => track.scrollTo({ left: atEnd() ? 0 : track.scrollLeft + step(), behavior: "smooth" });
+    qsa("[data-cat-nav]").forEach(b => b.addEventListener("click", () => {
+        track.scrollBy({ left: b.dataset.catNav === "next" ? step() : -step(), behavior: "smooth" });
+    }));
+
+    // gentle auto-slide; pauses on hover/touch and for reduced-motion users
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let timer = setInterval(next, 3500);
+    const pause = () => clearInterval(timer);
+    const resume = () => { clearInterval(timer); timer = setInterval(next, 3500); };
+    ["mouseenter", "touchstart", "focusin"].forEach(ev => track.addEventListener(ev, pause, { passive: true }));
+    ["mouseleave", "touchend", "focusout"].forEach(ev => track.addEventListener(ev, resume, { passive: true }));
 }
 
 function renderDeals() {

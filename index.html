@@ -32,16 +32,16 @@
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
             <div id="hero" class="lg:col-span-2 relative rounded-3xl overflow-hidden shadow-xl border border-orange-200/50 h-[440px] lg:h-[420px]"></div>
             <div class="grid grid-cols-2 lg:grid-cols-1 lg:grid-rows-2 gap-5">
-                <a href="pages/listing.html?cat=decor" class="relative overflow-hidden rounded-3xl p-6 bg-gradient-to-br from-gray-900 via-[#4A1500] to-gray-900 text-white flex flex-col justify-end hover:shadow-xl transition group">
-                    <div class="absolute right-3 top-3 text-6xl opacity-60 group-hover:scale-110 transition">🪔</div>
+                <a href="pages/listing.html?cat=decor" class="relative overflow-hidden rounded-3xl p-4 sm:p-6 min-h-[150px] bg-gradient-to-br from-gray-900 via-[#4A1500] to-gray-900 text-white flex flex-col justify-end hover:shadow-xl transition group">
+                    <div class="absolute right-2 top-2 text-4xl sm:text-6xl opacity-40 sm:opacity-60 group-hover:scale-110 transition">🪔</div>
                     <span class="text-[10px] font-bold text-yellow-400 uppercase tracking-widest">Festive Decor</span>
-                    <h3 class="font-festive font-extrabold text-xl leading-tight">Light up your Diwali</h3>
+                    <h3 class="font-festive font-extrabold text-base sm:text-xl leading-tight">Light up your Diwali</h3>
                     <span class="text-xs text-orange-200 mt-1">Diyas, lights &amp; rangoli from ₹129 →</span>
                 </a>
-                <a href="pages/listing.html?cat=electronics" class="relative overflow-hidden rounded-3xl p-6 bg-gradient-to-br from-blue-700 to-indigo-600 text-white flex flex-col justify-end hover:shadow-xl transition group">
-                    <div class="absolute right-3 top-3 text-6xl opacity-60 group-hover:scale-110 transition">🎧</div>
+                <a href="pages/listing.html?cat=electronics" class="relative overflow-hidden rounded-3xl p-4 sm:p-6 min-h-[150px] bg-gradient-to-br from-blue-700 to-indigo-600 text-white flex flex-col justify-end hover:shadow-xl transition group">
+                    <div class="absolute right-2 top-2 text-4xl sm:text-6xl opacity-40 sm:opacity-60 group-hover:scale-110 transition">🎧</div>
                     <span class="text-[10px] font-bold text-sky-200 uppercase tracking-widest">Electronics</span>
-                    <h3 class="font-festive font-extrabold text-xl leading-tight">Gadgets up to 65% off</h3>
+                    <h3 class="font-festive font-extrabold text-base sm:text-xl leading-tight">Gadgets up to 65% off</h3>
                     <span class="text-xs text-blue-100 mt-1">Audio, power banks &amp; more →</span>
                 </a>
             </div>
@@ -53,28 +53,38 @@
                 <h2 class="text-xl font-extrabold text-gray-900">Shop by Category 🛒</h2>
                 <a href="pages/listing.html" class="text-xs font-bold text-brand-600 hover:underline">View All</a>
             </div>
-            <div id="categories-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3"></div>
+            <div class="relative group/cat">
+                <button data-cat-nav="prev" class="cat-arrow hidden md:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white border border-orange-200 shadow-md text-brand-600 items-center justify-center hover:bg-brand-500 hover:text-white transition" aria-label="Previous categories"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                <div id="categories-grid" class="cat-track flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth py-1"></div>
+                <button data-cat-nav="next" class="cat-arrow hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white border border-orange-200 shadow-md text-brand-600 items-center justify-center hover:bg-brand-500 hover:text-white transition" aria-label="Next categories"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+            </div>
         </section>
 
         <!-- Delivery modes -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <a href="pages/listing.html" class="group bg-white p-6 rounded-3xl border border-orange-100 shadow-sm hover:shadow-festive transition relative overflow-hidden">
-                <div class="w-14 h-14 rounded-2xl bg-orange-100 text-brand-500 flex items-center justify-center mb-4 group-hover:scale-110 transition"><i data-lucide="truck" class="w-8 h-8"></i></div>
-                <span class="absolute top-4 right-4 bg-orange-100 text-brand-700 text-[10px] font-bold px-2.5 py-1 rounded-full">Standard</span>
-                <h3 class="font-extrabold text-lg text-gray-900 group-hover:text-brand-500 transition">Standard E-Commerce</h3>
-                <p class="text-xs text-gray-500 mt-1">Wide range of 50,000+ national products delivered with trusted care.</p>
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
+            <a href="pages/listing.html" class="group bg-white p-4 md:p-6 rounded-3xl border border-orange-100 shadow-sm hover:shadow-festive transition relative overflow-hidden flex md:block items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-orange-100 text-brand-500 flex items-center justify-center mb-0 md:mb-4 shrink-0 group-hover:scale-110 transition"><i data-lucide="truck" class="w-8 h-8"></i></div>
+                <span class="hidden md:block absolute top-4 right-4 bg-orange-100 text-brand-700 text-[10px] font-bold px-2.5 py-1 rounded-full">Standard</span>
+                <div class="min-w-0">
+                    <h3 class="font-extrabold text-base md:text-lg text-gray-900 group-hover:text-brand-500 transition">Standard E-Commerce</h3>
+                    <p class="text-xs text-gray-500 mt-1">Wide range of 50,000+ national products delivered with trusted care.</p>
+                </div>
             </a>
-            <a href="pages/listing.html?quick=1" class="group bg-white p-6 rounded-3xl border border-emerald-100 shadow-sm hover:shadow-festive transition relative overflow-hidden">
-                <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-110 transition"><i data-lucide="zap" class="w-8 h-8"></i></div>
-                <span class="absolute top-4 right-4 bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full">15-Mins</span>
-                <h3 class="font-extrabold text-lg text-gray-900 group-hover:text-emerald-600 transition">Quick 15-Min Delivery</h3>
-                <p class="text-xs text-gray-500 mt-1">Fresh milk, vegetables, snacks &amp; daily essentials at your doorstep instantly.</p>
+            <a href="pages/listing.html?quick=1" class="group bg-white p-4 md:p-6 rounded-3xl border border-emerald-100 shadow-sm hover:shadow-festive transition relative overflow-hidden flex md:block items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-0 md:mb-4 shrink-0 group-hover:scale-110 transition"><i data-lucide="zap" class="w-8 h-8"></i></div>
+                <span class="hidden md:block absolute top-4 right-4 bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full">15-Mins</span>
+                <div class="min-w-0">
+                    <h3 class="font-extrabold text-base md:text-lg text-gray-900 group-hover:text-emerald-600 transition">Quick 15-Min Delivery</h3>
+                    <p class="text-xs text-gray-500 mt-1">Fresh milk, vegetables, snacks &amp; daily essentials at your doorstep instantly.</p>
+                </div>
             </a>
-            <a href="pages/services.html" class="group bg-white p-6 rounded-3xl border border-purple-100 shadow-sm hover:shadow-festive transition relative overflow-hidden">
-                <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition"><i data-lucide="wrench" class="w-8 h-8"></i></div>
-                <span class="absolute top-4 right-4 bg-purple-100 text-purple-800 text-[10px] font-bold px-2.5 py-1 rounded-full">Verified Pros</span>
-                <h3 class="font-extrabold text-lg text-gray-900 group-hover:text-purple-600 transition">Home &amp; Local Services</h3>
-                <p class="text-xs text-gray-500 mt-1">Electricians, plumbers, salon at home, cleaners &amp; more.</p>
+            <a href="pages/services.html" class="group bg-white p-4 md:p-6 rounded-3xl border border-purple-100 shadow-sm hover:shadow-festive transition relative overflow-hidden flex md:block items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center mb-0 md:mb-4 shrink-0 group-hover:scale-110 transition"><i data-lucide="wrench" class="w-8 h-8"></i></div>
+                <span class="hidden md:block absolute top-4 right-4 bg-purple-100 text-purple-800 text-[10px] font-bold px-2.5 py-1 rounded-full">Verified Pros</span>
+                <div class="min-w-0">
+                    <h3 class="font-extrabold text-base md:text-lg text-gray-900 group-hover:text-purple-600 transition">Home &amp; Local Services</h3>
+                    <p class="text-xs text-gray-500 mt-1">Electricians, plumbers, salon at home, cleaners &amp; more.</p>
+                </div>
             </a>
         </section>
 
@@ -146,11 +156,11 @@
         </section>
 
         <!-- Newsletter -->
-        <section class="festive-banner-bg rounded-3xl p-8 lg:p-12 text-white grid md:grid-cols-2 gap-6 items-center gold-border-glow">
-            <div><h2 class="font-festive font-extrabold text-2xl lg:text-3xl">Get festive offers first 🎁</h2><p class="text-sm text-orange-200 mt-2">Subscribe for exclusive Diwali deals, coupons and new arrivals. No spam, ever.</p></div>
-            <form id="newsletter-form" class="flex gap-2" novalidate>
-                <input name="email" type="email" placeholder="Enter your email address" class="flex-1 rounded-2xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-gold" aria-label="Email">
-                <button class="bg-gradient-to-r from-brand-500 to-brand-gold text-white font-extrabold px-6 rounded-2xl hover:brightness-110">Subscribe</button>
+        <section class="festive-banner-bg rounded-3xl p-6 sm:p-8 lg:p-12 text-white grid md:grid-cols-2 gap-6 items-center gold-border-glow">
+            <div class="min-w-0"><h2 class="font-festive font-extrabold text-2xl lg:text-3xl">Get festive offers first 🎁</h2><p class="text-sm text-orange-200 mt-2">Subscribe for exclusive Diwali deals, coupons and new arrivals. No spam, ever.</p></div>
+            <form id="newsletter-form" class="flex flex-col sm:flex-row gap-2 min-w-0" novalidate>
+                <input name="email" type="email" placeholder="Enter your email address" class="flex-1 min-w-0 w-full rounded-2xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-gold" aria-label="Email">
+                <button class="bg-gradient-to-r from-brand-500 to-brand-gold text-white font-extrabold px-6 py-3 rounded-2xl hover:brightness-110">Subscribe</button>
             </form>
         </section>
         </div>
