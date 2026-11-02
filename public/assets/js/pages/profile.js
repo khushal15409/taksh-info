@@ -6,6 +6,7 @@ ready(() => {
     const h = location.hash.replace("#", "");
     if (TABS.some(t => t[0] === h)) tab = h;
     qs("#profile-root").addEventListener("click", e => {
+        if (e.target.closest("[data-logout]")) { Store.state.auth = { loggedIn: false }; Store.save(); toast("Logged out"); render(); renderHeader(); updateHeader(); return; }
         const t = e.target.closest("[data-tab], [data-addr], [data-new-addr]");
         if (!t) return;
         if (t.dataset.tab) { tab = t.dataset.tab; history.replaceState(null, "", "#" + tab); render(); }
@@ -58,7 +59,7 @@ function render() {
             <a href="${url("tracking", { id: o.id })}" class="flex flex-wrap items-center gap-4 p-4 rounded-2xl border border-gray-200 hover:border-brand-500 transition">
                 <div class="flex -space-x-3">${o.items.slice(0, 3).map(i => `<img src="${ROOT + i.img}" alt="" class="w-12 h-12 rounded-xl bg-orange-50 border-2 border-white object-contain">`).join("")}</div>
                 <div class="flex-1 min-w-[160px]"><div class="font-bold text-sm text-gray-800">#${o.id}</div><div class="text-[11px] text-gray-400">${new Date(o.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })} • ${o.items.length} item(s)</div></div>
-                <div class="font-extrabold text-brand-600">${money(o.totals.total)}</div><span class="text-xs font-bold text-brand-600">Track →</span></a>`).join("")
+                <div class="font-extrabold text-brand-600">${money(o.totals.total)}</div>${o.cancelled ? `<span class="text-xs font-bold text-red-500">Cancelled</span>` : `<span class="text-xs font-bold text-brand-600">Track →</span>`}</a>`).join("")
             : emptyState({ emoji: "📦", title: "No orders yet", text: "Your placed orders will show up here.", ctaLabel: "Start Shopping", ctaHref: url("listing") }))
     };
     qs("#profile-root").innerHTML = `
@@ -72,6 +73,18 @@ function render() {
                 ${TABS.map(([k, l, ic]) => `<button data-tab="${k}" class="w-full text-left px-3 py-2 rounded-xl flex items-center gap-2 ${tab === k ? "bg-orange-50 text-brand-600 font-bold" : "text-gray-600 hover:bg-gray-50"}"><i data-lucide="${ic}" class="w-4 h-4"></i>${l}</button>`).join("")}
                 <a href="${url("wishlist")}" class="w-full px-3 py-2 rounded-xl flex items-center gap-2 text-gray-600 hover:bg-gray-50"><i data-lucide="heart" class="w-4 h-4"></i>Wishlist</a>
                 <a href="${url("notifications")}" class="w-full px-3 py-2 rounded-xl flex items-center gap-2 text-gray-600 hover:bg-gray-50"><i data-lucide="bell" class="w-4 h-4"></i>Notifications</a>
+                <a href="${url("wallet")}" class="w-full px-3 py-2 rounded-xl flex items-center gap-2 text-gray-600 hover:bg-gray-50"><i data-lucide="wallet" class="w-4 h-4"></i>Wallet</a>
+                <a href="${url("help")}" class="w-full px-3 py-2 rounded-xl flex items-center gap-2 text-gray-600 hover:bg-gray-50"><i data-lucide="life-buoy" class="w-4 h-4"></i>Help &amp; Support</a>
+                <button data-open-prefs class="w-full text-left px-3 py-2 rounded-xl flex items-center gap-2 text-gray-600 hover:bg-gray-50"><i data-lucide="settings" class="w-4 h-4"></i>Language &amp; Theme</button>
+                <a href="${url("about")}" class="w-full px-3 py-2 rounded-xl flex items-center gap-2 text-gray-600 hover:bg-gray-50"><i data-lucide="info" class="w-4 h-4"></i>About, Refund &amp; Legal</a>
+                <div class="border-t border-gray-100 my-2"></div>
+                <a href="${url("delivery")}" class="w-full px-3 py-2 rounded-xl flex items-center gap-2 text-gray-600 hover:bg-gray-50"><i data-lucide="bike" class="w-4 h-4"></i>Join as Delivery Partner</a>
+                <a href="${url("vendor")}" class="w-full px-3 py-2 rounded-xl flex items-center gap-2 text-gray-600 hover:bg-gray-50"><i data-lucide="store" class="w-4 h-4"></i>Become a Vendor</a>
+                <a href="${url("devrequest")}" class="w-full px-3 py-2 rounded-xl flex items-center gap-2 text-gray-600 hover:bg-gray-50"><i data-lucide="code-2" class="w-4 h-4"></i>Development Request</a>
+                <div class="border-t border-gray-100 my-2"></div>
+                ${Store.state.auth.loggedIn
+                    ? `<button data-logout class="w-full text-left px-3 py-2 rounded-xl flex items-center gap-2 text-red-500 hover:bg-red-50"><i data-lucide="log-out" class="w-4 h-4"></i>Logout</button>`
+                    : `<a href="${url("login")}" class="w-full px-3 py-2 rounded-xl flex items-center gap-2 text-brand-600 hover:bg-orange-50 font-bold"><i data-lucide="log-in" class="w-4 h-4"></i>Login with OTP</a>`}
             </div>
         </div>
         <div class="lg:col-span-3 bg-white p-6 lg:p-8 rounded-3xl border border-orange-100 shadow-sm space-y-6">${panels[tab]}</div>

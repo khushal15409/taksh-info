@@ -45,6 +45,7 @@ function render(orders) {
                     <p class="text-xs text-gray-400">Placed on ${new Date(o.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })} • Paid via ${esc(o.payment)}</p>
                 </div>
                 <button onclick="window.print()" class="no-print border border-emerald-600 text-emerald-700 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 hover:bg-emerald-50"><i data-lucide="download" class="w-4 h-4"></i>Download Invoice</button>
+                <div id="order-actions" class="no-print flex flex-wrap gap-2 w-full"></div>
             </div>
             <div class="space-y-4"><h3 class="font-extrabold text-sm text-gray-900">Order Delivery Status</h3><div id="timeline" class="relative pl-10 space-y-6"></div></div>
             <div class="grid md:grid-cols-2 gap-6 border-t pt-6 border-gray-100 text-xs">
@@ -73,6 +74,14 @@ function render(orders) {
 function renderTimeline() {
     const el = qs("#timeline");
     if (!el || !current) return;
+    renderActions();
+    if (current.cancelled) {
+        const pill = qs("#status-pill");
+        pill.textContent = "Cancelled"; pill.className = "bg-red-100 text-red-700 text-xs font-extrabold px-3 py-1 rounded-full uppercase";
+        el.innerHTML = `<div class="timeline-line" style="left:15px"></div>` + [["Order Placed", "Your order was received by Taksh Seller", true], ["Order Cancelled", `Cancelled by you • Reason: ${esc(current.cancelled.reason)}. Refund (if paid) will be processed in 5-7 working days.`, false]].map(([t, d, ok]) =>
+            `<div class="relative"><span class="absolute -left-[33px] top-0 w-4 h-4 rounded-full ${ok ? "bg-emerald-500 ring-4 ring-emerald-100" : "bg-red-500 ring-4 ring-red-100"}"></span><h4 class="text-xs font-bold text-gray-900">${t}</h4><p class="text-[11px] text-gray-500">${d}</p></div>`).join("");
+        return;
+    }
     const idx = stepIndex(current);
     qs("#status-pill").textContent = STEPS[idx][0];
     el.innerHTML = `<div class="timeline-line" style="left:15px"></div>` + STEPS.map(([t, d], i) => {
@@ -82,3 +91,33 @@ function renderTimeline() {
             <p class="text-[11px] ${done ? "text-gray-500" : "text-gray-400"}">${d}</p></div>`;
     }).join("");
 }
+
+// Cancel (before dispatch) / Return (after delivery) actions
+const CANCEL_REASONS = ["Ordered by mistake", "Found a better price", "Delivery is taking too long", "Want to change address / items", "Other"];
+
+function renderActions() {
+    const box = qs("#order-actions");
+    if (!box || !current) return;
+    const idx = stepIndex(current);
+    let html = "";
+    if (current.returnRequest) html = `<span class="bg-sky-100 text-sky-800 text-xs font-bold px-3 py-1.5 rounded-xl">Return requested • ${current.returnRequest.id}</span>`;
+    else if (!current.cancelled && idx < 2) html = `<button data-cancel class="border border-red-300 text-red-600 hover:bg-red-50 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2"><i data-lucide="x-circle" class="w-4 h-4"></i>Cancel Order</button>`;
+    else if (!current.cancelled && idx === STEPS.length - 1) html = `<a href="${url("returns", { id: current.id })}" class="border border-brand-500 text-brand-600 hover:bg-orange-50 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2"><i data-lucide="undo-2" class="w-4 h-4"></i>Return Items</a>`;
+    if (box.dataset.state === html) return;
+    box.dataset.state = html; box.innerHTML = html; refreshIcons();
+}
+
+document.addEventListener("click", e => {
+    if (!e.target.closest("[data-cancel]")) return;
+    const m = Modal.open({
+        title: "Cancel this order?",
+        body: `<form id="cancel-form" class="space-y-4 text-xs"><p class="text-gray-500">Orders can be cancelled free of charge until they are shipped.</p>
+            ${CANCEL_REASONS.map((r, i) => `<label class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-orange-50/40"><input type="radio" name="reason" value="${r}" class="accent-brand-500" ${i === 0 ? "checked" : ""}><span class="font-semibold text-gray-700">${r}</span></label>`).join("")}
+            <div class="flex gap-3"><button type="button" data-modal-close class="flex-1 border border-gray-300 text-gray-600 font-bold py-3 rounded-2xl">Keep order</button><button class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-2xl">Cancel order</button></div></form>`
+    });
+    qs("#cancel-form", m).addEventListener("submit", ev => {
+        ev.preventDefault();
+        current.cancelled = { at: Date.now(), reason: new FormData(ev.target).get("reason") };
+        Store.save(); Modal.close(); renderTimeline(); toast("Order cancelled");
+    });
+});

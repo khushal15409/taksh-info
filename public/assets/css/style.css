@@ -82,3 +82,8 @@ details[open] .faq-chevron { transform: rotate(180deg); }
 
 /* Let product SVG backgrounds blend into their card */
 img[src*="/products/"] { mix-blend-mode: multiply; }
+
+/* Dark theme: inverts the page and re-inverts media so photos/logos keep their colours (toggled via html.dark) */
+html.dark { filter: invert(1) hue-rotate(180deg); background: #FFFBEF; }
+html.dark img, html.dark video, html.dark .hero-slide, html.dark .header-gradient, html.dark .coming-soon-banner, html.dark .festive-banner-bg, html.dark [class*="bg-gradient-to-"] { filter: invert(1) hue-rotate(180deg); }
+@media print { html.dark { filter: none; } }

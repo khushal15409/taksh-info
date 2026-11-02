@@ -65,4 +65,54 @@ class PageController extends Controller
     {
         return view('pages.terms');
     }
+
+    public function login(): View
+    {
+        return view('pages.login');
+    }
+
+    public function wallet(): View
+    {
+        return view('pages.wallet');
+    }
+
+    public function help(): View
+    {
+        return view('pages.help');
+    }
+
+    public function about(): View
+    {
+        return view('pages.about');
+    }
+
+    public function refund(): View
+    {
+        return view('pages.refund');
+    }
+
+    public function delivery(): View
+    {
+        return view('pages.form', ['page' => 'delivery', 'title' => 'Join as Delivery Partner']);
+    }
+
+    public function vendor(): View
+    {
+        return view('pages.form', ['page' => 'vendor', 'title' => 'Become a Vendor']);
+    }
+
+    public function devrequest(): View
+    {
+        return view('pages.form', ['page' => 'devrequest', 'title' => 'Development Request']);
+    }
+
+    public function returns(): View
+    {
+        return view('pages.return');
+    }
+
+    public function payresult(): View
+    {
+        return view('pages.payment-result');
+    }
 }

@@ -15,8 +15,35 @@ const PAGES = {
     services: "services",
     wishlist: "wishlist",
     privacy: "privacy-policy",
-    terms: "terms"
+    terms: "terms",
+    login: "login",
+    wallet: "wallet",
+    help: "help",
+    about: "about",
+    refund: "refund-policy",
+    delivery: "join/delivery-partner",
+    vendor: "join/vendor",
+    devrequest: "development-request",
+    returns: "return",
+    payresult: "payment/result"
 };
+
+// ---------- Language (chrome only: header, nav, footer) + theme ----------
+const I18N = {
+    hi: {
+        "Home": "होम", "Quick Products": "क्विक प्रोडक्ट्स", "Services": "सेवाएं", "My Cart": "मेरी कार्ट", "Search": "खोजें",
+        "Deliver to": "डिलीवरी स्थान", "24x7 Customer Care": "24x7 ग्राहक सेवा", "Track Order": "ऑर्डर ट्रैक करें", "My Account": "मेरा अकाउंट",
+        "Shop": "खरीदारी", "Quick Links": "क्विक लिंक", "Help & Legal": "सहायता और नियम", "Download App": "ऐप डाउनलोड करें",
+        "Partner With Us": "हमारे साथ जुड़ें", "Help & Support": "सहायता", "Privacy Policy": "गोपनीयता नीति", "Terms & Conditions": "नियम और शर्तें",
+        "About Us": "हमारे बारे में", "Refund Policy": "रिफंड नीति", "Wallet": "वॉलेट", "Wishlist": "विशलिस्ट", "Login": "लॉगिन",
+        "Local Services": "स्थानीय सेवाएं", "Courier Booking": "कूरियर बुकिंग", "Join as Delivery Partner": "डिलीवरी पार्टनर बनें",
+        "Become a Vendor": "वेंडर बनें", "Development Request": "डेवलपमेंट रिक्वेस्ट"
+    }
+};
+const lang = () => (Store.state.lang === "hi" ? "hi" : "en");
+const tr = (k) => (lang() === "hi" && I18N.hi[k]) || k;
+function applyTheme() { document.documentElement.classList.toggle("dark", Store.state.theme === "dark"); }
+applyTheme();
 
 // ---------- Helpers ----------
 function url(page, params, hash) {
@@ -257,9 +284,9 @@ function renderHeader() {
                 <span class="truncate"><b>Festive Sparkle Sale:</b> Up to 50% OFF + 15-Min Delivery | Code: <b class="underline decoration-yellow-300 decoration-2">TAKSHDIWALI</b></span>
             </div>
             <div class="hidden md:flex items-center gap-5 text-orange-100 font-medium shrink-0">
-                <a href="${url("services", null, "#help")}" class="hover:text-white">24x7 Customer Care</a>
-                <a href="${url("tracking")}" class="hover:text-white">Track Order</a>
-                <span class="flex items-center gap-1"><i data-lucide="globe" class="w-3.5 h-3.5"></i>EN / ₹ INR</span>
+                <a href="${url("help")}" class="hover:text-white">${tr("24x7 Customer Care")}</a>
+                <a href="${url("tracking")}" class="hover:text-white">${tr("Track Order")}</a>
+                <button data-open-prefs class="flex items-center gap-1 hover:text-white" aria-label="Language and theme"><i data-lucide="globe" class="w-3.5 h-3.5"></i>${lang() === "hi" ? "हिं" : "EN"} / ₹ INR</button>
             </div>
         </div>
     </div>
@@ -274,7 +301,7 @@ function renderHeader() {
             <button data-open-location class="hidden xl:flex items-center gap-2 text-left bg-orange-50/60 hover:bg-orange-100/80 px-3 py-2 rounded-xl border border-orange-200/60 transition shrink-0">
                 <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-brand-500 shadow-sm"><i data-lucide="map-pin" class="w-4 h-4"></i></div>
                 <div>
-                    <div class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider flex items-center gap-1">Deliver to <i data-lucide="chevron-down" class="w-3 h-3"></i></div>
+                    <div class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider flex items-center gap-1">${tr("Deliver to")} <i data-lucide="chevron-down" class="w-3 h-3"></i></div>
                     <div id="hdr-location" class="text-xs font-bold text-gray-800 truncate max-w-[130px]"></div>
                 </div>
             </button>
@@ -283,7 +310,7 @@ function renderHeader() {
                 <div class="flex items-center bg-gray-50 focus-within:bg-white rounded-2xl border-2 border-orange-200/80 focus-within:border-brand-500 transition overflow-hidden">
                     <i data-lucide="search" class="w-5 h-5 text-gray-400 ml-4 mr-2 shrink-0"></i>
                     <input id="search-input" name="q" type="search" placeholder="Search ${PRODUCTS.length}+ items (e.g. Atta, Rice, Diya)..." class="w-full py-2.5 text-sm bg-transparent focus:outline-none text-gray-800 placeholder-gray-400 font-medium">
-                    <button type="submit" class="bg-gradient-to-r from-brand-500 to-brand-600 text-white px-5 py-2.5 font-semibold text-sm hover:brightness-110 transition">Search</button>
+                    <button type="submit" class="bg-gradient-to-r from-brand-500 to-brand-600 text-white px-5 py-2.5 font-semibold text-sm hover:brightness-110 transition">${tr("Search")}</button>
                 </div>
                 <div id="search-popup" class="hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-2 max-h-96 overflow-y-auto"></div>
             </form>
@@ -303,15 +330,15 @@ function renderHeader() {
                         <span id="hdr-cart-count" class="absolute -top-2 -right-2 bg-yellow-400 text-gray-900 text-[10px] font-extrabold min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center shadow">0</span>
                     </div>
                     <div class="text-left leading-tight hidden sm:block">
-                        <div class="text-[10px] uppercase font-bold text-orange-200">My Cart</div>
+                        <div class="text-[10px] uppercase font-bold text-orange-200">${tr("My Cart")}</div>
                         <div id="hdr-cart-total" class="text-xs font-extrabold">₹0</div>
                     </div>
                 </a>
-                <a href="${url("profile")}" class="flex items-center gap-2 sm:pl-3 sm:border-l border-gray-200 hover:opacity-80 transition" aria-label="My Account">
+                <a href="${Store.state.auth.loggedIn ? url("profile") : url("login")}" class="flex items-center gap-2 sm:pl-3 sm:border-l border-gray-200 hover:opacity-80 transition" aria-label="My Account">
                     <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-orange-100 border-2 border-brand-500/40 text-brand-600 font-bold flex items-center justify-center">${esc(Store.state.profile.name.charAt(0).toUpperCase())}</div>
                     <div class="hidden lg:block text-left leading-tight">
                         <div class="text-xs font-bold text-gray-800">${esc(Store.state.profile.name)}</div>
-                        <div class="text-[10px] text-gray-400 font-medium">My Account</div>
+                        <div class="text-[10px] text-gray-400 font-medium">${tr("My Account")}</div>
                     </div>
                 </a>
             </div>
@@ -319,9 +346,9 @@ function renderHeader() {
 
         <nav id="main-nav" class="bg-orange-50/60 border-t border-orange-100/80" aria-label="Main">
             <div class="max-w-7xl mx-auto px-4 lg:px-8 py-3 grid grid-cols-3 gap-2 sm:gap-4">
-                ${navTab(url("home"), "home", "Home", act.home)}
-                ${navTab(url("listing", { quick: 1 }), "zap", "Quick Products", act.quick, "bg-emerald-100 text-emerald-600")}
-                ${navTab(url("services"), "wrench", "Services", act.services, "bg-purple-100 text-purple-600")}
+                ${navTab(url("home"), "home", tr("Home"), act.home)}
+                ${navTab(url("listing", { quick: 1 }), "zap", tr("Quick Products"), act.quick, "bg-emerald-100 text-emerald-600")}
+                ${navTab(url("services"), "wrench", tr("Services"), act.services, "bg-purple-100 text-purple-600")}
             </div>
         </nav>
     </header>`;
@@ -346,30 +373,40 @@ function renderFooter() {
                 </div>
             </div>
             <div>
-                <h4 class="font-bold mb-3 uppercase tracking-wider">Shop</h4>
+                <h4 class="font-bold mb-3 uppercase tracking-wider">${tr("Shop")}</h4>
                 <ul class="space-y-2 text-gray-400">
                     ${CATEGORIES.slice(0, 6).map(c => `<li><a href="${url("listing", { cat: c.id })}" class="hover:text-brand-500">${c.name}</a></li>`).join("")}
                 </ul>
             </div>
             <div>
-                <h4 class="font-bold mb-3 uppercase tracking-wider">Quick Links</h4>
+                <h4 class="font-bold mb-3 uppercase tracking-wider">${tr("Quick Links")}</h4>
                 <ul class="space-y-2 text-gray-400">
                     <li><a href="${url("home")}" class="hover:text-brand-500">Home</a></li>
-                    <li><a href="${url("services")}" class="hover:text-brand-500">Local Services</a></li>
-                    <li><a href="${url("services", null, "#courier")}" class="hover:text-brand-500">Courier Booking</a></li>
+                    <li><a href="${url("services")}" class="hover:text-brand-500">${tr("Local Services")}</a></li>
+                    <li><a href="${url("services", null, "#courier")}" class="hover:text-brand-500">${tr("Courier Booking")}</a></li>
                     <li><a href="${url("tracking")}" class="hover:text-brand-500">Track Order</a></li>
-                    <li><a href="${url("wishlist")}" class="hover:text-brand-500">Wishlist</a></li>
-                    <li><a href="${url("profile")}" class="hover:text-brand-500">My Account</a></li>
+                    <li><a href="${url("wishlist")}" class="hover:text-brand-500">${tr("Wishlist")}</a></li>
+                    <li><a href="${url("wallet")}" class="hover:text-brand-500">${tr("Wallet")}</a></li>
+                    <li><a href="${url("profile")}" class="hover:text-brand-500">${tr("My Account")}</a></li>
+                </ul>
+                <h4 class="font-bold mt-5 mb-3 uppercase tracking-wider">${tr("Partner With Us")}</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="${url("delivery")}" class="hover:text-brand-500">${tr("Join as Delivery Partner")}</a></li>
+                    <li><a href="${url("vendor")}" class="hover:text-brand-500">${tr("Become a Vendor")}</a></li>
+                    <li><a href="${url("devrequest")}" class="hover:text-brand-500">${tr("Development Request")}</a></li>
                 </ul>
             </div>
             <div>
-                <h4 class="font-bold mb-3 uppercase tracking-wider">Help & Legal</h4>
+                <h4 class="font-bold mb-3 uppercase tracking-wider">${tr("Help & Legal")}</h4>
                 <ul class="space-y-2 text-gray-400">
+                    <li><a href="${url("help")}" class="hover:text-brand-500">${tr("Help & Support")}</a></li>
                     <li><a href="${url("services", null, "#help")}" class="hover:text-brand-500">Help Centre & FAQs</a></li>
-                    <li><a href="${url("privacy")}" class="hover:text-brand-500">Privacy Policy</a></li>
-                    <li><a href="${url("terms")}" class="hover:text-brand-500">Terms & Conditions</a></li>
+                    <li><a href="${url("about")}" class="hover:text-brand-500">${tr("About Us")}</a></li>
+                    <li><a href="${url("privacy")}" class="hover:text-brand-500">${tr("Privacy Policy")}</a></li>
+                    <li><a href="${url("terms")}" class="hover:text-brand-500">${tr("Terms & Conditions")}</a></li>
+                    <li><a href="${url("refund")}" class="hover:text-brand-500">${tr("Refund Policy")}</a></li>
                 </ul>
-                <h4 class="font-bold mt-5 mb-3 uppercase tracking-wider">Download App</h4>
+                <h4 class="font-bold mt-5 mb-3 uppercase tracking-wider">${tr("Download App")}</h4>
                 <a href="${url("home", null, "#app")}" class="inline-block" aria-label="Taksh app coming soon on Google Play">${playBadge()}</a>
                 <p class="text-[11px] text-gray-500 mt-2">Android app launching soon - <a href="${url("home", null, "#app")}" class="text-brand-500 hover:underline">notify me</a></p>
             </div>
@@ -398,12 +435,24 @@ function initSearch() {
     form.addEventListener("submit", e => {
         e.preventDefault();
         const q = input.value.trim();
+        if (q) { Store.state.searches = [q, ...(Store.state.searches || []).filter(x => x.toLowerCase() !== q.toLowerCase())].slice(0, 6); Store.save(); }
         location.href = q ? url("listing", { q }) : url("listing");
     });
 
+    // Recent searches (shown when the empty box is focused)
+    const showRecent = () => {
+        const list = Store.state.searches || [];
+        if (input.value.trim() || !list.length) return;
+        popup.innerHTML = `<div class="flex items-center justify-between px-3 pt-2 pb-1"><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Recent searches</p><button type="button" data-clear-searches class="text-[10px] font-bold text-brand-600 hover:underline">Clear</button></div>` +
+            list.map(q => `<a href="${url("listing", { q })}" class="flex items-center gap-3 p-2.5 hover:bg-orange-50 rounded-xl text-sm font-semibold text-gray-700"><i data-lucide="history" class="w-4 h-4 text-gray-400"></i>${esc(q)}</a>`).join("");
+        popup.classList.remove("hidden"); refreshIcons();
+    };
+    input.addEventListener("focus", showRecent);
+    popup.addEventListener("click", e => { if (e.target.closest("[data-clear-searches]")) { Store.state.searches = []; Store.save(); popup.classList.add("hidden"); } });
+
     input.addEventListener("input", () => {
         const q = input.value.trim().toLowerCase();
-        if (!q) { popup.classList.add("hidden"); return; }
+        if (!q) { popup.classList.add("hidden"); showRecent(); return; }
         const prods = PRODUCTS.filter(p => (p.name + " " + p.brand).toLowerCase().includes(q)).slice(0, 6);
         const cats = CATEGORIES.filter(c => c.name.toLowerCase().includes(q)).slice(0, 3);
         popup.innerHTML = (cats.length ? `<p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-3 pt-2 pb-1">Categories</p>` +
@@ -430,8 +479,10 @@ function openLocationModal() {
                 <input name="pincode" maxlength="6" inputmode="numeric" value="${esc(Store.state.pincode)}" class="field mt-1" placeholder="e.g. 380061"></div>
             <div><label class="text-xs font-bold text-gray-500">City</label>
                 <input name="city" value="${esc(Store.state.city)}" class="field mt-1"></div>
+            <button type="button" id="loc-detect" class="w-full border-2 border-brand-500 text-brand-600 hover:bg-orange-50 font-bold py-2.5 rounded-2xl flex items-center justify-center gap-2"><i data-lucide="crosshair" class="w-4 h-4"></i>Use my current location</button>
             <button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-2xl">Update Location</button></form>`
     });
+    qs("#loc-detect", m).addEventListener("click", ev => detectLocation(m, ev.currentTarget));
     qs("#loc-form", m).addEventListener("submit", e => {
         e.preventDefault();
         const f = new FormData(e.target);
@@ -441,6 +492,47 @@ function openLocationModal() {
         Store.save();
         Modal.close();
         toast("📍 Delivery location updated");
+    });
+}
+
+// Browser geolocation + OpenStreetMap reverse lookup to prefill pincode / city (asks permission; manual entry always works)
+function detectLocation(modal, btn) {
+    if (!navigator.geolocation) return toast("Location is not supported on this browser", "error");
+    const label = btn.innerHTML;
+    btn.disabled = true; btn.textContent = "Detecting…";
+    const reset = () => { btn.disabled = false; btn.innerHTML = label; refreshIcons(); };
+    navigator.geolocation.getCurrentPosition(async pos => {
+        try {
+            const { latitude: la, longitude: lo } = pos.coords;
+            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${la}&lon=${lo}`);
+            const a = (await r.json()).address || {};
+            const form = qs("#loc-form", modal);
+            if (a.postcode) form.elements.pincode.value = a.postcode.replace(/\D/g, "").slice(0, 6);
+            const city = a.city || a.town || a.village || a.state_district;
+            if (city) form.elements.city.value = city;
+            toast("📍 Location detected - review and update");
+        } catch (e) { toast("Couldn't look up your address. Please enter your pincode.", "error"); }
+        reset();
+    }, err => { toast(err.code === 1 ? "Location permission denied. Enter your pincode instead." : "Couldn't detect location", "error"); reset(); }, { timeout: 10000 });
+}
+
+// Language + theme preferences
+function openPrefsModal() {
+    const m = Modal.open({
+        title: "Preferences",
+        body: `<form id="prefs-form" class="space-y-5 text-xs">
+            <div><p class="font-bold text-gray-500 mb-2">Language</p><div class="grid grid-cols-2 gap-3">${[["en", "English"], ["hi", "हिन्दी (Hindi)"]].map(([k, l]) => `<label class="flex items-center gap-2 p-3 rounded-xl border-2 border-gray-200 cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-orange-50/40"><input type="radio" name="lang" value="${k}" class="accent-brand-500" ${lang() === k ? "checked" : ""}><span class="font-bold text-gray-700">${l}</span></label>`).join("")}</div>
+                <p class="text-[11px] text-gray-400 mt-2">Hindi applies to the menus, header and footer.</p></div>
+            <div><p class="font-bold text-gray-500 mb-2">Theme</p><div class="grid grid-cols-2 gap-3">${[["light", "☀️ Light"], ["dark", "🌙 Dark"]].map(([k, l]) => `<label class="flex items-center gap-2 p-3 rounded-xl border-2 border-gray-200 cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-orange-50/40"><input type="radio" name="theme" value="${k}" class="accent-brand-500" ${Store.state.theme === k ? "checked" : ""}><span class="font-bold text-gray-700">${l}</span></label>`).join("")}</div></div>
+            <button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-2xl">Save preferences</button></form>`
+    });
+    qs("#prefs-form", m).addEventListener("submit", e => {
+        e.preventDefault();
+        const f = new FormData(e.target);
+        Store.state.lang = f.get("lang"); Store.state.theme = f.get("theme");
+        Store.save(); applyTheme(); Modal.close();
+        renderHeader(); renderFooter(); updateHeader(); initSearch();
+        toast("✅ Preferences saved");
     });
 }
 
@@ -477,9 +569,10 @@ function openAddressModal(existing, onSave) {
 
 // ---------- Global event delegation ----------
 document.addEventListener("click", e => {
-    const t = e.target.closest("[data-action], [data-open-location], [data-close-banner]");
+    const t = e.target.closest("[data-action], [data-open-location], [data-close-banner], [data-open-prefs]");
     if (!t) return;
     if (t.matches("[data-open-location]")) return openLocationModal();
+    if (t.matches("[data-open-prefs]")) return openPrefsModal();
     if (t.matches("[data-close-banner]")) {
         qs("#coming-soon").classList.add("hidden");
         try { sessionStorage.setItem("taksh_banner_closed", "1"); } catch (err) { /* ignore */ }

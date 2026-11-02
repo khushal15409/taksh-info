@@ -84,7 +84,7 @@ function render(p) {
 
     <div class="bg-white rounded-3xl border border-orange-100 shadow-sm mt-8">
         <div class="flex gap-6 px-6 pt-4 border-b border-gray-100 text-sm font-bold" id="pd-tabs">
-            ${["Description", "Details", "Reviews"].map((t, i) => `<button data-t="${i}" class="pb-3 border-b-2 ${i === 0 ? "border-brand-500 text-brand-600" : "border-transparent text-gray-400 hover:text-gray-700"}">${t}${t === "Reviews" ? ` (${p.reviews.toLocaleString("en-IN")})` : ""}</button>`).join("")}
+            ${["Description", "Details", "Reviews", "Q&A"].map((t, i) => `<button data-t="${i}" class="pb-3 border-b-2 ${i === 0 ? "border-brand-500 text-brand-600" : "border-transparent text-gray-400 hover:text-gray-700"}">${t}${t === "Reviews" ? ` (${p.reviews.toLocaleString("en-IN")})` : ""}</button>`).join("")}
         </div>
         <div class="p-6 text-sm text-gray-600 leading-relaxed" id="pd-panel"></div>
     </div>`;
@@ -96,11 +96,13 @@ function render(p) {
             <dt class="text-gray-400 font-bold">Pack size</dt><dd class="font-semibold">${esc(p.unit)}</dd>
             <dt class="text-gray-400 font-bold">SKU</dt><dd class="font-semibold">${p.sku}</dd>
             <dt class="text-gray-400 font-bold">Country of origin</dt><dd class="font-semibold">India</dd></dl>`,
-        reviewsHtml(p)
+        reviewsHtml(p),
+        qaHtml(p)
     ];
     const panel = qs("#pd-panel");
     const showTab = (i) => {
-        panel.innerHTML = panels[i];
+        panel.innerHTML = i === 3 ? qaHtml(p) : panels[i];
+        if (i === 3) bindQa(p);
         qsa("#pd-tabs [data-t]").forEach(b => { const on = Number(b.dataset.t) === i; b.classList.toggle("border-brand-500", on); b.classList.toggle("text-brand-600", on); b.classList.toggle("border-transparent", !on); b.classList.toggle("text-gray-400", !on); });
         refreshIcons();
     };
@@ -138,4 +140,32 @@ function reviewsHtml(p) {
     const bars = [5, 4, 3, 2, 1].map((s, i) => { const w = [68, 22, 7, 2, 1][i]; return `<div class="flex items-center gap-2 text-xs"><span class="w-6">${s}★</span><div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden"><div class="h-full bg-amber-400" style="width:${w}%"></div></div><span class="w-8 text-gray-400">${w}%</span></div>`; }).join("");
     return `<div class="grid md:grid-cols-3 gap-8"><div class="space-y-3"><div class="text-5xl font-extrabold text-gray-900">${p.rating}</div><div class="flex gap-0.5">${stars(p.rating, "w-5 h-5")}</div><p class="text-xs text-gray-400">Based on ${p.reviews.toLocaleString("en-IN")} ratings</p>${bars}</div>
         <div class="md:col-span-2 space-y-4">${names.map((n, i) => `<div class="border-b border-gray-100 pb-4"><div class="flex items-center gap-2"><span class="font-bold text-gray-800 text-xs">${n}</span><span class="flex gap-0.5">${stars(i === 3 ? 4 : 5, "w-3 h-3")}</span><span class="text-[10px] text-emerald-600 font-bold">Verified Buyer</span></div><p class="text-xs mt-1">${texts[i]}</p></div>`).join("")}</div></div>`;
+}
+
+// Questions & Answers (seeded examples + your own questions, kept in this browser)
+function qaHtml(p) {
+    const own = (Store.state.qa || {})[p.id] || [];
+    const seed = [
+        ["Is this product genuine and sealed?", "Yes, Taksh sells 100% genuine, factory-sealed products straight from the brand or authorised distributors."],
+        ["What is the return policy?", "This item has a 7 day easy return policy from the date of delivery."],
+        ["Is cash on delivery available?", "Yes, COD is available on most pincodes, along with UPI and card payments."]
+    ];
+    const row = ([q, a], mine) => `<div class="border-b border-gray-100 pb-4"><p class="text-xs font-extrabold text-gray-900">Q: ${esc(q)}</p>
+        <p class="text-xs text-gray-600 mt-1">${a ? "A: " + esc(a) : `<span class="text-gray-400 italic">Awaiting an answer from the seller</span>`}</p>${mine ? `<span class="text-[10px] text-brand-600 font-bold">Your question</span>` : ""}</div>`;
+    return `<div class="max-w-2xl space-y-5"><form id="qa-form" class="flex gap-2"><input name="q" maxlength="160" class="field" placeholder="Ask a question about this product…" required>
+        <button class="bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs px-5 rounded-xl shrink-0">Ask</button></form>
+        <div class="space-y-4">${own.map(q => row([q, ""], true)).join("")}${seed.map(x => row(x)).join("")}</div></div>`;
+}
+
+function bindQa(p) {
+    qs("#qa-form").addEventListener("submit", e => {
+        e.preventDefault();
+        const q = e.target.elements.q.value.trim();
+        if (q.length < 5) return toast("Please enter a longer question", "error");
+        const qa = Store.state.qa = Store.state.qa || {};
+        qa[p.id] = [q, ...(qa[p.id] || [])];
+        Store.save();
+        qs("#pd-panel").innerHTML = qaHtml(p); bindQa(p);
+        toast("✅ Question posted");
+    });
 }

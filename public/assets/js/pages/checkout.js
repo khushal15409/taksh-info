@@ -39,7 +39,8 @@ function renderPayment() {
     const opts = [
         ["cod", "Cash on Delivery (COD)", "Pay with cash upon delivery", "FREE", "text-emerald-600"],
         ["upi", "UPI (Google Pay / PhonePe / Paytm)", "Instant refund & quick processing", "Instant", "text-brand-600"],
-        ["card", "Credit / Debit Card", "Visa, MasterCard, RuPay", "Secure", "text-brand-600"]
+        ["card", "Credit / Debit Card", "Visa, MasterCard, RuPay", "Secure", "text-brand-600"],
+        ["razorpay", "Pay Online (Razorpay)", "Cards, UPI, Netbanking & Wallets via secure gateway", "Secure", "text-blue-600"]
     ];
     qs("#pay-list").innerHTML = opts.map(([k, t, d, tag, tc]) => `
         <label class="flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition ${payment === k ? "border-brand-500 bg-orange-50/40" : "border-gray-200 hover:border-brand-500/50"}">
@@ -87,8 +88,32 @@ function placeOrder() {
         if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(qs("#card-exp").value)) return toast("Enter expiry as MM/YY", "error");
         if (!/^\d{3}$/.test(qs("#card-cvv").value)) return toast("Enter a valid 3-digit CVV", "error");
     }
+    if (payment === "razorpay") return openGateway(address);
     const label = { cod: "Cash on Delivery", upi: "UPI", card: "Card" }[payment];
     const order = Store.Orders.place({ address, payment: label, note: qs("#order-note").value.trim() });
     toast("🎉 Order Confirmed Successfully!");
     setTimeout(() => { location.href = url("tracking", { id: order.id }); }, 700);
+}
+
+// Online gateway (demo): simulates the pay-now step. Replace with the real Razorpay Checkout once the backend creates orders.
+function openGateway(address) {
+    const total = Cart.totals().total;
+    const m = Modal.open({
+        title: "Secure Online Payment",
+        body: `<div class="space-y-4 text-xs">
+            <div class="flex items-center justify-between bg-orange-50/60 border border-orange-100 rounded-2xl p-4"><span class="font-bold text-gray-600">Amount payable</span><span class="text-xl font-extrabold text-brand-600">${money2(total)}</span></div>
+            <p class="text-gray-500">Choose a method to complete the payment. <span class="text-gray-400">(Demo gateway - no real money is charged.)</span></p>
+            <div class="grid grid-cols-2 gap-3">${[["upi", "📱", "UPI"], ["card", "💳", "Card"], ["netbanking", "🏦", "Netbanking"], ["wallet", "👛", "Wallet"]].map(([k, e, l], i) => `<label class="flex items-center gap-2 p-3 rounded-xl border-2 border-gray-200 cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-orange-50/40"><input type="radio" name="gw" value="${k}" class="accent-brand-500" ${i === 0 ? "checked" : ""}><span>${e}</span><span class="font-bold text-gray-700">${l}</span></label>`).join("")}</div>
+            <button id="gw-pay" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-extrabold py-3 rounded-2xl transition">Pay ${money2(total)}</button>
+            <button id="gw-fail" class="w-full text-gray-400 hover:text-red-500 font-bold">Simulate a failed payment</button></div>`
+    });
+    qs("#gw-pay", m).onclick = ev => {
+        ev.target.disabled = true; ev.target.textContent = "Processing payment…";
+        setTimeout(() => {
+            const order = Store.Orders.place({ address, payment: "Razorpay (Online)", note: qs("#order-note").value.trim() });
+            Modal.close();
+            location.href = url("payresult", { status: "success", order: order.id });
+        }, 1400);
+    };
+    qs("#gw-fail", m).onclick = () => { Modal.close(); location.href = url("payresult", { status: "failed" }); };
 }

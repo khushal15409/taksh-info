@@ -12,6 +12,11 @@ const Store = (() => {
         bookings: [],
         recent: [],               // recently viewed product ids
         readNotifs: [],
+        auth: { loggedIn: false },
+        lang: "en",
+        theme: "light",
+        requests: [],             // partner / callback / development form submissions
+        wallet: { points: 100, banks: [], txns: [{ id: "t0", type: "credit", title: "Welcome bonus", points: 100, at: Date.now() }] },
         pincode: "380061",
         city: "Ahmedabad",
         profile: { name: "Taksh User", phone: "+91 98765 43210", email: "taksh@allinone.com" },

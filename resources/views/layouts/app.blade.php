@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>try{if(JSON.parse(localStorage.getItem("taksh_v2")).theme==="dark")document.documentElement.classList.add("dark")}catch(e){}</script>
     <title>@yield('title', 'TakshAllInOne')</title>
     <meta name="description" content="TakshAllInOne - groceries, 15-minute delivery, festive decor, electronics and verified home services in one app.">
     <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}">
