@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Shopping Cart | TakshAllInOne</title>
-    <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+    <meta name="description" content="TakshAllInOne - groceries, 15-minute delivery, festive decor, electronics and verified home services in one app.">
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+    <link rel="apple-touch-icon" href="../assets/img/favicon.png">
 
     <!-- Tailwind CSS (CDN) + theme config -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,328 +22,26 @@
 </head>
 <body class="font-sans antialiased text-gray-800 bg-[#FFFBEF] min-h-screen flex flex-col selection:bg-brand-500 selection:text-white" data-root="../" data-page="cart">
 
-    <!-- COMING SOON BANNER -->
-    <div class="coming-soon-banner text-center text-white text-xs sm:text-sm font-bold tracking-wide py-2.5 px-4 relative z-50">
-        <span class="mr-1">🚀</span>
-        <span class="uppercase tracking-widest">Coming Soon</span>
-        <span class="mx-2 text-yellow-300">•</span>
-        <span class="font-medium text-orange-100">TakshAllInOne is launching shortly. Stay tuned for the festive launch!</span>
-    </div>
+    <!-- Header, nav & coming-soon banner are rendered by assets/js/ui.js -->
+    <div id="site-header" class="contents"></div>
 
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6">
 
-    <!-- TOP ANNOUNCEMENT BAR -->
-    <div class="header-gradient text-white text-xs sm:text-sm py-2 px-4 shadow-sm relative z-50 overflow-hidden">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-2 animate-pulse">
-                <span class="text-yellow-300">✨</span>
-                <span class="font-semibold tracking-wide">Taksh Festive Sparkle Sale:</span>
-                <span>Get up to 50% OFF + Instant 15-Min Delivery | Use Code: <strong class="underline decoration-yellow-300 decoration-2">TAKSHDIWALI</strong></span>
-            </div>
-            <div class="hidden md:flex items-center space-x-6 text-xs text-orange-100 font-medium">
-                <a href="../pages/services.html" class="hover:text-white transition">24x7 Customer Care</a>
-                <span>|</span>
-                <a href="../pages/tracking.html" class="hover:text-white transition">Track Order</a>
-                <span>|</span>
-                <div class="flex items-center space-x-1 cursor-pointer hover:text-white">
-                    <i data-lucide="globe" class="w-3.5 h-3.5"></i>
-                    <span>EN / ₹ INR</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <header class="bg-white sticky top-0 z-40 border-b border-orange-100 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 lg:px-8 py-3 flex items-center justify-between gap-6">
-            
-            <!-- Brand Logo -->
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('home')">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 via-brand-500 to-brand-gold p-0.5 shadow-md transform hover:rotate-3 transition">
-                    <div class="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
-                        <i data-lucide="shopping-bag" class="w-7 h-7 text-brand-600"></i>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex items-center space-x-1">
-                        <span class="font-festive font-extrabold text-2xl tracking-tight text-gray-900">Taksh</span>
-                        <span class="text-xs px-2 py-0.5 rounded-full bg-brand-500 text-white font-bold tracking-wider uppercase shadow-sm">AllInOne</span>
-                    </div>
-                    <p class="text-[10px] text-gray-500 tracking-wide font-medium">Ecommerce • Quick Delivery • Services</p>
-                </div>
-            </div>
-
-            <!-- Location Selector -->
-            <button onclick="openModal('location-modal')" class="hidden xl:flex items-center space-x-2 text-left bg-orange-50/60 hover:bg-orange-100/80 px-3 py-2 rounded-xl border border-orange-200/60 transition group">
-                <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-brand-500 shadow-sm group-hover:scale-105 transition">
-                    <i data-lucide="map-pin" class="w-4 h-4"></i>
-                </div>
-                <div>
-                    <div class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider flex items-center space-x-1">
-                        <span>Deliver to</span>
-                        <i data-lucide="chevron-down" class="w-3 h-3 text-gray-400"></i>
-                    </div>
-                    <div class="text-xs font-bold text-gray-800 truncate max-w-[130px]">Ahmedabad 380061</div>
-                </div>
-            </button>
-
-            <!-- Search Bar with Live Filter capability -->
-            <div class="flex-1 max-w-2xl relative">
-                <div class="flex items-center bg-gray-50 hover:bg-gray-100/80 focus-within:bg-white rounded-2xl border-2 border-orange-200/80 focus-within:border-brand-500 transition shadow-inner overflow-hidden">
-                    <div class="pl-4 pr-2 text-gray-400">
-                        <i data-lucide="search" class="w-5 h-5"></i>
-                    </div>
-                    <input type="text" id="main-search-input" onkeyup="handleSearch(this.value)" placeholder="Search 15,000+ items (e.g. Aashirvaad Atta, Fortune Oil, Rice)..." class="w-full py-2.5 text-sm bg-transparent border-none focus:outline-none text-gray-800 placeholder-gray-400 font-medium">
-                    <button class="px-3 text-gray-400 hover:text-brand-500 border-l border-gray-200">
-                        <i data-lucide="mic" class="w-4 h-4"></i>
-                    </button>
-                    <button onclick="switchView('listing')" class="bg-gradient-to-r from-brand-500 to-brand-600 text-white px-5 py-2.5 font-semibold text-sm hover:brightness-110 transition flex items-center space-x-1">
-                        <span>Search</span>
-                    </button>
-                </div>
-                <!-- Search Live Dropdown Popup -->
-                <div id="search-results-popup" class="hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-3 max-h-80 overflow-y-auto">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 py-1">Quick Suggestions</p>
-                    <div id="search-results-list" class="divide-y divide-gray-50"></div>
-                </div>
-            </div>
-
-            <!-- User Actions Header Icons -->
-            <div class="flex items-center space-x-4">
-                
-                <!-- Notifications -->
-                <button onclick="switchView('notifications')" class="relative p-2.5 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-brand-600 transition">
-                    <i data-lucide="bell" class="w-6 h-6"></i>
-                    <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-brand-500 rounded-full ring-2 ring-white"></span>
-                </button>
-
-                <!-- Wishlist -->
-                <button onclick="switchView('wishlist')" class="relative p-2.5 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-brand-600 transition flex items-center space-x-1">
-                    <i data-lucide="heart" class="w-6 h-6"></i>
-                    <span id="wishlist-counter" class="absolute -top-1 -right-1 bg-gray-900 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">2</span>
-                </button>
-
-                <!-- Shopping Cart Switcher -->
-                <button onclick="switchView('cart')" class="flex items-center space-x-3 bg-gradient-to-r from-brand-500 to-brand-600 text-white px-4 py-2.5 rounded-2xl shadow-md hover:shadow-lg hover:brightness-105 transition transform active:scale-95">
-                    <div class="relative">
-                        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-                        <span id="header-cart-count" class="absolute -top-2 -right-2 bg-yellow-400 text-gray-900 text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow">1</span>
-                    </div>
-                    <div class="text-left leading-tight hidden sm:block">
-                        <div class="text-[10px] uppercase font-bold text-orange-200">My Cart</div>
-                        <div id="header-cart-total" class="text-xs font-extrabold">₹364.00</div>
-                    </div>
-                </button>
-
-                <!-- Profile Dropdown Button -->
-                <div class="relative group">
-                    <button onclick="switchView('profile')" class="flex items-center space-x-2 pl-2 border-l border-gray-200 hover:opacity-80 transition">
-                        <div class="w-9 h-9 rounded-xl bg-orange-100 border-2 border-brand-500/40 text-brand-600 font-bold flex items-center justify-center shadow-inner">
-                            T
-                        </div>
-                        <div class="hidden lg:block text-left">
-                            <div class="text-xs font-bold text-gray-800">Taksh User</div>
-                            <div class="text-[10px] text-gray-400 font-medium">My Account</div>
-                        </div>
-                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- NAVIGATION TAB BAR & SCREEN QUICK SWITCHER -->
-
-        <!-- NAVIGATION TAB BAR & SCREEN QUICK SWITCHER -->
-        <nav class="bg-orange-50/50 border-t border-orange-100/80 px-4 lg:px-8 py-2">
-            <div class="max-w-7xl mx-auto flex items-center justify-between">
-
-                <!-- Main Category Tabs -->
-                <div class="flex items-center space-x-1 sm:space-x-2 overflow-x-auto no-scrollbar">
-                    <button onclick="switchView('home')" class="nav-tab flex items-center space-x-2 px-4 py-2 rounded-xl text-xs transition font-semibold text-gray-700 hover:bg-orange-100/80 hover:text-brand-600">
-                        <i data-lucide="grid" class="w-4 h-4"></i>
-                        <span>All Categories</span>
-                    </button>
-                    <button onclick="switchView('quick-home')" class="nav-tab flex items-center space-x-2 px-4 py-2 rounded-xl text-xs transition font-semibold text-gray-700 hover:bg-orange-100/80 hover:text-brand-600">
-                        <i data-lucide="zap" class="w-4 h-4 text-brand-500"></i>
-                        <span>Quick 15-Min Delivery</span>
-                    </button>
-                    <button onclick="switchView('services')" class="nav-tab flex items-center space-x-2 px-4 py-2 rounded-xl text-xs transition font-semibold text-gray-700 hover:bg-orange-100/80 hover:text-brand-600">
-                        <i data-lucide="wrench" class="w-4 h-4 text-purple-600"></i>
-                        <span>Home Services</span>
-                    </button>
-                    <button onclick="switchView('courier')" class="nav-tab flex items-center space-x-2 px-4 py-2 rounded-xl text-xs transition font-semibold text-gray-700 hover:bg-orange-100/80 hover:text-brand-600">
-                        <i data-lucide="truck" class="w-4 h-4 text-blue-600"></i>
-                        <span>Courier Booking</span>
-                    </button>
-                    <button onclick="switchView('offers')" class="nav-tab flex items-center space-x-2 px-4 py-2 rounded-xl text-xs transition font-semibold text-gray-700 hover:bg-orange-100/80 hover:text-brand-600">
-                        <i data-lucide="percent" class="w-4 h-4 text-emerald-600"></i>
-                        <span>Diwali Offers</span>
-                    </button>
-                </div>
-
-                <!-- ALL SCREENS SWITCHER DRAWER TRIGGER FOR REVIEWERS -->
-                <div class="relative">
-                    <button onclick="openModal('screen-navigator-modal')" class="flex items-center space-x-2 bg-gradient-to-r from-gray-900 to-gray-800 text-yellow-400 px-3 py-1.5 rounded-xl text-xs font-bold border border-yellow-500/30 hover:shadow-lg transition">
-                        <i data-lucide="layers" class="w-4 h-4"></i>
-                        <span>All 45+ Screen Views Navigator</span>
-                    </button>
-                </div>
-            </div>
-        </nav>
-    </header>
-
-    <!-- GLOBAL TOAST NOTIFICATION CONTAINER -->
-    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
-
-    <!-- MAIN VIEWPORT CONTAINER -->
-    <main id="app-viewport" class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6">
-
-        <section id="view-cart" class="space-y-6">
-            <h1 class="text-2xl font-extrabold text-gray-900 flex items-center space-x-3">
-                <i data-lucide="shopping-cart" class="w-7 h-7 text-brand-500"></i>
-                <span>Your Shopping Cart</span>
-            </h1>
-
-            <!-- Delivery Split Tabs -->
-            <div class="flex border-b border-gray-200 space-x-6 text-sm font-bold">
-                <button class="pb-3 border-b-2 border-brand-500 text-brand-600 flex items-center space-x-2">
-                    <i data-lucide="truck" class="w-4 h-4"></i>
-                    <span>Standard Delivery (<span id="cart-item-count">1</span>)</span>
-                </button>
-                <button class="pb-3 text-gray-400 hover:text-gray-600 flex items-center space-x-2">
-                    <i data-lucide="zap" class="w-4 h-4"></i>
-                    <span>Quick Delivery (0)</span>
-                </button>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-                <!-- Cart Items List -->
-                <div class="lg:col-span-2 space-y-4">
-                    <div id="cart-items-container" class="space-y-4">
-                        <!-- Dynamic Cart Item -->
-                    </div>
-
-                    <!-- Value Props Strip -->
-                    <div class="bg-emerald-50/60 rounded-2xl p-4 border border-emerald-100 grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-xs font-semibold text-emerald-900">
-                        <div class="flex items-center justify-center space-x-2">
-                            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
-                            <span>100% Genuine</span>
-                        </div>
-                        <div class="flex items-center justify-center space-x-2">
-                            <i data-lucide="truck" class="w-4 h-4 text-emerald-600"></i>
-                            <span>Fast Delivery</span>
-                        </div>
-                        <div class="flex items-center justify-center space-x-2">
-                            <i data-lucide="refresh-cw" class="w-4 h-4 text-emerald-600"></i>
-                            <span>7 Day Returns</span>
-                        </div>
-                        <div class="flex items-center justify-center space-x-2">
-                            <i data-lucide="lock" class="w-4 h-4 text-emerald-600"></i>
-                            <span>Secure Payment</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Order Summary Side Card -->
-                <div class="bg-white p-6 rounded-3xl border border-orange-100 shadow-sm space-y-6 h-fit">
-                    <h3 class="font-extrabold text-base text-gray-900 border-b pb-3 border-gray-100">Order Summary</h3>
-                
-                    <!-- Coupon Box -->
-                    <div class="flex space-x-2">
-                        <input type="text" id="coupon-code-input" placeholder="Have a coupon code?" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-brand-500">
-                        <button onclick="applyCoupon()" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition">Apply</button>
-                    </div>
-
-                    <!-- Calculation breakdown -->
-                    <div class="space-y-3 text-xs">
-                        <div class="flex justify-between text-gray-600">
-                            <span>Subtotal</span>
-                            <span id="cart-subtotal" class="font-bold text-gray-900">₹364.00</span>
-                        </div>
-                        <div class="flex justify-between text-gray-600">
-                            <span>Delivery Charges</span>
-                            <span class="font-bold text-emerald-600 uppercase">FREE</span>
-                        </div>
-                        <div id="discount-row" class="hidden flex justify-between text-emerald-600 font-bold">
-                            <span>Diwali Discount</span>
-                            <span>-₹50.00</span>
-                        </div>
-                        <div class="border-t pt-3 flex justify-between text-base font-extrabold text-gray-900">
-                            <span>Total Amount</span>
-                            <span id="cart-total" class="text-brand-600">₹364.00</span>
-                        </div>
-                    </div>
-
-                    <button onclick="switchView('checkout')" class="w-full bg-gradient-to-r from-brand-500 to-brand-600 hover:brightness-110 text-white font-extrabold py-3.5 rounded-2xl shadow-md transition flex items-center justify-center space-x-2">
-                        <i data-lucide="lock" class="w-4 h-4"></i>
-                        <span>Proceed to Checkout</span>
-                    </button>
-                </div>
-            </div>
-        </section>
+        <h1 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3 mb-5"><i data-lucide="shopping-cart" class="w-7 h-7 text-brand-500"></i><span>Your Shopping Cart</span></h1>
+        <div id="cart-tabs" class="flex border-b border-gray-200 gap-6 text-sm font-bold mb-6 overflow-x-auto no-scrollbar"></div>
+        <div id="cart-root"></div>
+        <section id="cart-recs" class="mt-12"></section>
 
     </main>
 
-    <!-- FOOTER -->
-    <footer class="bg-gray-900 text-white mt-16 border-t border-gray-800">
-        <div class="max-w-7xl mx-auto px-4 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-4 gap-8 text-xs">
-            <div class="space-y-3">
-                <div class="flex items-center space-x-2">
-                    <span class="font-festive font-extrabold text-2xl text-brand-500">Taksh</span>
-                    <span class="text-[10px] bg-brand-500 text-white px-2 py-0.5 rounded-full font-bold">ALL IN ONE</span>
-                </div>
-                <p class="text-gray-400">India's premier festive e-commerce platform offering groceries, instant delivery & verified local services.</p>
-            </div>
-            <div>
-                <h4 class="font-bold text-white mb-3 uppercase tracking-wider">Quick Links</h4>
-                <ul class="space-y-2 text-gray-400">
-                    <li><a href="../index.html" class="hover:text-brand-500">Home</a></li>
-                    <li><a href="../pages/listing.html" class="hover:text-brand-500">Grocery Store</a></li>
-                    <li><a href="../pages/services.html" class="hover:text-brand-500">Local Services</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-bold text-white mb-3 uppercase tracking-wider">Help & Legal</h4>
-                <ul class="space-y-2 text-gray-400">
-                    <li><a href="../pages/tracking.html" class="hover:text-brand-500">Track Order</a></li>
-                    <li><a href="#" class="hover:text-brand-500">Privacy Policy</a></li>
-                    <li><a href="#" class="hover:text-brand-500">Terms & Conditions</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-bold text-white mb-3 uppercase tracking-wider">Download App</h4>
-                <p class="text-gray-400 mb-3">Get the mobile experience on Android & iOS</p>
-                <div class="flex space-x-2">
-                    <div class="bg-gray-800 px-3 py-2 rounded-xl text-center font-bold">Google Play</div>
-                    <div class="bg-gray-800 px-3 py-2 rounded-xl text-center font-bold">App Store</div>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <!-- Footer is rendered by assets/js/ui.js -->
+    <div id="site-footer"></div>
 
-    <!-- MODAL: ALL 45 SCREENS INTERACTIVE NAVIGATOR -->
-    <div id="screen-navigator-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-3xl w-full p-6 space-y-6 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b pb-4">
-                <h3 class="font-extrabold text-lg text-gray-900">TakshAllInOne Viewport Switcher</h3>
-                <button onclick="closeModal('screen-navigator-modal')" class="text-gray-400 hover:text-gray-600">✕</button>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-                <button onclick="switchView('home'); closeModal('screen-navigator-modal');" class="p-3 border rounded-xl hover:border-brand-500 text-left font-bold">1. Homepage</button>
-                <button onclick="switchView('listing'); closeModal('screen-navigator-modal');" class="p-3 border rounded-xl hover:border-brand-500 text-left font-bold">2. Product Listing</button>
-                <button onclick="switchView('product-details'); closeModal('screen-navigator-modal');" class="p-3 border rounded-xl hover:border-brand-500 text-left font-bold">3. Product Details</button>
-                <button onclick="switchView('cart'); closeModal('screen-navigator-modal');" class="p-3 border rounded-xl hover:border-brand-500 text-left font-bold">4. Shopping Cart</button>
-                <button onclick="switchView('checkout'); closeModal('screen-navigator-modal');" class="p-3 border rounded-xl hover:border-brand-500 text-left font-bold">5. Multi-Step Checkout</button>
-                <button onclick="switchView('tracking'); closeModal('screen-navigator-modal');" class="p-3 border rounded-xl hover:border-brand-500 text-left font-bold">6. Live Order Tracking</button>
-                <button onclick="switchView('profile'); closeModal('screen-navigator-modal');" class="p-3 border rounded-xl hover:border-brand-500 text-left font-bold">7. User Profile</button>
-                <button onclick="switchView('notifications'); closeModal('screen-navigator-modal');" class="p-3 border rounded-xl hover:border-brand-500 text-left font-bold">8. Notifications Hub</button>
-                <button onclick="switchView('services'); closeModal('screen-navigator-modal');" class="p-3 border rounded-xl hover:border-brand-500 text-left font-bold">9. Home Services</button>
-                <button onclick="switchView('empty-cart'); closeModal('screen-navigator-modal');" class="p-3 border rounded-xl hover:border-brand-500 text-left font-bold">10. Empty Cart State</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts: data -> app logic -->
+    <!-- Scripts: catalogue -> data -> store -> shared UI -> page logic -->
+    <script src="../assets/js/products.js"></script>
     <script src="../assets/js/data.js"></script>
-    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/store.js"></script>
+    <script src="../assets/js/ui.js"></script>
+    <script src="../assets/js/pages/cart.js"></script>
 </body>
 </html>
