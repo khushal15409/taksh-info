@@ -196,6 +196,30 @@ function updateHeader() {
     const dot = qs("#hdr-notif-dot"); if (dot) dot.classList.toggle("hidden", unreadNotifCount() === 0);
 }
 
+// ---------- App "coming soon" ----------
+// Placeholder badge (not the official Google artwork) - swap for the official badge + Play Store link at launch.
+function playBadge(cls = "") {
+    return `<span class="relative inline-flex items-center gap-3 bg-black text-white rounded-xl pl-3 pr-5 py-2 border border-gray-600 ${cls}">
+        <svg viewBox="0 0 24 24" class="w-7 h-7 shrink-0" aria-hidden="true"><path fill="#00D7FE" d="M3.6 2.3 13.3 12 3.6 21.7a1.5 1.5 0 0 1-.6-1.2V3.5c0-.5.2-.9.6-1.2z"/><path fill="#00F076" d="m16.5 8.8-3.2 3.2L3.6 2.3a1.5 1.5 0 0 1 1.6.1z"/><path fill="#FF3A44" d="m16.5 15.2-11.3 6.4a1.5 1.5 0 0 1-1.6.1l9.7-9.7z"/><path fill="#FFD500" d="m20.3 10.8-3.8-2 -3.2 3.2 3.2 3.2 3.8-2.1c1-.6 1-1.7 0-2.3z"/></svg>
+        <span class="text-left leading-tight"><span class="block text-[9px] uppercase tracking-wider text-gray-300">Get it on</span><span class="block text-base font-bold">Google Play</span></span>
+        <span class="absolute -top-2 -right-2 bg-brand-500 text-white text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full shadow">Soon</span>
+    </span>`;
+}
+
+// "Notify me" forms (any <form data-notify-form>) - saved locally until a backend is connected
+document.addEventListener("submit", e => {
+    const form = e.target.closest("[data-notify-form]");
+    if (!form) return;
+    e.preventDefault();
+    const v = form.elements.contact.value.trim();
+    if (!/^\S+@\S+\.\S+$/.test(v) && !/^\+?[\d\s-]{10,14}$/.test(v)) return toast("Enter a valid email or mobile number", "error");
+    const list = Store.state.notify = Store.state.notify || [];
+    if (!list.includes(v)) list.push(v);
+    Store.save();
+    form.reset();
+    toast("🔔 You're on the list! We'll notify you when the app launches.");
+});
+
 // ---------- Layout ----------
 function navTab(href, icon, label, active, tint = "bg-orange-100 text-brand-600") {
     return `<a href="${href}" ${active ? 'aria-current="page"' : ""} class="nav-tab group flex items-center justify-center gap-2 sm:gap-3 px-2 sm:px-4 py-2.5 rounded-2xl text-xs min-[400px]:text-sm leading-tight text-center transition-all duration-200 ${active ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white font-extrabold shadow-md shadow-orange-300/50" : "bg-white border border-orange-100 text-gray-700 font-bold hover:border-brand-500/50 hover:text-brand-600 hover:-translate-y-0.5 hover:shadow-md"}">
@@ -218,9 +242,11 @@ function renderHeader() {
 
     host.innerHTML = `
     <div id="coming-soon" class="${bannerHidden ? "hidden" : ""} coming-soon-banner text-center text-white text-xs sm:text-sm font-bold tracking-wide py-2.5 px-10 relative z-50">
-        <span class="mr-1">🚀</span><span class="uppercase tracking-widest">Coming Soon</span>
-        <span class="mx-2 text-yellow-300 hidden sm:inline">•</span>
-        <span class="font-medium text-orange-100 hidden sm:inline">TakshAllInOne is launching shortly. Stay tuned for the festive launch!</span>
+        <a href="${url("home", null, "#app")}" class="hover:underline underline-offset-4 decoration-yellow-300">
+            <span class="mr-1">📱</span><span class="uppercase tracking-widest">App Coming Soon</span>
+            <span class="mx-2 text-yellow-300 hidden sm:inline">•</span>
+            <span class="font-medium text-orange-100 hidden sm:inline">Taksh app is coming soon to Google Play - <u>Get notified</u></span>
+        </a>
         <button data-close-banner class="absolute right-3 top-1/2 -translate-y-1/2 text-orange-200 hover:text-white w-6 h-6" aria-label="Dismiss">✕</button>
     </div>
 
@@ -309,11 +335,9 @@ function renderFooter() {
     <footer class="bg-gray-900 text-white mt-16 border-t border-gray-800">
         <div class="max-w-7xl mx-auto px-4 lg:px-8 py-12 grid grid-cols-2 lg:grid-cols-5 gap-8 text-xs">
             <div class="col-span-2 space-y-4">
-                <div class="flex items-center gap-2">
-                    <img src="${ROOT}assets/img/favicon.png" alt="" class="h-9 w-auto">
-                    <span class="font-festive font-extrabold text-2xl text-brand-500">Taksh</span>
-                    <span class="text-[10px] bg-brand-500 text-white px-2 py-0.5 rounded-full font-bold">ALL IN ONE</span>
-                </div>
+                <a href="${url("home")}" class="inline-block bg-white rounded-2xl px-4 py-2.5 shadow-lg shadow-black/20" aria-label="TakshAllInOne - Home">
+                    <img src="${ROOT}assets/img/logo.png" alt="Taksh - All in one Ecommerce, Logistics & Services" class="h-12 sm:h-14 w-auto">
+                </a>
                 <p class="text-gray-400 max-w-xs leading-relaxed">India's premier festive e-commerce platform offering groceries, instant delivery & verified local services.</p>
                 <div class="space-y-1.5 text-gray-400">
                     <p class="flex items-center gap-2"><i data-lucide="phone" class="w-3.5 h-3.5 text-brand-500"></i>${SITE.supportPhone}</p>
@@ -346,10 +370,8 @@ function renderFooter() {
                     <li><a href="${url("terms")}" class="hover:text-brand-500">Terms & Conditions</a></li>
                 </ul>
                 <h4 class="font-bold mt-5 mb-3 uppercase tracking-wider">Download App</h4>
-                <div class="flex gap-2">
-                    <span class="bg-gray-800 px-3 py-2 rounded-xl font-bold">Google Play</span>
-                    <span class="bg-gray-800 px-3 py-2 rounded-xl font-bold">App Store</span>
-                </div>
+                <a href="${url("home", null, "#app")}" class="inline-block" aria-label="Taksh app coming soon on Google Play">${playBadge()}</a>
+                <p class="text-[11px] text-gray-500 mt-2">Android app launching soon - <a href="${url("home", null, "#app")}" class="text-brand-500 hover:underline">notify me</a></p>
             </div>
         </div>
         <div class="border-t border-gray-800">

@@ -9,6 +9,7 @@ ready(() => {
     renderServices();
     renderTestimonials();
     initNewsletter();
+    qsa("[data-play-badge]").forEach(el => { el.innerHTML = playBadge(); });
     refreshIcons();
 });
 
