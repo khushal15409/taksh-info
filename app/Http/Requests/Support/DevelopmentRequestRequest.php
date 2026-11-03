@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Http\Requests\Support;
+
+use App\Http\Requests\ApiFormRequest;
+
+/** App / website development enquiry (public; a logged-in customer is attached). */
+class DevelopmentRequestRequest extends ApiFormRequest
+{
+    protected int $failureStatus = 400;
+
+    public function rules(): array
+    {
+        return [
+            'name' => ['nullable', 'string', 'max:255'],
+            'mobile' => ['required', 'string', 'regex:/^[0-9]{10}$/'],
+            'email' => ['required', 'email', 'max:255'],
+            'description' => ['required', 'string', 'min:10', 'max:2000'],
+            'request_type' => ['required', 'in:app_development,web_development'],
+        ];
+    }
+}

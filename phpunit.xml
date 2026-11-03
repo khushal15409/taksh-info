@@ -32,5 +32,8 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="TAKSH_SUPPORT_PHONE" value="+91 99999 12345"/>
+        <env name="TAKSH_SUPPORT_EMAIL" value="care@takshallinone.com"/>
+        <env name="RAZORPAY_REFUND_ON_CANCEL" value="false"/>
     </php>
 </phpunit>

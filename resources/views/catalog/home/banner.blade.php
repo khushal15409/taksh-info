@@ -1,0 +1,1 @@
+<a href="{{ \App\Support\Presenters\HomeLayout::bannerUrl($b) }}" class="block rounded-3xl overflow-hidden border border-orange-100 shadow-sm hover:shadow-md transition"><img src="{{ $b['image_url'] ?? '' }}" alt="{{ $b['title'] ?? 'Offer' }}" loading="lazy" class="w-full object-cover"></a>

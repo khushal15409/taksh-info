@@ -1,49 +1,16 @@
-/* TakshAllInOne - shared UI: layout (header/footer), product card, modal, toast, helpers */
+/* TakshAllInOne - shared browser code: helpers, toast, modal, the header's live numbers, product search suggestions, the delivery-location
+   and language/theme dialogs. (The pages, header and footer themselves are rendered by the server.) */
 
 const ROOT = document.body.dataset.root || "";
 const PAGE = document.body.dataset.page || "home";
 
+// Page paths (what url("name") builds); they mirror routes/web.php
 const PAGES = {
-    home: "",
-    listing: "shop",
-    product: "product",
-    cart: "cart",
-    checkout: "checkout",
-    tracking: "tracking",
-    profile: "profile",
-    notifications: "notifications",
-    services: "services",
-    wishlist: "wishlist",
-    privacy: "privacy-policy",
-    terms: "terms",
-    login: "login",
-    wallet: "wallet",
-    help: "help",
-    about: "about",
-    refund: "refund-policy",
-    delivery: "join/delivery-partner",
-    vendor: "join/vendor",
-    devrequest: "development-request",
-    returns: "return",
-    payresult: "payment/result"
+    home: "", listing: "shop", product: "product", cart: "cart", checkout: "checkout", tracking: "tracking", profile: "profile", notifications: "notifications",
+    services: "services", wishlist: "wishlist", privacy: "privacy-policy", terms: "terms", login: "login", wallet: "wallet", help: "help", about: "about",
+    refund: "refund-policy", delivery: "join/delivery-partner", vendor: "join/vendor", devrequest: "development-request", returns: "return",
+    payresult: "payment/result", sales: "sales", orderplaced: "order/placed", orderpay: "order/pay"
 };
-
-// ---------- Language (chrome only: header, nav, footer) + theme ----------
-const I18N = {
-    hi: {
-        "Home": "होम", "Quick Products": "क्विक प्रोडक्ट्स", "Services": "सेवाएं", "My Cart": "मेरी कार्ट", "Search": "खोजें",
-        "Deliver to": "डिलीवरी स्थान", "24x7 Customer Care": "24x7 ग्राहक सेवा", "Track Order": "ऑर्डर ट्रैक करें", "My Account": "मेरा अकाउंट",
-        "Shop": "खरीदारी", "Quick Links": "क्विक लिंक", "Help & Legal": "सहायता और नियम", "Download App": "ऐप डाउनलोड करें",
-        "Partner With Us": "हमारे साथ जुड़ें", "Help & Support": "सहायता", "Privacy Policy": "गोपनीयता नीति", "Terms & Conditions": "नियम और शर्तें",
-        "About Us": "हमारे बारे में", "Refund Policy": "रिफंड नीति", "Wallet": "वॉलेट", "Wishlist": "विशलिस्ट", "Login": "लॉगिन",
-        "Local Services": "स्थानीय सेवाएं", "Courier Booking": "कूरियर बुकिंग", "Join as Delivery Partner": "डिलीवरी पार्टनर बनें",
-        "Become a Vendor": "वेंडर बनें", "Development Request": "डेवलपमेंट रिक्वेस्ट"
-    }
-};
-const lang = () => (Store.state.lang === "hi" ? "hi" : "en");
-const tr = (k) => (lang() === "hi" && I18N.hi[k]) || k;
-function applyTheme() { document.documentElement.classList.toggle("dark", Store.state.theme === "dark"); }
-applyTheme();
 
 // ---------- Helpers ----------
 function url(page, params, hash) {
@@ -56,22 +23,14 @@ const qs = (sel, root = document) => root.querySelector(sel);
 const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 const money = (n) => "₹" + Math.round(n).toLocaleString("en-IN");
 const money2 = (n) => "₹" + Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const discountPct = (p) => Math.round((1 - p.price / p.mrp) * 100);
 const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const catById = (id) => CATEGORIES.find(c => c.id === id);
-const imgUrl = (p) => ROOT + p.img;
 function ready(fn) {
     if (document.readyState !== "loading") fn();
     else document.addEventListener("DOMContentLoaded", fn);
 }
 function refreshIcons() { if (window.lucide) lucide.createIcons(); }
-function stars(r, size = "w-3.5 h-3.5") {
-    return Array.from({ length: 5 }, (_, i) =>
-        `<i data-lucide="star" class="${size} ${i < Math.round(r) ? "fill-amber-400 text-amber-400" : "text-gray-300"}"></i>`).join("");
-}
-function productImg(p, cls = "") {
-    return `<img src="${imgUrl(p)}" alt="${esc(p.name)}" loading="lazy" class="${cls}">`;
-}
+const lang = () => (document.documentElement.lang === "hi" ? "hi" : "en");
+function applyTheme() { document.documentElement.classList.toggle("dark", Prefs.state.theme === "dark"); }
 
 // ---------- Toast ----------
 function toast(message, type = "success") {
@@ -90,7 +49,7 @@ function toast(message, type = "success") {
     setTimeout(() => { el.classList.add("opacity-0", "transition"); setTimeout(() => el.remove(), 300); }, 2800);
 }
 
-// ---------- Modal ----------
+// ---------- Modal (built in the browser: the address, location and preferences dialogs; server pages use <x-modal>) ----------
 const Modal = {
     open({ title, body, wide = false }) {
         this.close();
@@ -119,67 +78,6 @@ const Modal = {
 };
 document.addEventListener("keydown", e => { if (e.key === "Escape") Modal.close(); });
 
-// ---------- Product card ----------
-function cardAction(id) {
-    const q = Cart.qty(id);
-    if (q === 0) {
-        return `<button data-action="add" data-id="${id}" class="w-full bg-orange-50 hover:bg-brand-500 hover:text-white text-brand-600 border border-brand-500/40 font-bold text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5">
-                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add</button>`;
-    }
-    return `<div class="flex items-center justify-between bg-brand-500 text-white rounded-xl font-bold text-xs">
-                <button data-action="dec" data-id="${id}" class="w-9 h-8 hover:bg-brand-600 rounded-l-xl" aria-label="Decrease">−</button>
-                <span>${q}</span>
-                <button data-action="inc" data-id="${id}" class="w-9 h-8 hover:bg-brand-600 rounded-r-xl" aria-label="Increase">+</button>
-            </div>`;
-}
-
-function wishBtn(id, cls = "") {
-    const on = Wishlist.has(id);
-    return `<button data-action="wish" data-id="${id}" data-wish-btn="${id}" aria-label="Wishlist"
-        class="wish-btn ${on ? "is-on" : ""} w-8 h-8 rounded-full bg-white/90 shadow flex items-center justify-center text-gray-400 hover:text-red-500 transition ${cls}">
-        <i data-lucide="heart" class="w-4 h-4"></i></button>`;
-}
-
-function productCard(p) {
-    const off = discountPct(p);
-    const badge = p.tags.includes("new")
-        ? `<span class="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">NEW</span>`
-        : p.tags.includes("bestseller") ? `<span class="bg-gray-900 text-yellow-400 text-[10px] font-bold px-2 py-0.5 rounded-full">BESTSELLER</span>` : "";
-    return `
-    <article class="product-card group bg-white rounded-3xl border border-orange-100 hover:border-brand-500/40 hover:shadow-card-hover transition flex flex-col overflow-hidden">
-        <div class="relative">
-            <div class="absolute top-3 left-3 z-10 flex flex-col gap-1 items-start">
-                ${off > 0 ? `<span class="bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">${off}% OFF</span>` : ""}
-                ${badge}
-            </div>
-            ${wishBtn(p.id, "absolute top-3 right-3 z-10")}
-            <a href="${url("product", { id: p.id })}" class="block bg-gradient-to-b from-orange-50/60 to-white p-3">
-                ${productImg(p, "w-full aspect-square object-contain group-hover:scale-105 transition duration-300")}
-            </a>
-        </div>
-        <div class="p-4 pt-1 flex-1 flex flex-col gap-2">
-            <div class="flex items-center gap-1.5 text-[10px] font-bold">
-                ${p.quick ? `<span class="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded flex items-center gap-0.5"><i data-lucide="zap" class="w-3 h-3"></i>15 min</span>` : ""}
-                <span class="text-gray-400 uppercase tracking-wide truncate">${esc(p.brand)}</span>
-            </div>
-            <a href="${url("product", { id: p.id })}" class="font-bold text-[13px] text-gray-800 leading-snug line-clamp-2 hover:text-brand-600 min-h-[2.4rem]">${esc(p.name)}</a>
-            <div class="flex items-center justify-between text-[11px] text-gray-500">
-                <span>${esc(p.unit)}</span>
-                <span class="flex items-center gap-1 bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded"><i data-lucide="star" class="w-3 h-3 fill-current"></i>${p.rating}</span>
-            </div>
-            <div class="flex items-end gap-2 mt-auto pt-1">
-                <span class="font-extrabold text-base text-gray-900">${money(p.price)}</span>
-                ${off > 0 ? `<span class="text-xs text-gray-400 line-through pb-0.5">${money(p.mrp)}</span>` : ""}
-            </div>
-            <div data-card-action="${p.id}">${cardAction(p.id)}</div>
-        </div>
-    </article>`;
-}
-
-function productGrid(list, cls = "grid-cols-2 md:grid-cols-3 xl:grid-cols-4") {
-    return `<div class="grid ${cls} gap-4 lg:gap-5">${list.map(productCard).join("")}</div>`;
-}
-
 function emptyState({ emoji, title, text, ctaLabel, ctaHref }) {
     return `<div class="text-center py-16 space-y-4">
         <div class="w-28 h-28 mx-auto bg-orange-100 rounded-full flex items-center justify-center text-5xl">${emoji}</div>
@@ -189,38 +87,17 @@ function emptyState({ emoji, title, text, ctaLabel, ctaHref }) {
     </div>`;
 }
 
-// ---------- Live updates (header counters, card buttons) ----------
-function refreshCardActions() {
-    qsa("[data-card-action]").forEach(el => { el.innerHTML = cardAction(Number(el.dataset.cardAction)); });
-    qsa("[data-wish-btn]").forEach(el => el.classList.toggle("is-on", Wishlist.has(Number(el.dataset.wishBtn))));
-    refreshIcons();
-}
-
-function unreadNotifCount() {
-    const all = allNotifications();
-    return all.filter(n => !Store.state.readNotifs.includes(n.id)).length;
-}
-
-function allNotifications() {
-    const orderNotifs = Store.state.orders.map(o => ({
-        id: "o-" + o.id, kind: "order", icon: "📦", title: `Order ${o.id} confirmed`,
-        text: `Your order of ${o.items.length} item(s) worth ${money(o.totals.total)} has been placed successfully.`,
-        time: new Date(o.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }),
-        href: url("tracking", { id: o.id })
-    }));
-    return [...orderNotifs, ...BASE_NOTIFICATIONS];
-}
-
+// ---------- The header's live numbers ----------
 function updateHeader() {
     const t = Cart.totals();
     const set = (id, v) => { const el = qs("#" + id); if (el) el.textContent = v; };
     set("hdr-cart-count", t.count);
     set("hdr-cart-total", money(t.total));
-    set("hdr-wish-count", Store.state.wishlist.length);
-    set("hdr-location", `${Store.state.city} ${Store.state.pincode}`);
+    set("hdr-wish-count", Wishlist.count());
+    set("hdr-location", [Prefs.state.city, Prefs.state.pincode].filter(Boolean).join(" ") || "Set location");
     const cc = qs("#hdr-cart-count"); if (cc) cc.classList.toggle("hidden", t.count === 0);
-    const wc = qs("#hdr-wish-count"); if (wc) wc.classList.toggle("hidden", Store.state.wishlist.length === 0);
-    const dot = qs("#hdr-notif-dot"); if (dot) dot.classList.toggle("hidden", unreadNotifCount() === 0);
+    const wc = qs("#hdr-wish-count"); if (wc) wc.classList.toggle("hidden", Wishlist.count() === 0);
+    const dot = qs("#hdr-notif-dot"); if (dot) dot.classList.toggle("hidden", NotifBadge.count() === 0);
 }
 
 // ---------- App "coming soon" ----------
@@ -233,195 +110,18 @@ function playBadge(cls = "") {
     </span>`;
 }
 
-// "Notify me" forms (any <form data-notify-form>) - saved locally until a backend is connected
+// "Notify me" forms (any <form data-notify-form>) - kept in this browser until a launch list exists
 document.addEventListener("submit", e => {
     const form = e.target.closest("[data-notify-form]");
     if (!form) return;
     e.preventDefault();
     const v = form.elements.contact.value.trim();
     if (!/^\S+@\S+\.\S+$/.test(v) && !/^\+?[\d\s-]{10,14}$/.test(v)) return toast("Enter a valid email or mobile number", "error");
-    const list = Store.state.notify = Store.state.notify || [];
-    if (!list.includes(v)) list.push(v);
-    Store.save();
+    if (!Prefs.state.notify.includes(v)) Prefs.state.notify.push(v);
+    Prefs.save();
     form.reset();
     toast("🔔 You're on the list! We'll notify you when the app launches.");
 });
-
-// ---------- Layout ----------
-function navTab(href, icon, label, active, tint = "bg-orange-100 text-brand-600") {
-    return `<a href="${href}" ${active ? 'aria-current="page"' : ""} class="nav-tab group flex items-center justify-center gap-2 sm:gap-3 px-2 sm:px-4 py-2.5 rounded-2xl text-xs min-[400px]:text-sm leading-tight text-center transition-all duration-200 ${active ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white font-extrabold shadow-md shadow-orange-300/50" : "bg-white border border-orange-100 text-gray-700 font-bold hover:border-brand-500/50 hover:text-brand-600 hover:-translate-y-0.5 hover:shadow-md"}">
-        <span class="hidden min-[400px]:flex w-8 h-8 shrink-0 rounded-xl items-center justify-center transition ${active ? "bg-white/20 text-white" : tint + " group-hover:scale-110"}"><i data-lucide="${icon}" class="w-4 h-4"></i></span>
-        <span>${label}</span></a>`;
-}
-
-function renderHeader() {
-    const host = qs("#site-header");
-    if (!host) return;
-    const params = new URLSearchParams(location.search);
-    const isListing = PAGE === "listing";
-    const act = {
-        home: PAGE === "home",
-        quick: isListing && params.get("quick") === "1",
-        services: PAGE === "services"
-    };
-    let bannerHidden = false;
-    try { bannerHidden = sessionStorage.getItem("taksh_banner_closed") === "1"; } catch (e) { /* ignore */ }
-
-    host.innerHTML = `
-    <div id="coming-soon" class="${bannerHidden ? "hidden" : ""} coming-soon-banner text-center text-white text-xs sm:text-sm font-bold tracking-wide py-2.5 px-10 relative z-50">
-        <a href="${url("home", null, "#app")}" class="hover:underline underline-offset-4 decoration-yellow-300">
-            <span class="mr-1">📱</span><span class="uppercase tracking-widest">App Coming Soon</span>
-            <span class="mx-2 text-yellow-300 hidden sm:inline">•</span>
-            <span class="font-medium text-orange-100 hidden sm:inline">Taksh app is coming soon to Google Play - <u>Get notified</u></span>
-        </a>
-        <button data-close-banner class="absolute right-3 top-1/2 -translate-y-1/2 text-orange-200 hover:text-white w-6 h-6" aria-label="Dismiss">✕</button>
-    </div>
-
-    <div class="header-gradient text-white text-xs py-2 px-4 relative z-40">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <div class="flex items-center gap-2 min-w-0">
-                <span class="text-yellow-300">✨</span>
-                <span class="truncate"><b>Festive Sparkle Sale:</b> Up to 50% OFF + 15-Min Delivery | Code: <b class="underline decoration-yellow-300 decoration-2">TAKSHDIWALI</b></span>
-            </div>
-            <div class="hidden md:flex items-center gap-5 text-orange-100 font-medium shrink-0">
-                <a href="${url("help")}" class="hover:text-white">${tr("24x7 Customer Care")}</a>
-                <a href="${url("tracking")}" class="hover:text-white">${tr("Track Order")}</a>
-                <button data-open-prefs class="flex items-center gap-1 hover:text-white" aria-label="Language and theme"><i data-lucide="globe" class="w-3.5 h-3.5"></i>${lang() === "hi" ? "हिं" : "EN"} / ₹ INR</button>
-            </div>
-        </div>
-    </div>
-
-    <header class="bg-white sticky top-0 z-40 border-b border-orange-100 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 lg:px-8 py-3 flex flex-wrap lg:flex-nowrap items-center gap-x-4 gap-y-3">
-
-            <a href="${url("home")}" class="flex items-center shrink-0" aria-label="TakshAllInOne - Home">
-                <img src="${ROOT}assets/img/logo.png" alt="Taksh - All in one Ecommerce, Logistics & Services" class="h-9 min-[360px]:h-10 sm:h-14 w-auto">
-            </a>
-
-            <button data-open-location class="hidden xl:flex items-center gap-2 text-left bg-orange-50/60 hover:bg-orange-100/80 px-3 py-2 rounded-xl border border-orange-200/60 transition shrink-0">
-                <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-brand-500 shadow-sm"><i data-lucide="map-pin" class="w-4 h-4"></i></div>
-                <div>
-                    <div class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider flex items-center gap-1">${tr("Deliver to")} <i data-lucide="chevron-down" class="w-3 h-3"></i></div>
-                    <div id="hdr-location" class="text-xs font-bold text-gray-800 truncate max-w-[130px]"></div>
-                </div>
-            </button>
-
-            <form id="search-form" class="order-last lg:order-none w-full lg:w-auto lg:flex-1 relative" role="search" autocomplete="off">
-                <div class="flex items-center bg-gray-50 focus-within:bg-white rounded-2xl border-2 border-orange-200/80 focus-within:border-brand-500 transition overflow-hidden">
-                    <i data-lucide="search" class="w-5 h-5 text-gray-400 ml-4 mr-2 shrink-0"></i>
-                    <input id="search-input" name="q" type="search" placeholder="Search ${PRODUCTS.length}+ items (e.g. Atta, Rice, Diya)..." class="w-full py-2.5 text-sm bg-transparent focus:outline-none text-gray-800 placeholder-gray-400 font-medium">
-                    <button type="submit" class="bg-gradient-to-r from-brand-500 to-brand-600 text-white px-5 py-2.5 font-semibold text-sm hover:brightness-110 transition">${tr("Search")}</button>
-                </div>
-                <div id="search-popup" class="hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-2 max-h-96 overflow-y-auto"></div>
-            </form>
-
-            <div class="flex items-center gap-0.5 sm:gap-3 ml-auto lg:ml-0 shrink-0">
-                <a href="${url("notifications")}" class="relative p-2 sm:p-2.5 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-brand-600 transition" aria-label="Notifications">
-                    <i data-lucide="bell" class="w-6 h-6"></i>
-                    <span id="hdr-notif-dot" class="absolute top-2 right-2 w-2.5 h-2.5 bg-brand-500 rounded-full ring-2 ring-white"></span>
-                </a>
-                <a href="${url("wishlist")}" class="relative p-2 sm:p-2.5 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-brand-600 transition" aria-label="Wishlist">
-                    <i data-lucide="heart" class="w-6 h-6"></i>
-                    <span id="hdr-wish-count" class="absolute -top-0.5 -right-0.5 bg-gray-900 text-white text-[10px] font-bold min-w-[20px] h-5 px-1 rounded-full flex items-center justify-center border-2 border-white">0</span>
-                </a>
-                <a href="${url("cart")}" class="flex items-center gap-3 bg-gradient-to-r from-brand-500 to-brand-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl mx-1 sm:mx-0 shadow-md hover:shadow-lg hover:brightness-105 transition active:scale-95">
-                    <div class="relative">
-                        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-                        <span id="hdr-cart-count" class="absolute -top-2 -right-2 bg-yellow-400 text-gray-900 text-[10px] font-extrabold min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center shadow">0</span>
-                    </div>
-                    <div class="text-left leading-tight hidden sm:block">
-                        <div class="text-[10px] uppercase font-bold text-orange-200">${tr("My Cart")}</div>
-                        <div id="hdr-cart-total" class="text-xs font-extrabold">₹0</div>
-                    </div>
-                </a>
-                <a href="${Store.state.auth.loggedIn ? url("profile") : url("login")}" class="flex items-center gap-2 sm:pl-3 sm:border-l border-gray-200 hover:opacity-80 transition" aria-label="My Account">
-                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-orange-100 border-2 border-brand-500/40 text-brand-600 font-bold flex items-center justify-center">${esc(Store.state.profile.name.charAt(0).toUpperCase())}</div>
-                    <div class="hidden lg:block text-left leading-tight">
-                        <div class="text-xs font-bold text-gray-800">${esc(Store.state.profile.name)}</div>
-                        <div class="text-[10px] text-gray-400 font-medium">${tr("My Account")}</div>
-                    </div>
-                </a>
-            </div>
-        </div>
-
-        <nav id="main-nav" class="bg-orange-50/60 border-t border-orange-100/80" aria-label="Main">
-            <div class="max-w-7xl mx-auto px-4 lg:px-8 py-3 grid grid-cols-3 gap-2 sm:gap-4">
-                ${navTab(url("home"), "home", tr("Home"), act.home)}
-                ${navTab(url("listing", { quick: 1 }), "zap", tr("Quick Products"), act.quick, "bg-emerald-100 text-emerald-600")}
-                ${navTab(url("services"), "wrench", tr("Services"), act.services, "bg-purple-100 text-purple-600")}
-            </div>
-        </nav>
-    </header>`;
-    refreshIcons();
-}
-
-function renderFooter() {
-    const host = qs("#site-footer");
-    if (!host) return;
-    host.innerHTML = `
-    <footer class="bg-gray-900 text-white mt-16 border-t border-gray-800">
-        <div class="max-w-7xl mx-auto px-4 lg:px-8 py-12 grid grid-cols-2 lg:grid-cols-5 gap-8 text-xs">
-            <div class="col-span-2 space-y-4">
-                <a href="${url("home")}" class="inline-block bg-white rounded-2xl px-4 py-2.5 shadow-lg shadow-black/20" aria-label="TakshAllInOne - Home">
-                    <img src="${ROOT}assets/img/logo.png" alt="Taksh - All in one Ecommerce, Logistics & Services" class="h-12 sm:h-14 w-auto">
-                </a>
-                <p class="text-gray-400 max-w-xs leading-relaxed">India's premier festive e-commerce platform offering groceries, instant delivery & verified local services.</p>
-                <div class="space-y-1.5 text-gray-400">
-                    <p class="flex items-center gap-2"><i data-lucide="phone" class="w-3.5 h-3.5 text-brand-500"></i>${SITE.supportPhone}</p>
-                    <p class="flex items-center gap-2"><i data-lucide="mail" class="w-3.5 h-3.5 text-brand-500"></i>${SITE.supportEmail}</p>
-                    <p class="flex items-center gap-2"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-500"></i>Ghatlodiya, Ahmedabad 380061</p>
-                </div>
-            </div>
-            <div>
-                <h4 class="font-bold mb-3 uppercase tracking-wider">${tr("Shop")}</h4>
-                <ul class="space-y-2 text-gray-400">
-                    ${CATEGORIES.slice(0, 6).map(c => `<li><a href="${url("listing", { cat: c.id })}" class="hover:text-brand-500">${c.name}</a></li>`).join("")}
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-bold mb-3 uppercase tracking-wider">${tr("Quick Links")}</h4>
-                <ul class="space-y-2 text-gray-400">
-                    <li><a href="${url("home")}" class="hover:text-brand-500">Home</a></li>
-                    <li><a href="${url("services")}" class="hover:text-brand-500">${tr("Local Services")}</a></li>
-                    <li><a href="${url("services", null, "#courier")}" class="hover:text-brand-500">${tr("Courier Booking")}</a></li>
-                    <li><a href="${url("tracking")}" class="hover:text-brand-500">Track Order</a></li>
-                    <li><a href="${url("wishlist")}" class="hover:text-brand-500">${tr("Wishlist")}</a></li>
-                    <li><a href="${url("wallet")}" class="hover:text-brand-500">${tr("Wallet")}</a></li>
-                    <li><a href="${url("profile")}" class="hover:text-brand-500">${tr("My Account")}</a></li>
-                </ul>
-                <h4 class="font-bold mt-5 mb-3 uppercase tracking-wider">${tr("Partner With Us")}</h4>
-                <ul class="space-y-2 text-gray-400">
-                    <li><a href="${url("delivery")}" class="hover:text-brand-500">${tr("Join as Delivery Partner")}</a></li>
-                    <li><a href="${url("vendor")}" class="hover:text-brand-500">${tr("Become a Vendor")}</a></li>
-                    <li><a href="${url("devrequest")}" class="hover:text-brand-500">${tr("Development Request")}</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-bold mb-3 uppercase tracking-wider">${tr("Help & Legal")}</h4>
-                <ul class="space-y-2 text-gray-400">
-                    <li><a href="${url("help")}" class="hover:text-brand-500">${tr("Help & Support")}</a></li>
-                    <li><a href="${url("services", null, "#help")}" class="hover:text-brand-500">Help Centre & FAQs</a></li>
-                    <li><a href="${url("about")}" class="hover:text-brand-500">${tr("About Us")}</a></li>
-                    <li><a href="${url("privacy")}" class="hover:text-brand-500">${tr("Privacy Policy")}</a></li>
-                    <li><a href="${url("terms")}" class="hover:text-brand-500">${tr("Terms & Conditions")}</a></li>
-                    <li><a href="${url("refund")}" class="hover:text-brand-500">${tr("Refund Policy")}</a></li>
-                </ul>
-                <h4 class="font-bold mt-5 mb-3 uppercase tracking-wider">${tr("Download App")}</h4>
-                <a href="${url("home", null, "#app")}" class="inline-block" aria-label="Taksh app coming soon on Google Play">${playBadge()}</a>
-                <p class="text-[11px] text-gray-500 mt-2">Android app launching soon - <a href="${url("home", null, "#app")}" class="text-brand-500 hover:underline">notify me</a></p>
-            </div>
-        </div>
-        <div class="border-t border-gray-800">
-            <div class="max-w-7xl mx-auto px-4 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-gray-500">
-                <p>© ${new Date().getFullYear()} TakshAllInOne. All rights reserved.</p>
-                <div class="flex items-center gap-2 font-bold text-gray-400">
-                    <span class="bg-gray-800 px-2.5 py-1 rounded">UPI</span><span class="bg-gray-800 px-2.5 py-1 rounded">VISA</span>
-                    <span class="bg-gray-800 px-2.5 py-1 rounded">MasterCard</span><span class="bg-gray-800 px-2.5 py-1 rounded">COD</span>
-                </div>
-            </div>
-        </div>
-    </footer>`;
-}
 
 // ---------- Search suggestions ----------
 function initSearch() {
@@ -430,55 +130,65 @@ function initSearch() {
     const input = qs("#search-input");
     const popup = qs("#search-popup");
     const initial = new URLSearchParams(location.search).get("q");
-    if (initial && PAGE === "listing") input.value = initial;
 
     form.addEventListener("submit", e => {
         e.preventDefault();
         const q = input.value.trim();
-        if (q) { Store.state.searches = [q, ...(Store.state.searches || []).filter(x => x.toLowerCase() !== q.toLowerCase())].slice(0, 6); Store.save(); }
+        if (q) { Prefs.state.searches = [q, ...(Prefs.state.searches || []).filter(x => x.toLowerCase() !== q.toLowerCase())].slice(0, 6); Prefs.save(); }
         location.href = q ? url("listing", { q }) : url("listing");
     });
 
+    // Live catalogue: suggestions come from GET /products/search, recent searches from the account when logged in
+    let suggestTimer = null, suggestSeq = 0;
+    const suggest = (raw) => {
+        clearTimeout(suggestTimer);
+        suggestTimer = setTimeout(async () => {
+            const seq = ++suggestSeq;
+            let rows = [];
+            try { rows = await Api.search(raw, 6); } catch (e) { /* keep the popup quiet */ }
+            if (seq !== suggestSeq || input.value.trim() !== raw) return;     // a newer keystroke won
+            popup.innerHTML = (rows.length ? `<p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-3 pt-2 pb-1">Products</p>` +
+                rows.map(r => `<a href="${url("product", { id: r.id })}" class="flex items-center gap-3 p-2 hover:bg-orange-50 rounded-xl">
+                    ${r.image ? `<img src="${esc(r.image)}" alt="" class="w-10 h-10 rounded-lg object-contain bg-orange-50/60">` : `<span class="w-10 h-10 rounded-lg bg-orange-50/60 flex items-center justify-center">🛍️</span>`}
+                    <div class="min-w-0 flex-1"><div class="text-xs font-bold text-gray-800 truncate">${esc(r.name)}</div><div class="text-[11px] text-gray-400">${r.brand ? esc(r.brand) : ""}${r.in_stock ? "" : " · Out of stock"}</div></div>
+                    <div class="text-xs font-extrabold text-brand-600">${money(r.price)}</div></a>`).join("")
+                : `<div class="p-4 text-xs text-gray-400">No products found matching "${esc(raw)}"</div>`) +
+                `<a href="${url("listing", { q: raw })}" class="block text-center text-xs font-bold text-brand-600 py-2.5 hover:underline">See all results for "${esc(raw)}"</a>`;
+            popup.classList.remove("hidden");
+        }, 250);
+    };
+
     // Recent searches (shown when the empty box is focused)
-    const showRecent = () => {
-        const list = Store.state.searches || [];
+    const showRecent = async () => {
+        let list = Prefs.state.searches || [];
+        if (Auth.loggedIn) { try { list = await Api.recentSearches(); } catch (e) { /* fall back to this browser's list */ } }
         if (input.value.trim() || !list.length) return;
         popup.innerHTML = `<div class="flex items-center justify-between px-3 pt-2 pb-1"><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Recent searches</p><button type="button" data-clear-searches class="text-[10px] font-bold text-brand-600 hover:underline">Clear</button></div>` +
             list.map(q => `<a href="${url("listing", { q })}" class="flex items-center gap-3 p-2.5 hover:bg-orange-50 rounded-xl text-sm font-semibold text-gray-700"><i data-lucide="history" class="w-4 h-4 text-gray-400"></i>${esc(q)}</a>`).join("");
         popup.classList.remove("hidden"); refreshIcons();
     };
     input.addEventListener("focus", showRecent);
-    popup.addEventListener("click", e => { if (e.target.closest("[data-clear-searches]")) { Store.state.searches = []; Store.save(); popup.classList.add("hidden"); } });
+    popup.addEventListener("click", e => { if (e.target.closest("[data-clear-searches]")) { Prefs.state.searches = []; Prefs.save(); popup.classList.add("hidden"); } });
 
     input.addEventListener("input", () => {
         const q = input.value.trim().toLowerCase();
         if (!q) { popup.classList.add("hidden"); showRecent(); return; }
-        const prods = PRODUCTS.filter(p => (p.name + " " + p.brand).toLowerCase().includes(q)).slice(0, 6);
-        const cats = CATEGORIES.filter(c => c.name.toLowerCase().includes(q)).slice(0, 3);
-        popup.innerHTML = (cats.length ? `<p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-3 pt-2 pb-1">Categories</p>` +
-            cats.map(c => `<a href="${url("listing", { cat: c.id })}" class="flex items-center gap-3 p-2.5 hover:bg-orange-50 rounded-xl text-sm font-semibold text-gray-700"><span class="text-lg">${c.emoji}</span>${c.name}</a>`).join("") : "") +
-            (prods.length ? `<p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-3 pt-2 pb-1">Products</p>` +
-            prods.map(p => `<a href="${url("product", { id: p.id })}" class="flex items-center gap-3 p-2 hover:bg-orange-50 rounded-xl">
-                ${productImg(p, "w-10 h-10 rounded-lg object-contain bg-orange-50/60")}
-                <div class="min-w-0 flex-1"><div class="text-xs font-bold text-gray-800 truncate">${esc(p.name)}</div><div class="text-[11px] text-gray-400">${esc(p.unit)}</div></div>
-                <div class="text-xs font-extrabold text-brand-600">${money(p.price)}</div></a>`).join("") : "") +
-            (!cats.length && !prods.length ? `<div class="p-4 text-xs text-gray-400">No products found matching "${esc(input.value)}"</div>` : "") +
-            `<a href="${url("listing", { q: input.value.trim() })}" class="block text-center text-xs font-bold text-brand-600 py-2.5 hover:underline">See all results for "${esc(input.value.trim())}"</a>`;
-        popup.classList.remove("hidden");
+        suggest(input.value.trim());
     });
     document.addEventListener("click", e => { if (!form.contains(e.target)) popup.classList.add("hidden"); });
 }
 
 // ---------- Location + address modals ----------
 function openLocationModal() {
+    if (Auth.loggedIn) { location.href = url("profile", { tab: "addresses" }); return; }   // saved addresses are managed in the account
     const m = Modal.open({
         title: "Choose delivery location",
         body: `<form id="loc-form" class="space-y-4">
             <p class="text-sm text-gray-500">Enter your pincode to see delivery options and availability.</p>
             <div><label class="text-xs font-bold text-gray-500">Pincode</label>
-                <input name="pincode" maxlength="6" inputmode="numeric" value="${esc(Store.state.pincode)}" class="field mt-1" placeholder="e.g. 380061"></div>
+                <input name="pincode" maxlength="6" inputmode="numeric" value="${esc(Prefs.state.pincode)}" class="field mt-1" placeholder="e.g. 380061"></div>
             <div><label class="text-xs font-bold text-gray-500">City</label>
-                <input name="city" value="${esc(Store.state.city)}" class="field mt-1"></div>
+                <input name="city" value="${esc(Prefs.state.city)}" class="field mt-1"></div>
             <button type="button" id="loc-detect" class="w-full border-2 border-brand-500 text-brand-600 hover:bg-orange-50 font-bold py-2.5 rounded-2xl flex items-center justify-center gap-2"><i data-lucide="crosshair" class="w-4 h-4"></i>Use my current location</button>
             <button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-2xl">Update Location</button></form>`
     });
@@ -487,9 +197,9 @@ function openLocationModal() {
         e.preventDefault();
         const f = new FormData(e.target);
         if (!/^\d{6}$/.test(f.get("pincode"))) return toast("Enter a valid 6-digit pincode", "error");
-        Store.state.pincode = f.get("pincode");
-        Store.state.city = f.get("city").trim() || Store.state.city;
-        Store.save();
+        Prefs.state.pincode = f.get("pincode");
+        Prefs.state.city = f.get("city").trim() || Prefs.state.city;
+        Prefs.save();
         Modal.close();
         toast("📍 Delivery location updated");
     });
@@ -504,12 +214,11 @@ function detectLocation(modal, btn) {
     navigator.geolocation.getCurrentPosition(async pos => {
         try {
             const { latitude: la, longitude: lo } = pos.coords;
-            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${la}&lon=${lo}`);
-            const a = (await r.json()).address || {};
+            // asked through our own /location endpoint (identified, cached) rather than from the browser
+            const a = ((await Api.reverseGeocode(la, lo)).place || {}).address || {};
             const form = qs("#loc-form", modal);
-            if (a.postcode) form.elements.pincode.value = a.postcode.replace(/\D/g, "").slice(0, 6);
-            const city = a.city || a.town || a.village || a.state_district;
-            if (city) form.elements.city.value = city;
+            if (a.pincode) form.elements.pincode.value = a.pincode.slice(0, 6);
+            if (a.city) form.elements.city.value = a.city;
             toast("📍 Location detected - review and update");
         } catch (e) { toast("Couldn't look up your address. Please enter your pincode.", "error"); }
         reset();
@@ -522,81 +231,44 @@ function openPrefsModal() {
         title: "Preferences",
         body: `<form id="prefs-form" class="space-y-5 text-xs">
             <div><p class="font-bold text-gray-500 mb-2">Language</p><div class="grid grid-cols-2 gap-3">${[["en", "English"], ["hi", "हिन्दी (Hindi)"]].map(([k, l]) => `<label class="flex items-center gap-2 p-3 rounded-xl border-2 border-gray-200 cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-orange-50/40"><input type="radio" name="lang" value="${k}" class="accent-brand-500" ${lang() === k ? "checked" : ""}><span class="font-bold text-gray-700">${l}</span></label>`).join("")}</div>
-                <p class="text-[11px] text-gray-400 mt-2">Hindi applies to the menus, header and footer.</p></div>
-            <div><p class="font-bold text-gray-500 mb-2">Theme</p><div class="grid grid-cols-2 gap-3">${[["light", "☀️ Light"], ["dark", "🌙 Dark"]].map(([k, l]) => `<label class="flex items-center gap-2 p-3 rounded-xl border-2 border-gray-200 cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-orange-50/40"><input type="radio" name="theme" value="${k}" class="accent-brand-500" ${Store.state.theme === k ? "checked" : ""}><span class="font-bold text-gray-700">${l}</span></label>`).join("")}</div></div>
-            <button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-2xl">Save preferences</button></form>`
+                <p class="text-[11px] text-gray-400 mt-2">The whole page is shown in the language you choose.</p></div>
+            <div><p class="font-bold text-gray-500 mb-2">Theme</p><div class="grid grid-cols-2 gap-3">${[["light", "☀️ Light"], ["dark", "🌙 Dark"]].map(([k, l]) => `<label class="flex items-center gap-2 p-3 rounded-xl border-2 border-gray-200 cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-orange-50/40"><input type="radio" name="theme" value="${k}" class="accent-brand-500" ${Prefs.state.theme === k ? "checked" : ""}><span class="font-bold text-gray-700">${l}</span></label>`).join("")}</div></div>
+            <button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-2xl">Save preferences</button>
+            <p class="text-center text-[11px] text-gray-400">TakshAllInOne Web • version ${esc(document.body.dataset.version || "1.0.0")}</p></form>`
     });
     qs("#prefs-form", m).addEventListener("submit", e => {
         e.preventDefault();
         const f = new FormData(e.target);
-        Store.state.lang = f.get("lang"); Store.state.theme = f.get("theme");
-        Store.save(); applyTheme(); Modal.close();
-        renderHeader(); renderFooter(); updateHeader(); initSearch();
+        const langChanged = lang() !== f.get("lang");
+        Prefs.state.lang = f.get("lang"); Prefs.state.theme = f.get("theme");
+        document.cookie = `taksh_lang=${f.get("lang")}; path=/; max-age=31536000; SameSite=Lax`;   // the server renders the page in this language
+        Prefs.save(); applyTheme(); Modal.close();
+        if (langChanged) { location.reload(); return; }
         toast("✅ Preferences saved");
-    });
-}
-
-// Add / edit address. Calls onSave(address) once saved.
-function openAddressModal(existing, onSave) {
-    const a = existing || { label: "Home", name: Store.state.profile.name, phone: Store.state.profile.phone, line: "", city: Store.state.city, pincode: Store.state.pincode };
-    const m = Modal.open({
-        title: existing ? "Edit address" : "Add new address",
-        body: `<form id="addr-form" class="grid grid-cols-2 gap-4 text-xs">
-            <div class="col-span-2"><label class="font-bold text-gray-500">Save as</label>
-                <div class="flex gap-2 mt-1">${["Home", "Work", "Other"].map(l => `<label class="cursor-pointer"><input type="radio" name="label" value="${l}" class="peer sr-only" ${a.label === l ? "checked" : ""}><span class="block px-4 py-2 rounded-xl border border-gray-200 font-bold text-gray-600 peer-checked:bg-brand-500 peer-checked:text-white peer-checked:border-brand-500">${l}</span></label>`).join("")}</div></div>
-            <div><label class="font-bold text-gray-500">Full name</label><input name="name" value="${esc(a.name)}" class="field mt-1" required></div>
-            <div><label class="font-bold text-gray-500">Phone</label><input name="phone" value="${esc(a.phone)}" class="field mt-1" required></div>
-            <div class="col-span-2"><label class="font-bold text-gray-500">Address</label><input name="line" value="${esc(a.line)}" class="field mt-1" placeholder="House no., building, area" required></div>
-            <div><label class="font-bold text-gray-500">City</label><input name="city" value="${esc(a.city)}" class="field mt-1" required></div>
-            <div><label class="font-bold text-gray-500">Pincode</label><input name="pincode" maxlength="6" value="${esc(a.pincode)}" class="field mt-1" required></div>
-            <button class="col-span-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm py-3 rounded-2xl">Save Address</button></form>`
-    });
-    qs("#addr-form", m).addEventListener("submit", e => {
-        e.preventDefault();
-        const f = Object.fromEntries(new FormData(e.target));
-        if (!/^\d{6}$/.test(f.pincode)) return toast("Enter a valid 6-digit pincode", "error");
-        if (!/^[+\d][\d\s-]{7,14}$/.test(f.phone.trim())) return toast("Enter a valid phone number", "error");
-        const list = Store.state.addresses;
-        let saved;
-        if (existing) { saved = Object.assign(existing, f); }
-        else { saved = Object.assign({ id: Store.uid("a"), isDefault: list.length === 0 }, f); list.push(saved); }
-        Store.save();
-        Modal.close();
-        toast("✅ Address saved");
-        if (onSave) onSave(saved);
     });
 }
 
 // ---------- Global event delegation ----------
 document.addEventListener("click", e => {
-    const t = e.target.closest("[data-action], [data-open-location], [data-close-banner], [data-open-prefs]");
+    const t = e.target.closest("[data-open-location], [data-close-banner], [data-open-prefs]");
     if (!t) return;
     if (t.matches("[data-open-location]")) return openLocationModal();
     if (t.matches("[data-open-prefs]")) return openPrefsModal();
     if (t.matches("[data-close-banner]")) {
         qs("#coming-soon").classList.add("hidden");
         try { sessionStorage.setItem("taksh_banner_closed", "1"); } catch (err) { /* ignore */ }
-        return;
-    }
-    const id = Number(t.dataset.id);
-    const p = Store.product(id);
-    switch (t.dataset.action) {
-        case "add": Cart.add(id); toast(`🛒 ${p.name} added to cart`); break;
-        case "inc": Cart.setQty(id, Cart.qty(id) + 1); break;
-        case "dec": Cart.setQty(id, Cart.qty(id) - 1); break;
-        case "remove": Cart.remove(id); toast("Item removed from cart"); break;
-        case "wish":
-            e.preventDefault();
-            toast(Wishlist.toggle(id) ? "❤️ Added to wishlist" : "Removed from wishlist");
-            break;
     }
 });
 
 ready(() => {
-    renderHeader();
-    renderFooter();
+    try { if (sessionStorage.getItem("taksh_banner_closed") === "1") qs("#coming-soon").classList.add("hidden"); } catch (e) { /* ignore */ }
     initSearch();
     updateHeader();
-    Store.subscribe(() => { updateHeader(); refreshCardActions(); });
+    Wishlist.paint();
+    Addresses.refresh();      // the default address drives the "Deliver to" chip
+    NotifBadge.refresh();
+    Prefs.subscribe(updateHeader);
+    if (typeof startHindiPage === "function") startHindiPage();
+    qsa("[data-play-badge]").forEach(el => { el.innerHTML = playBadge(); });
     refreshIcons();
 });
