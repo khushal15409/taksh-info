@@ -47,7 +47,7 @@
             <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-brand-500 shadow-sm"><i data-lucide="map-pin" class="w-4 h-4"></i></div>
             <div>
                 <div class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider flex items-center gap-1">Deliver to <i data-lucide="chevron-down" class="w-3 h-3"></i></div>
-                <div id="hdr-location" class="text-xs font-bold text-gray-800 truncate max-w-[130px]">Set location</div>
+                <div id="hdr-location" data-server="1" data-pincode="{{ $deliverTo['pincode'] }}" data-address-id="{{ $deliverTo['address_id'] ?? '' }}" class="text-xs font-bold text-gray-800 truncate max-w-[130px]">{{ $deliverTo['label'] ?: 'Set location' }}</div>
             </div>
         </button>
 

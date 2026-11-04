@@ -36,7 +36,7 @@ const Addresses = (() => {
             try {
                 if (act === "new") openForm(null, () => { mount(host); });
                 if (act === "edit") openForm(a, () => { mount(host); });
-                if (act === "default") { await Api.addressDefault(Number(id)); toast("Default address updated"); await mount(host); updateHeader(); }
+                if (act === "default") { await Api.addressDefault(Number(id)); toast("Default address updated"); document.cookie = "taksh_loc=; max-age=0; path=/"; location.reload(); return; }   // the saved default is the delivery place again
                 if (act === "delete" && confirm("Delete this address?")) { await Api.addressDelete(Number(id)); toast("Address removed"); await mount(host); updateHeader(); }
             } catch (err) { toast(err.message, "error"); }
         };

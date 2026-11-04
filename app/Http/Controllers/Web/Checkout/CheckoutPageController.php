@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
- * "Review & Place Order" (standard delivery; Quick orders are placed in the app). The page shows the saved addresses, the ways to pay the
+ * "Review & Place Order" (Standard, or Quick with ?type=30_min). The page shows the saved addresses, the ways to pay the
  * admin has switched on, and the server-built bill. Confirming places the order through the same OrderPlacementService as the JSON
  * endpoint - stock is reserved under locks there - and is safe to press twice (CheckoutIdempotency). Cash on delivery goes straight to
  * "order placed"; an online order exists unpaid and continues on the pay page, where the Razorpay window opens.
@@ -32,25 +32,42 @@ class CheckoutPageController extends WebController
         private readonly AddressService $addresses,
         private readonly OrderPlacementService $placement,
         private readonly CheckoutIdempotency $idempotency,
+        private readonly \App\Services\Quick\QuickServiceability $quick,
     ) {}
 
     public function show(Request $request): View|RedirectResponse
     {
         $user = $request->user();
-        $cart = $this->cart->get($this->cartOwner($request), 'normal')['cart'];
+        $type = $request->query('type') === '30_min' ? '30_min' : 'normal';
+        $quick = $type === '30_min';
+        $cart = $this->cart->get($this->cartOwner($request), $type)['cart'];
 
         if (! $cart['items']) {
-            return $this->redirectWith('cart', 'error', 'Your cart is empty - add something to check out', ['type' => 'normal']);
+            return $this->redirectWith('cart', 'error', 'Your cart is empty - add something to check out', ['type' => $type]);
         }
 
         $book = $this->addresses->list($user->id);
         $all = collect([$book['default_address'], ...$book['addresses']])->filter()->values()->all();
-        $options = array_filter(PaymentOptions::all()['standard']);
+        $options = array_filter(PaymentOptions::all()[$quick ? 'quick' : 'standard']);
+
+        // Quick goes only to an address the shops of this cart serve (10 km, or the shop's pincode): the others are shown but cannot be picked
+        $serviceable = [];
+        if ($quick) {
+            $vendorIds = collect($cart['items'])->pluck('vendor_id')->filter()->unique()->values()->all();
+            foreach ($all as $a) {
+                $serviceable[$a['id']] = $this->quick->servesAll($vendorIds, $a['latitude'] ?? null, $a['longitude'] ?? null, $a['pincode'] ?? null);
+            }
+        }
+        $usable = fn ($a) => ! $quick || ($serviceable[$a['id']] ?? false);
+        $first = collect([$book['default_address'], ...$all])->filter()->first($usable);
 
         return $this->page('checkout.index', [
+            'type' => $type,
+            'quick' => $quick,
+            'serviceable' => $serviceable,
             'cart' => $cart,
             'addresses' => $all,
-            'selectedAddress' => old('address_id', $book['default_address']['id'] ?? ($all[0]['id'] ?? null)),
+            'selectedAddress' => old('address_id', $first['id'] ?? null),
             'methods' => array_keys($options),
             'method' => old('payment_method', array_key_exists('cod', $options) ? 'cod' : (array_key_first($options) ?? 'online')),
             'unavailable' => collect($cart['items'])->contains(fn ($i) => ! $i['in_stock']),
@@ -63,14 +80,15 @@ class CheckoutPageController extends WebController
         $user = $request->user();
         $v = $request->validated();
 
-        $cart = $this->cart->get($this->cartOwner($request), 'normal')['cart'];
+        $type = $request->type();
+        $cart = $this->cart->get($this->cartOwner($request), $type)['cart'];
         if (collect($cart['items'])->contains(fn ($i) => ! $i['in_stock'])) {
-            return $this->redirectWith('cart', 'error', 'Some items in your cart are unavailable. Please review your cart.', ['type' => 'normal']);
+            return $this->redirectWith('cart', 'error', 'Some items in your cart are unavailable. Please review your cart.', ['type' => $type]);
         }
 
         try {
-            $result = $this->idempotency->run($user, $v['checkout_token'], function () use ($user, $v) {
-                $placed = $this->placement->place($user, ['address_id' => (int) $v['address_id'], 'delivery_type' => 'normal', 'payment_method' => $v['payment_method']]);
+            $result = $this->idempotency->run($user, $v['checkout_token'], function () use ($user, $v, $type) {
+                $placed = $this->placement->place($user, ['address_id' => (int) $v['address_id'], 'delivery_type' => $type, 'payment_method' => $v['payment_method']]);
 
                 return collect($placed['placed'])->pluck('id')->map(fn ($id) => (int) $id)->all();
             });
@@ -78,13 +96,13 @@ class CheckoutPageController extends WebController
             // not placed (empty cart, no stock, address not found, method switched off ...): nothing was charged and the cart is as it was
             $this->flash('error', Lang::has($e->getMessage()) ? __($e->getMessage()) : $e->getMessage());
 
-            return redirect()->route($e->getMessage() === 'api.cart_empty' ? 'cart' : 'checkout');
+            return $e->getMessage() === 'api.cart_empty' ? redirect()->route('cart', $type === '30_min' ? ['type' => $type] : []) : redirect()->route('checkout', $type === '30_min' ? ['type' => $type] : []);
         } catch (\Throwable $e) {
             report($e);
             Log::error('Order placement failed', ['user_id' => $user->id, 'error' => $e->getMessage()]);
             $this->flash('error', 'We could not place your order. Please try again.');
 
-            return redirect()->route('checkout');
+            return redirect()->route('checkout', $type === '30_min' ? ['type' => $type] : []);
         }
 
         $ids = $result['order_ids'];

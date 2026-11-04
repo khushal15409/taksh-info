@@ -50,9 +50,12 @@ class HeaderStateService
         try {
             // a guest who has never added anything has no cart token yet: nothing to read
             if ($user || $this->guest->token()) {
-                $cart = $this->cart->get($this->guest->owner($user), 'normal')['cart'];
-                $empty['cart_count'] = (int) collect($cart['items'])->sum('qty');
-                $empty['cart_total'] = (float) $cart['total_with_delivery'];
+                // the header counts both carts: Standard and Quick
+                foreach (['normal', '30_min'] as $bucket) {
+                    $cart = $this->cart->get($this->guest->owner($user), $bucket)['cart'];
+                    $empty['cart_count'] += (int) collect($cart['items'])->sum('qty');
+                    $empty['cart_total'] += (float) $cart['total_with_delivery'];
+                }
             }
         } catch (\Throwable $e) {
             report($e);

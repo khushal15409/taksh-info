@@ -15,7 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Guests hitting a customer-only page go to the login page and come back afterwards (like the app's redirectAfter).
         // The page language: a plain (unencrypted) cookie set by the language settings, read before anything renders and applied to the HTML after.
-        $middleware->encryptCookies(except: [\App\Http\Middleware\SetLocale::COOKIE]);
+        $middleware->encryptCookies(except: [\App\Http\Middleware\SetLocale::COOKIE, \App\Services\Quick\QuickLocation::COOKIE]);
         $middleware->web(prepend: [\App\Http\Middleware\SetLocale::class], append: [\App\Http\Middleware\TranslateHtml::class]);
 
         $middleware->redirectGuestsTo(fn (Request $request) => route('login', ['next' => $request->getRequestUri()]));

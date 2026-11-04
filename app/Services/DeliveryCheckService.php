@@ -3,25 +3,36 @@
 namespace App\Services;
 
 use App\Exceptions\ProductNotFoundException;
+use App\Helpers\QuickDelivery;
 use App\Models\Vendor;
+use App\Services\Quick\QuickAvailability;
+use App\Repositories\Contracts\CartCatalogRepositoryInterface;
 use App\Repositories\Contracts\DeliveryCheckRepositoryInterface;
 
 /**
  * Can this product be delivered to a pincode? Standard products follow the vendor's service area and stock
  * (the same rule order placement enforces). Quick (30 min) products are served by the app's quick delivery,
- * which the website does not offer yet, so they are reported as not deliverable here.
+ * which is judged by the radius around the shop (QuickAvailability), as the app does.
  */
 class DeliveryCheckService
 {
-    public function __construct(private readonly DeliveryCheckRepositoryInterface $delivery) {}
+    public function __construct(
+        private readonly DeliveryCheckRepositoryInterface $delivery,
+        private readonly QuickAvailability $quick,
+        private readonly CartCatalogRepositoryInterface $stock,
+    ) {}
 
     /** @return array<string, mixed> */
-    public function check(int $productId, string $pincode, ?int $variantId = null, int $qty = 1): array
+    /**
+     * @param  array{pincode: ?string, latitude: ?float, longitude: ?float}|null  $where  the customer's delivery place; when it is the pincode being
+     *                                                                                  checked its coordinates make the 10 km test exact
+     */
+    public function check(int $productId, string $pincode, ?int $variantId = null, int $qty = 1, ?array $where = null): array
     {
         $product = $this->delivery->product($productId) ?? throw new ProductNotFoundException();
         $quick = (bool) $product->is_express_30;
 
-        $respond = fn (bool $deliverable, string $messageKey, ?Vendor $vendor = null) => [
+        $respond = fn (bool $deliverable, string $messageKey, ?Vendor $vendor = null, array $extra = []) => $extra + [
             'product_id' => $product->id,
             'product_name' => $product->name,
             'pincode' => $pincode,
@@ -41,7 +52,23 @@ class DeliveryCheckService
         }
 
         if ($quick) {
-            return $respond(false, 'api.delivery_check_quick_on_app', $vendor);
+            // Quick serves a radius around the shop, not pincodes: judge it where the customer is, else at the pincode's own position
+            [$lat, $lng] = $where && ($where['pincode'] ?? null) === $pincode ? [$where['latitude'], $where['longitude']] : [null, null];
+            if (! QuickDelivery::validCoordinates($lat, $lng) && ($record = $this->delivery->activePincode($pincode))) {
+                [$lat, $lng] = [$record->latitude, $record->longitude];
+            }
+            if (! QuickDelivery::validCoordinates($lat, $lng) && QuickDelivery::normalizePincode($pincode) === null) {
+                return $respond(false, 'api.delivery_check_quick_no_location', $vendor, ['availability_status' => QuickAvailability::LOCATION_REQUIRED]);
+            }
+
+            $product->loadMissing('variants');
+            $verdict = $this->quick->check($product, $lat, $lng, $pincode, $variantId);
+            $status = $verdict['status'];
+            if ($verdict['can_order'] && $variantId !== null && $this->stock->availableStock((int) $product->vendor_id, $variantId) < max(1, $qty)) {
+                $status = QuickAvailability::OUT_OF_STOCK;
+            }
+
+            return $respond($status === QuickAvailability::AVAILABLE, QuickAvailability::messageKey($status), $vendor, ['availability_status' => $status]);
         }
 
         if (! $vendor->servesPincode($pincode)) {

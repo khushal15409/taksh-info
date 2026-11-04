@@ -40,7 +40,9 @@ class AddressController extends Controller
     {
         $this->addresses->setDefault($request->user()->id, (int) $request->validated('address_id'));
 
-        return response()->json(['status' => true, 'message' => 'Default address updated successfully', 'data' => null]);
+        // the chosen saved address is the delivery place again: forget a pincode typed or picked earlier
+        return response()->json(['status' => true, 'message' => 'Default address updated successfully', 'data' => null])
+            ->withCookie(\Illuminate\Support\Facades\Cookie::forget(\App\Services\Quick\QuickLocation::COOKIE));
     }
 
     /** POST /address/user/addresses/delete {address_id} */

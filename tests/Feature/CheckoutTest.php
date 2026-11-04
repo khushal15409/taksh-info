@@ -182,11 +182,66 @@ class CheckoutTest extends OrderTestCase
         $this->place(['payment_method' => 'online'])->assertOk();
     }
 
-    public function test_quick_orders_are_placed_in_the_app(): void
+    /** A quick product of shop 7, whose shop is in pincode 395001 (where the customer's address is), in the customer's cart. */
+    private function quickInCart(array $product = [], int $qty = 1): \App\Models\ProductVariant
     {
-        $this->inCart($this->sold(1, 100), 1);
+        $this->checkoutStore->vendors[7]->forceFill(['shop_pincode' => '395001', 'shop_latitude' => 21.17, 'shop_longitude' => 72.83]);
+        $variant = $this->sold(2, 90, 5, array_merge(['is_express_30' => true, 'approval_status' => 'approved'], $product));
+        $this->inCart($variant, $qty);
 
-        $this->place(['delivery_type' => '30_min'])->assertStatus(422)->assertJsonPath('data.code', 'quick_on_app');
+        return $variant;
+    }
+
+    public function test_a_quick_order_is_placed_for_an_address_the_shop_serves(): void
+    {
+        $this->quickInCart(qty: 2);
+
+        $this->place(['delivery_type' => '30_min'])->assertOk()->assertJsonPath('data.delivery_type', '30_min')->assertJsonPath('data.is_quick', true);
+
+        $o = $this->db->orders[1];
+        $this->assertTrue($o->is_express);
+        $this->assertSame('30_min', $o->delivery_type);
+        $this->assertEquals(180, $o->grand_total);
+        $this->assertSame([1], $this->dispatch->logged);                    // the delivery workflow knows about it
+        $this->assertSame([1], $this->dispatch->assigned);                  // cash: a rider is tried at once
+        $this->assertSame(2, (int) $this->db->stock['7_2']->reserved_qty);  // stock is reserved by the same rule as standard
+    }
+
+    public function test_an_online_quick_order_waits_for_payment_before_a_rider_is_tried(): void
+    {
+        $this->quickInCart();
+
+        $this->place(['delivery_type' => '30_min', 'payment_method' => 'online'])->assertOk();
+
+        $this->assertSame([1], $this->dispatch->logged);
+        $this->assertSame([], $this->dispatch->assigned);
+    }
+
+    public function test_a_quick_order_is_refused_when_the_shop_does_not_serve_the_address(): void
+    {
+        $this->quickInCart();
+        $this->checkoutStore->vendors[7]->forceFill(['shop_pincode' => '110001', 'shop_latitude' => 28.6, 'shop_longitude' => 77.2]);
+
+        $this->place(['delivery_type' => '30_min'])->assertStatus(400)->assertJsonPath('data.code', 'quick_not_serviceable');
+
+        $this->assertSame([], $this->db->orders);
+        $this->assertSame([], $this->dispatch->logged);
+    }
+
+    public function test_a_quick_order_needs_an_address_that_can_be_located(): void
+    {
+        $this->quickInCart();
+        $this->checkoutStore->addresses[1]->forceFill(['pincode' => '000000', 'latitude' => null, 'longitude' => null]);
+
+        $this->place(['delivery_type' => '30_min'])->assertStatus(422)->assertJsonPath('data.code', 'quick_location_required');
+        $this->assertSame([], $this->db->orders);
+    }
+
+    public function test_a_quick_line_that_ran_out_or_was_unapproved_is_refused_with_its_reason(): void
+    {
+        $this->quickInCart(['approval_status' => 'pending']);
+
+        $this->place(['delivery_type' => '30_min'])->assertStatus(422)->assertJsonPath('data.code', 'quick_item_unavailable')->assertJsonPath('data.availability_status', 'product_unavailable');
         $this->assertSame([], $this->db->orders);
     }
 

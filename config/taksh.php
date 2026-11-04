@@ -24,6 +24,8 @@ return [
     'version' => env('TAKSH_WEB_VERSION', '1.0.0'),
 
     // Where customers reach Taksh (the help links on order pages, the footer).
+    // Hide a quick product the admin switched off (Express 30 status = inactive). Off: it is listed, as the Taksh app lists it.
+    'quick_require_active' => (bool) env('TAKSH_QUICK_REQUIRE_ACTIVE', false),
     'support_phone' => env('TAKSH_SUPPORT_PHONE', '+91 99999 12345'),
     'support_email' => env('TAKSH_SUPPORT_EMAIL', 'care@takshallinone.com'),
 ];

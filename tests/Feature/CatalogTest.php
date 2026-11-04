@@ -6,8 +6,13 @@ use App\Models\ProductImage;
 use App\Models\ProductReview;
 use App\Models\VendorProduct;
 use Tests\CatalogTestCase;
+use Tests\Support\FakeCartCatalogRepository;
+use Tests\Support\FakeQuickVendors;
 use Tests\Support\FakeVendor;
 use Tests\Support\Make;
+
+require_once __DIR__.'/../Support/CartFakes.php';
+require_once __DIR__.'/../Support/QuickFakes.php';
 
 class CatalogTest extends CatalogTestCase
 {
@@ -331,12 +336,27 @@ class CatalogTest extends CatalogTestCase
         $post()->assertJsonPath('data.message', 'Product is not assigned to any vendor');
     }
 
-    public function test_quick_products_are_pointed_to_the_app(): void
+    public function test_a_quick_product_is_judged_by_the_shop_radius_and_pincode_like_the_app(): void
     {
-        $this->checkable(['is_express_30' => true]);
+        $vendors = new FakeQuickVendors;
+        $vendors->vendorRows[7] = (new FakeVendor)->forceFill(['id' => 7, 'status' => 'approved', 'shop_pincode' => '395001']);
+        $this->app->instance(\App\Repositories\Contracts\QuickVendorRepositoryInterface::class, $vendors);
+        $stock = new FakeCartCatalogRepository;
+        $stock->free['7_31'] = 5;
+        $this->app->instance(\App\Repositories\Contracts\CartCatalogRepositoryInterface::class, $stock);
 
-        $this->postJson('/ecommerce/products/3/check-delivery', ['pincode' => '395001'])->assertOk()
-            ->assertJsonPath('data.is_deliverable', false)->assertJsonPath('data.delivery_type', '30_min');
+        $this->delivery->product = Make::product(3, ['vendor_id' => 7, 'is_express_30' => true, 'approval_status' => 'approved', 'status' => 'active'], [Make::variant(['id' => 31, 'status' => 'active'])]);
+        $this->delivery->vendor = (new FakeVendor)->forceFill(['id' => 7, 'vendor_name' => 'V', 'shop_name' => 'Shop']);
+        $post = fn (array $extra) => $this->postJson('/ecommerce/products/3/check-delivery', $extra);
+
+        $post(['pincode' => '395001'])->assertOk()
+            ->assertJsonPath('data.is_deliverable', true)->assertJsonPath('data.delivery_type', '30_min')->assertJsonPath('data.availability_status', 'available');
+
+        $post(['pincode' => '110001'])->assertOk()
+            ->assertJsonPath('data.is_deliverable', false)->assertJsonPath('data.availability_status', 'area_unserviceable');
+
+        $post(['pincode' => '395001', 'product_variant_id' => 31, 'qty' => 9])->assertOk()
+            ->assertJsonPath('data.is_deliverable', false)->assertJsonPath('data.availability_status', 'out_of_stock');
     }
 
     public function test_delivery_check_validation_and_unknown_product(): void

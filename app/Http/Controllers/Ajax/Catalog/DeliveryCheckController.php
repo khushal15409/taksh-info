@@ -13,7 +13,10 @@ class DeliveryCheckController extends Controller
 {
     use ApiResponseTrait;
 
-    public function __construct(private readonly DeliveryCheckService $delivery) {}
+    public function __construct(
+        private readonly DeliveryCheckService $delivery,
+        private readonly \App\Services\Quick\QuickLocation $location,
+    ) {}
 
     /** POST /ecommerce/products/{id}/check-delivery */
     public function check(int $id, CheckDeliveryRequest $request): JsonResponse
@@ -26,6 +29,7 @@ class DeliveryCheckController extends Controller
                 trim($v['pincode']),
                 isset($v['product_variant_id']) ? (int) $v['product_variant_id'] : null,
                 (int) ($v['qty'] ?? 1),
+                $this->location->for($request),
             );
         } catch (\App\Exceptions\ApiException $e) {
             throw $e;

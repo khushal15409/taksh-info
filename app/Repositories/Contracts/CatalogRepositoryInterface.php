@@ -17,6 +17,9 @@ interface CatalogRepositoryInterface
      */
     public function paginate(array $filters, int $perPage): LengthAwarePaginator;
 
+    /** How many quick products each category has among those the given vendors can sell now (category id => count). @return array<int, int> */
+    public function quickCategoryCounts(array $vendorIds): array;
+
     /** vendor_product rows of these variants, keyed "<vendor_id>_<variant_id>". */
     public function vendorStock(array $variantIds): Collection;
 

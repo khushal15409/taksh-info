@@ -18,7 +18,7 @@ use App\Support\DeliveryBucket;
 /**
  * The shopping cart as taksh-admin's CartController runs it: Standard and Quick products in separate carts,
  * stock-checked lines, a server-built bill (fees, coupon) and a guest cart that follows the customer after login.
- * The Quick bucket can be viewed, changed and cleared here; adding to it happens in the app for now.
+ * The Quick bucket works like the Standard one; a Quick product is added only for a place a shop serves with stock to give (QuickAvailability).
  */
 class CartService
 {
@@ -29,12 +29,17 @@ class CartService
         private readonly PricingService $pricing,
         private readonly CouponService $coupons,
         private readonly GuestCartSession $guest,
+        private readonly \App\Services\Quick\QuickAvailability $quick,
     ) {}
 
     // ---------------------------------------------------------------- add (D2)
 
     /** @return array{cart: array, guest_token: ?string} */
-    public function add(CartOwner $owner, int $variantId, int $qty, ?string $deliveryType = null): array
+    /**
+     * @param  array{pincode: ?string, latitude: ?float, longitude: ?float}|null  $where  the place a Quick product is for (checked when it is known;
+     *                                                                                  the order checks it again either way)
+     */
+    public function add(CartOwner $owner, int $variantId, int $qty, ?string $deliveryType = null, ?array $where = null): array
     {
         $variant = $this->catalog->variant($variantId) ?? throw CartProblemException::notAvailable();
         $product = $variant->product;
@@ -45,8 +50,13 @@ class CartService
             throw CartProblemException::bucketMismatch($productIsQuick);
         }
 
-        if ($productIsQuick) {
-            throw CartProblemException::quickOnApp();
+        // a Quick product is only added for a place a shop serves with stock to give, just as in the app
+        if ($productIsQuick && $where && ($where['pincode'] !== null || $where['latitude'] !== null)) {
+            $product->loadMissing('variants');
+            $verdict = $this->quick->check($product, $where['latitude'], $where['longitude'], $where['pincode'], $variantId);
+            if (! $verdict['can_order']) {
+                throw CartProblemException::quickUnavailable($verdict['status'], \App\Services\Quick\QuickAvailability::messageKey($verdict['status']));
+            }
         }
 
         $cart = $owner->isGuest()

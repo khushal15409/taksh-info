@@ -28,6 +28,7 @@ class PaymentSettlementService
         private readonly PaymentRepositoryInterface $payments,
         private readonly OrderStockService $stock,
         private readonly OrderNotifier $notifier,
+        private readonly \App\Services\Quick\QuickOrderDispatch $dispatch,
     ) {}
 
     /**
@@ -89,6 +90,17 @@ class PaymentSettlementService
 
         if ($result['outcome'] === self::PAID && $result['order']) {
             $this->notifier->paymentConfirmed($result['order']);   // after the transaction; never throws into the payment
+
+            // a paid Quick order now enters rider dispatch; a dispatch problem must never undo or block the payment
+            try {
+                $order = $result['order'];
+                if (\App\Services\Quick\QuickOrderDispatch::isQuick($order->delivery_type, (bool) $order->is_express)) {
+                    $this->dispatch->logPlaced($order);
+                    $this->dispatch->tryAssignRider($order);
+                }
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
         return $result;

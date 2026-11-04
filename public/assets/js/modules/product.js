@@ -24,7 +24,7 @@ ready(() => {
         const ab = e.target.closest("[data-lp-add]");
         if (ab) {
             ab.disabled = true;
-            Cart.add(variantId, qty)
+            Cart.add(variantId, qty, page.dataset.delivery || "normal")
                 .then(c => { const line = c.items.find(i => i.product_variant_id === variantId); toast(`🛒 Added ${qty} item(s) to cart`); qs("#lp-in-cart").innerHTML = `${line ? line.qty : qty} in your cart • <a class="underline" href="${url("cart")}">View cart</a>`; })
                 .catch(err => toast(err.message, "error"))
                 .finally(() => { ab.disabled = false; });
@@ -33,7 +33,7 @@ ready(() => {
 
     // delivery check: starts from the pincode of the customer's default address (or the one they chose before)
     const pin = qs("#lp-pin-input"), out = qs("#lp-pin-result");
-    pin.value = Prefs.state.pincode || "";
+    pin.value = (qs("#hdr-location") || { dataset: {} }).dataset.pincode || Prefs.state.pincode || "";   // the delivery place shown in the header
     async function check(silent) {
         const value = pin.value.trim();
         if (!/^\d{4,10}$/.test(value)) { out.className = "text-[11px] font-medium text-red-600"; out.textContent = "Enter a valid pincode."; return; }

@@ -139,7 +139,8 @@ class AddressTest extends AccountTestCase
         $this->addresses->seed(5);
 
         $this->actingAs($this->user())->postJson('/address/user/addresses/set-default', ['address_id' => 2])->assertOk()
-            ->assertJsonPath('message', 'Default address updated successfully');
+            ->assertJsonPath('message', 'Default address updated successfully')
+            ->assertCookieExpired(\App\Services\Quick\QuickLocation::COOKIE);   // a pincode typed earlier no longer overrides the chosen address
 
         $this->assertSame([false, true], [$this->addresses->items[1]->is_default, $this->addresses->items[2]->is_default]);
         $this->actingAs($this->user())->postJson('/address/user/addresses/set-default', [])->assertStatus(422);

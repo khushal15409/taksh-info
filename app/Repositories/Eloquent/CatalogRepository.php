@@ -21,7 +21,11 @@ class CatalogRepository implements CatalogRepositoryInterface
         $query = Product::with(['brand', 'category', 'variants', 'images'])
             ->where('status', 'active')
             ->where('approval_status', 'approved')
-            ->where('is_express_30', false);                       // a 30 minute product is sold through the quick screens only
+            ->where('is_express_30', ! empty($filters['express']));   // a 30 minute product is listed through the quick screens only
+
+        if (! empty($filters['express'])) {
+            $this->quickEligible($query, $filters['vendor_ids'] ?? []);
+        }
 
         if (isset($filters['category_ids'])) {
             $query->whereIn('category_id', $filters['category_ids']);
@@ -49,6 +53,29 @@ class CatalogRepository implements CatalogRepositoryInterface
         }
 
         return $query->orderBy('products.id', 'asc')->paginate($perPage);
+    }
+
+    /**
+     * Quick: sold by a vendor that serves the location, with free stock in that vendor's own row. The admin's Quick on/off switch
+     * (express_30_status) is honoured only when asked for (TAKSH_QUICK_REQUIRE_ACTIVE): the Taksh app currently lists a quick
+     * product that is switched off, and the website follows the app.
+     */
+    private function quickEligible($query, array $vendorIds)
+    {
+        return $query->when(config('taksh.quick_require_active'), fn ($q) => $q->where('express_30_status', 'active'))
+            ->whereIn('products.vendor_id', $vendorIds)
+            ->whereHas('variants', fn ($v) => $v->where('status', 'active')->whereHas('vendorProducts', fn ($vp) => $vp
+                ->whereColumn('vendor_products.vendor_id', 'products.vendor_id')
+                ->whereRaw('(vendor_products.stock_qty - vendor_products.reserved_qty) > 0')));
+    }
+
+    public function quickCategoryCounts(array $vendorIds): array
+    {
+        $query = Product::query()->where('status', 'active')->where('approval_status', 'approved')->where('is_express_30', true);
+
+        return $this->quickEligible($query, $vendorIds)
+            ->selectRaw('products.category_id, COUNT(*) as total')->groupBy('products.category_id')
+            ->pluck('total', 'category_id')->map(fn ($n) => (int) $n)->all();
     }
 
     /** SQL for what a customer pays for one piece of a variant: selling price (a sale price only counts above zero) + the Taksh charge. */

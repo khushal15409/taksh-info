@@ -65,6 +65,11 @@ class FakeCategoryRepository implements CategoryRepositoryInterface
     {
         return $this->standardIds[$categoryId] ?? [$categoryId];
     }
+
+    public function idsWithChildren(int $categoryId, string $type): array
+    {
+        return $this->standardIdsWithChildren($categoryId);
+    }
 }
 
 class FakeCatalogRepository implements CatalogRepositoryInterface
@@ -110,6 +115,14 @@ class FakeCatalogRepository implements CatalogRepositoryInterface
         $this->lastPerPage = $perPage;
 
         return new Paginator($this->products->values(), $this->products->count(), $perPage, 1, ['path' => 'http://localhost/ecommerce/products']);
+    }
+
+    /** @var array<int, int> */
+    public array $quickCounts = [];
+
+    public function quickCategoryCounts(array $vendorIds): array
+    {
+        return $vendorIds ? $this->quickCounts : [];
     }
 
     public function vendorStock(array $variantIds): Collection

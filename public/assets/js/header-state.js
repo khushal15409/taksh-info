@@ -10,9 +10,12 @@ const Cart = (() => {
     const totals = () => ({ count: count(), total: cart ? cart.total_with_delivery : seeded.total });
     const seed = (n, total) => { seeded = { count: n, total }; cart = null; };
 
-    async function add(variantId, qty = 1) {
-        const d = await Api.cartAdd(variantId, qty);
-        if (d.cart) cart = d.cart;
+    // The header counts both carts (Standard and Quick); an add answers with the cart it went into, so the header is moved by what was added
+    async function add(variantId, qty = 1, deliveryType = "normal") {
+        const d = await Api.cartAdd(variantId, qty, deliveryType);
+        const line = d.cart && d.cart.items.find(i => i.product_variant_id === variantId);
+        seeded = { count: seeded.count + qty, total: seeded.total + (line ? Number(line.price) * qty : 0) };
+        cart = null;
         updateHeader();
         return d.cart;
     }
@@ -23,7 +26,7 @@ const Cart = (() => {
         if (!b) return;
         e.preventDefault();
         b.disabled = true;
-        try { await add(Number(b.dataset.add), 1); toast("🛒 Added to cart"); }
+        try { await add(Number(b.dataset.add), 1, b.dataset.delivery || "normal"); toast("🛒 Added to cart"); }
         catch (err) { toast(err.message, "error"); }
         b.disabled = false;
     });

@@ -50,6 +50,12 @@ class CartProblemException extends ApiException
         ]);
     }
 
+    /** A Quick line that cannot be ordered here: typed, so the page can say why (see QuickAvailability). */
+    public static function quickUnavailable(string $status, string $messageKey = 'api.express.item_unavailable'): self
+    {
+        return new self($messageKey, 422, ['code' => 'quick_item_unavailable', 'availability_status' => $status]);
+    }
+
     public static function quickOnApp(): self
     {
         return new self('api.cart_quick_on_app', 422, ['code' => 'quick_on_app']);

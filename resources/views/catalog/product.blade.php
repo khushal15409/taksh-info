@@ -33,7 +33,7 @@
         <span class="text-gray-800 font-bold truncate">{{ $product['name'] }}</span>
     </nav>
 
-    <div id="product-page" data-product-id="{{ $product['id'] }}" data-variant-id="{{ $v['id'] }}" data-max-qty="{{ max(1, (int) ($v['available_stock'] ?? 1)) }}">
+    <div id="product-page" data-delivery="{{ ! empty($product['is_express_30']) ? '30_min' : 'normal' }}" data-product-id="{{ $product['id'] }}" data-variant-id="{{ $v['id'] }}" data-max-qty="{{ max(1, (int) ($v['available_stock'] ?? 1)) }}">
         <div class="bg-white rounded-3xl p-6 lg:p-10 border border-orange-100 shadow-sm grid grid-cols-1 lg:grid-cols-2 gap-10">
             <div class="space-y-4">
                 <div class="relative bg-gradient-to-b from-orange-50/70 to-white rounded-2xl p-6 border border-orange-100 flex items-center justify-center overflow-hidden">

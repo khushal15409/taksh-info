@@ -6,7 +6,14 @@ ready(() => {
     const range = qs("#price-range", form), label = qs("#price-val", form), max = Number(range && range.dataset.max);
 
     form.addEventListener("change", e => {
-        if (e.target.name === "category" || e.target.name === "max") {
+        // ticking a category ticks its sub-categories (and the other way round), so one click filters the whole group
+        const t = e.target;
+        if (t.dataset && t.dataset.parent) qsa(`[data-child-of="${t.dataset.parent}"]`, form).forEach(c => { c.checked = t.checked; });
+        if (t.dataset && t.dataset.childOf) {
+            const kids = qsa(`[data-child-of="${t.dataset.childOf}"]`, form), parent = qs(`[data-parent="${t.dataset.childOf}"]`, form);
+            if (parent && kids.every(c => c.checked)) parent.checked = true;
+        }
+        if (e.target.name === "category[]" || e.target.name === "max") {
             if (range && Number(range.value) >= max) range.disabled = true;   // "any price" is simply not in the URL
             form.submit();
         }

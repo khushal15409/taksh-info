@@ -43,7 +43,7 @@ const Api = (() => {
 
     return {
         get, post, upload,
-        cartAdd: (variantId, qty = 1) => post("cart/add", { product_variant_id: variantId, qty, delivery_type: "normal" }),   // D2
+        cartAdd: (variantId, qty = 1, deliveryType = "normal") => post("cart/add", { product_variant_id: variantId, qty, delivery_type: deliveryType }),   // D2
         wishlistAdd: (productId) => post("wishlist/add", { product_id: productId }),
         wishlistRemove: (productId) => post(`wishlist/remove/${productId}`, {}),
         addresses: () => get("address/addresses"),                          // F1 F2 (login required)

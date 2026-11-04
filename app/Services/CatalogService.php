@@ -7,6 +7,7 @@ use App\Http\Resources\Catalog\ProductDetailResource;
 use App\Http\Resources\Catalog\ProductListResource;
 use App\Http\Resources\Catalog\SimilarProductResource;
 use App\Http\Resources\Catalog\VariantResource;
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
 use App\Repositories\Contracts\CatalogRepositoryInterface;
@@ -33,18 +34,27 @@ class CatalogService
 
     // ---------------------------------------------------------------- list (C2)
 
-    /** @param array{category_id?: ?int, search?: ?string, min_price?: ?float, max_price?: ?float, limit?: ?int} $filters */
+    /** @param array{category_id?: ?int, category_ids?: ?int[], express?: ?bool, vendor_ids?: int[], search?: ?string, min_price?: ?float, max_price?: ?float, limit?: ?int} $filters */
     public function list(array $filters): LengthAwarePaginator
     {
         $query = [
             'search' => $filters['search'] ?? null,
             'min_price' => $filters['min_price'] ?? null,
             'max_price' => $filters['max_price'] ?? null,
+            'express' => ! empty($filters['express']),
+            'vendor_ids' => $filters['vendor_ids'] ?? [],
         ];
 
-        // A parent category also lists the products of its sub-categories; a sub-category lists only its own.
-        if (! empty($filters['category_id'])) {
-            $query['category_ids'] = $this->categories->standardIdsWithChildren((int) $filters['category_id']);
+        // A parent category also lists the products of its sub-categories; a sub-category lists only its own. Several can be picked.
+        $picked = array_filter(array_map('intval', $filters['category_ids'] ?? (empty($filters['category_id']) ? [] : [$filters['category_id']])));
+        if ($picked) {
+            $type = $query['express'] ? Category::DELIVERY_EXPRESS : Category::DELIVERY_STANDARD;
+            $query['category_ids'] = array_values(array_unique(array_merge(...array_map(function (int $id) use ($type, $picked) {
+                $with = $this->categories->idsWithChildren($id, $type);
+
+                // a parent alone brings its sub-categories along; when some of its sub-categories were picked too, only those count
+                return array_intersect(array_diff($with, [$id]), $picked) ? [$id] : $with;
+            }, $picked))));
         }
 
         $perPage = min(max((int) ($filters['limit'] ?? 15), 1), self::MAX_PAGE_SIZE);
@@ -64,6 +74,12 @@ class CatalogService
                 'in_stock' => $this->anyInStock($rows),
             ])->resolve();
         });
+    }
+
+    /** @return array<int, int> category id => quick products the vendors can sell now */
+    public function quickCategoryCounts(array $vendorIds): array
+    {
+        return $vendorIds ? $this->catalog->quickCategoryCounts($vendorIds) : [];
     }
 
     // ---------------------------------------------------------------- detail (C3, C4, C6)

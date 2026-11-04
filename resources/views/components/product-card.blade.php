@@ -30,7 +30,7 @@
             @if (($p['discount'] ?? 0) > 0)<span class="text-xs text-gray-400 line-through pb-0.5">@rupee($p['original_price'])</span>@endif
         </div>
         @if (! empty($p['in_stock']) && ! empty($p['variant_id']))
-            <button type="button" data-add="{{ $p['variant_id'] }}" class="{{ $btn }} flex items-center justify-center gap-1.5"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Add</button>
+            <button type="button" data-add="{{ $p['variant_id'] }}" data-delivery="{{ ! empty($p['is_quick']) ? '30_min' : 'normal' }}" class="{{ $btn }} flex items-center justify-center gap-1.5"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Add</button>
         @elseif (! empty($p['in_stock']))
             <a href="{{ $href }}" class="{{ $btn }} text-center">View</a>
         @else

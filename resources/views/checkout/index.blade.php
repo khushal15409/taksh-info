@@ -6,10 +6,13 @@
 @section('content')
 
     @php($err = fn ($k) => $errors->first($k))
-    <h1 class="text-2xl font-extrabold text-gray-900 mb-6">Review &amp; Place Order</h1>
+    <h1 class="text-2xl font-extrabold text-gray-900 mb-6">Review &amp; Place Order
+        @if ($quick)<span class="ml-2 align-middle text-xs font-bold bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">⚡ 30-minute delivery</span>@endif
+    </h1>
     <form id="checkout-form" method="POST" action="{{ route('checkout.place') }}" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         @csrf
         <input type="hidden" name="checkout_token" value="{{ $token }}">
+        <input type="hidden" name="type" value="{{ $type }}">
 
         <div class="lg:col-span-2 space-y-6">
             <section class="bg-white p-6 rounded-3xl border border-orange-100 shadow-sm space-y-4">
@@ -19,15 +22,17 @@
                 </div>
                 <div class="space-y-3">
                     @forelse ($addresses as $a)
-                        <label class="block p-4 rounded-2xl border-2 cursor-pointer transition {{ (int) $selectedAddress === $a['id'] ? 'border-brand-500 bg-orange-50/40' : 'border-gray-200 hover:border-brand-500/50' }}">
+                        @php($ok = ! $quick || ($serviceable[$a['id']] ?? false))
+                        <label class="block p-4 rounded-2xl border-2 transition {{ $ok ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed' }} {{ (int) $selectedAddress === $a['id'] ? 'border-brand-500 bg-orange-50/40' : 'border-gray-200 '.($ok ? 'hover:border-brand-500/50' : '') }}">
                             <div class="flex justify-between items-start gap-3">
                                 <div class="flex gap-3">
-                                    <input type="radio" name="address_id" value="{{ $a['id'] }}" class="accent-brand-500 mt-1" @checked((int) $selectedAddress === $a['id'])>
+                                    <input type="radio" name="address_id" value="{{ $a['id'] }}" class="accent-brand-500 mt-1" @checked((int) $selectedAddress === $a['id']) @disabled(! $ok)>
                                     <div>
                                         <span class="bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">{{ $a['address_type'] }}</span>
                                         <h4 class="font-bold text-sm text-gray-800 mt-2">{{ $a['name'] }}</h4>
                                         <p class="text-xs text-gray-500 mt-1">{{ collect([$a['address_line_1'], $a['address_line_2'], $a['area'], $a['city'], $a['state']])->filter()->implode(', ') }} - {{ $a['pincode'] }}</p>
                                         <p class="text-xs text-gray-500 mt-0.5">Phone: {{ $a['mobile'] }}</p>
+                                        @if (! $ok)<p class="text-[11px] text-amber-700 font-semibold mt-1">30-minute delivery is not available at this address.</p>@endif
                                     </div>
                                 </div>
                                 <button type="button" data-address-edit='@json($a)' class="text-xs font-bold text-brand-600 hover:underline">Edit</button>
@@ -78,8 +83,8 @@
                 <div class="border-t pt-3 flex justify-between text-base font-extrabold text-gray-900"><span>Grand Total</span><span class="text-brand-600">@rupee2($cart['total_with_delivery'])</span></div>
                 @if ($unavailable)<p class="text-[11px] text-red-500 font-semibold">Some items are no longer available. Remove them from your cart to continue.</p>@endif
             </div>
-            <button id="place-order" @disabled($unavailable || ! $addresses || ! $methods) class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 disabled:opacity-50"><i data-lucide="check-circle" class="w-5 h-5"></i><span>Confirm Order</span></button>
-            <a href="{{ route('cart') }}" class="block text-center text-xs font-bold text-gray-500 hover:text-brand-600">← Back to cart</a>
+            <button id="place-order" @disabled($unavailable || ! $addresses || ! $methods || ($quick && ! in_array(true, $serviceable, true))) class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 disabled:opacity-50"><i data-lucide="check-circle" class="w-5 h-5"></i><span>Confirm Order</span></button>
+            <a href="{{ route('cart', ['type' => $type]) }}" class="block text-center text-xs font-bold text-gray-500 hover:text-brand-600">← Back to cart</a>
         </aside>
     </form>
 

@@ -94,7 +94,7 @@ function updateHeader() {
     set("hdr-cart-count", t.count);
     set("hdr-cart-total", money(t.total));
     set("hdr-wish-count", Wishlist.count());
-    set("hdr-location", [Prefs.state.city, Prefs.state.pincode].filter(Boolean).join(" ") || "Set location");
+    // the "Deliver to" chip is drawn by the server (the place Quick delivers to), so the header and the Quick page always agree
     const cc = qs("#hdr-cart-count"); if (cc) cc.classList.toggle("hidden", t.count === 0);
     const wc = qs("#hdr-wish-count"); if (wc) wc.classList.toggle("hidden", Wishlist.count() === 0);
     const dot = qs("#hdr-notif-dot"); if (dot) dot.classList.toggle("hidden", NotifBadge.count() === 0);
@@ -180,13 +180,47 @@ function initSearch() {
 
 // ---------- Location + address modals ----------
 function openLocationModal() {
-    if (Auth.loggedIn) { location.href = url("profile", { tab: "addresses" }); return; }   // saved addresses are managed in the account
+    if (Auth.loggedIn) return openAddressPicker();
+    openPincodeForm();
+}
+
+// A signed-in customer picks one of the saved addresses: it becomes the default, and the header, Quick products, the product pages' pincode
+// and checkout all follow it.
+async function openAddressPicker() {
+    const m = Modal.open({ title: "Choose delivery address", body: `<div id="addr-pick" class="space-y-3 text-sm text-gray-400">Loading your addresses…</div>` });
+    const host = qs("#addr-pick", m);
+    let list = [];
+    try { const d = await Api.addresses(); list = [d.default_address, ...d.addresses].filter(Boolean); } catch (e) { /* shown below */ }
+    // the server says which saved address the header is using (none when a pincode was typed instead)
+    const current = (qs("#hdr-location") || { dataset: {} }).dataset.addressId;
+    const on = a => current && String(a.id) === current;
+    host.className = "space-y-3";
+    host.innerHTML = (list.length ? list.map(a => `<button type="button" data-pick="${a.id}" class="w-full text-left p-3 rounded-2xl border-2 ${on(a) ? "border-brand-500 bg-orange-50/40" : "border-gray-200 hover:border-brand-500"}">
+            <span class="flex items-center justify-between gap-2"><span class="font-bold text-gray-800 text-sm">${esc(a.name || (a.type ? a.type[0].toUpperCase() + a.type.slice(1) : "Address"))}</span>${on(a) ? `<span class="text-[10px] font-extrabold uppercase text-brand-600">Delivering here</span>` : ""}</span>
+            <span class="block text-xs text-gray-500 mt-1">${esc([a.address_line_1, a.area, a.city].filter(Boolean).join(", "))} - ${esc(a.pincode)}</span></button>`).join("")
+        : `<p class="text-sm text-gray-500">You have no saved address yet.</p>`) +
+        `<a href="${url("profile", { tab: "addresses" })}" class="block text-center w-full border-2 border-brand-500 text-brand-600 hover:bg-orange-50 font-bold py-2.5 rounded-2xl text-sm">+ Add new address</a>
+        <button type="button" data-other-pin class="block w-full text-center text-xs font-bold text-gray-500 hover:text-brand-600 underline">Use another pincode</button>`;
+    host.addEventListener("click", async e => {
+        if (e.target.closest("[data-other-pin]")) { Modal.close(); return openPincodeForm(); }
+        const b = e.target.closest("[data-pick]");
+        if (!b) return;
+        b.disabled = true;
+        try {
+            await Api.addressDefault(Number(b.dataset.pick));
+            document.cookie = "taksh_loc=; max-age=0; path=/";   // a saved address replaces a pincode typed earlier
+            location.reload();
+        } catch (err) { b.disabled = false; toast(err.message || "Couldn't change the address", "error"); }
+    });
+}
+
+function openPincodeForm() {
     const m = Modal.open({
         title: "Choose delivery location",
         body: `<form id="loc-form" class="space-y-4">
             <p class="text-sm text-gray-500">Enter your pincode to see delivery options and availability.</p>
             <div><label class="text-xs font-bold text-gray-500">Pincode</label>
-                <input name="pincode" maxlength="6" inputmode="numeric" value="${esc(Prefs.state.pincode)}" class="field mt-1" placeholder="e.g. 380061"></div>
+                <input name="pincode" maxlength="6" inputmode="numeric" value="${esc((qs("#hdr-location") || { dataset: {} }).dataset.pincode || Prefs.state.pincode)}" class="field mt-1" placeholder="e.g. 380061"></div>
             <div><label class="text-xs font-bold text-gray-500">City</label>
                 <input name="city" value="${esc(Prefs.state.city)}" class="field mt-1"></div>
             <button type="button" id="loc-detect" class="w-full border-2 border-brand-500 text-brand-600 hover:bg-orange-50 font-bold py-2.5 rounded-2xl flex items-center justify-center gap-2"><i data-lucide="crosshair" class="w-4 h-4"></i>Use my current location</button>
@@ -200,8 +234,12 @@ function openLocationModal() {
         Prefs.state.pincode = f.get("pincode");
         Prefs.state.city = f.get("city").trim() || Prefs.state.city;
         Prefs.save();
+        // the server finds Quick products near this place: pincode, plus the coordinates when the place was detected
+        const here = m.dataset.lat && m.dataset.lng && m.dataset.pincode === f.get("pincode") ? `${m.dataset.lat},${m.dataset.lng}` : ",";
+        document.cookie = `taksh_loc=${f.get("pincode")},${here}; path=/; max-age=31536000; SameSite=Lax`;
         Modal.close();
         toast("📍 Delivery location updated");
+        setTimeout(() => location.reload(), 400);   // the header and Quick products follow the new place
     });
 }
 
@@ -218,6 +256,7 @@ function detectLocation(modal, btn) {
             const a = ((await Api.reverseGeocode(la, lo)).place || {}).address || {};
             const form = qs("#loc-form", modal);
             if (a.pincode) form.elements.pincode.value = a.pincode.slice(0, 6);
+            Object.assign(modal.dataset, { lat: la, lng: lo, pincode: (a.pincode || "").slice(0, 6) });
             if (a.city) form.elements.city.value = a.city;
             toast("📍 Location detected - review and update");
         } catch (e) { toast("Couldn't look up your address. Please enter your pincode.", "error"); }

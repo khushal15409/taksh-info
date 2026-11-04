@@ -40,6 +40,14 @@ class AppServiceProvider extends ServiceProvider
                 $view->with('headerState', ['cart_count' => 0, 'cart_total' => 0.0, 'wish_ids' => []]);
                 $view->with('footerCategories', []);
             }
+
+            // the delivery place is a nicety: if it cannot be worked out the header just says "Set location"
+            try {
+                $view->with('deliverTo', app(\App\Services\Quick\QuickLocation::class)->current(request()));
+            } catch (Throwable $e) {
+                report($e);
+                $view->with('deliverTo', ['pincode' => null, 'address_id' => null, 'label' => '']);
+            }
         });
     }
 }

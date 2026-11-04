@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <style>[hidden]{display:none!important}</style>
 </head>
-<body class="font-sans antialiased text-gray-800 bg-[#FFFBEF] min-h-screen flex flex-col selection:bg-brand-500 selection:text-white" data-root="{{ url('/') }}/" data-page="@yield('page', 'home')" data-version="{{ config('taksh.version') }}" data-cart-count="{{ $headerState['cart_count'] }}" data-cart-total="{{ $headerState['cart_total'] }}" data-wish-ids="{{ json_encode($headerState['wish_ids']) }}" data-otp-length="{{ \App\Helpers\Otp::length() }}" data-user="{{ $authUser ? json_encode($authUser) : '' }}">
+<body class="font-sans antialiased text-gray-800 bg-[#FFFBEF] min-h-screen flex flex-col selection:bg-brand-500 selection:text-white" data-root="{{ url('/') }}/" data-page="@yield('page', 'home')" data-quick="{{ request()->routeIs('listing') && request()->query('quick') === '1' ? 1 : 0 }}" data-version="{{ config('taksh.version') }}" data-cart-count="{{ $headerState['cart_count'] }}" data-cart-total="{{ $headerState['cart_total'] }}" data-wish-ids="{{ json_encode($headerState['wish_ids']) }}" data-otp-length="{{ \App\Helpers\Otp::length() }}" data-user="{{ $authUser ? json_encode($authUser) : '' }}">
 
     @include('layouts.partials.header')
 

@@ -22,6 +22,8 @@ use Tests\Support\FakeVendor;
 
 require_once __DIR__.'/Support/OrderFakes.php';
 
+require_once __DIR__.'/Support/QuickFakes.php';
+
 abstract class OrderTestCase extends CartTestCase
 {
     protected FakeOrderDb $db;
@@ -44,6 +46,8 @@ abstract class OrderTestCase extends CartTestCase
 
     protected FakeShipmentSync $shipments;
 
+    protected \Tests\Support\FakeQuickDispatch $dispatch;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -54,6 +58,7 @@ abstract class OrderTestCase extends CartTestCase
         $this->app->instance(StockRepositoryInterface::class, $this->stockStore = new FakeStockRepository($this->db));
         $this->app->instance(RazorpayGateway::class, $this->razorpay = new FakeRazorpayGateway);
         $this->app->instance(OrderNotifier::class, $this->notifier = new FakeOrderNotifier);
+        $this->app->instance(\App\Services\Quick\QuickOrderDispatch::class, $this->dispatch = new \Tests\Support\FakeQuickDispatch);
         $this->app->instance(\App\Repositories\Contracts\OrderRepositoryInterface::class, $this->orderStore = new FakeOrderRepository($this->db, $this->checkoutStore));
         $this->app->instance(\App\Repositories\Contracts\ReturnRepositoryInterface::class, $this->returnStore = new FakeReturnRepository($this->db));
         $this->app->instance(\App\Services\Returns\ReturnMediaStore::class, $this->mediaStore = new FakeReturnMediaStore);

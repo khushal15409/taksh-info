@@ -13,7 +13,14 @@ class PlaceOrderPageRequest extends WebFormRequest
             'address_id' => ['required', 'integer', 'min:1'],
             'payment_method' => ['required', 'in:cod,online'],
             'checkout_token' => ['required', 'uuid'],
+            'type' => ['nullable', 'in:normal,30_min'],
         ];
+    }
+
+    /** The cart being ordered: Standard (default) or Quick. */
+    public function type(): string
+    {
+        return $this->input('type') === '30_min' ? '30_min' : 'normal';
     }
 
     public function messages(): array

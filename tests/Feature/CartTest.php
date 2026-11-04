@@ -108,8 +108,28 @@ class CartTest extends CartTestCase
         $this->add(1, 1, ['delivery_type' => '30_min'])->assertStatus(422)
             ->assertJsonPath('data.code', 'delivery_bucket_mismatch')->assertJsonPath('data.product_delivery_type', 'normal');
         $this->add(2, 1, ['delivery_type' => 'normal'])->assertStatus(422)->assertJsonPath('data.product_delivery_type', '30_min');
-        $this->add(2, 1, ['delivery_type' => '30_min'])->assertStatus(422)->assertJsonPath('data.code', 'quick_on_app');
-        $this->add(2)->assertStatus(422)->assertJsonPath('data.code', 'quick_on_app');   // a quick product never lands in the standard cart
+        $this->add(2, 1, ['delivery_type' => '30_min'])->assertOk();                       // a quick product goes into the quick cart
+        $this->add(2)->assertOk();                                                          // without a delivery type: its own cart, never the standard one
+        $this->cart('normal')->assertJsonPath('data.cart.items', []);
+        $this->assertSame(2, $this->cart('30_min')->json('data.cart.items.0.qty'));
+    }
+
+    public function test_a_quick_product_is_only_added_for_a_place_a_shop_serves(): void
+    {
+        $vendors = new \Tests\Support\FakeQuickVendors;
+        $vendors->vendorRows[7] = (new \Tests\Support\FakeVendor)->forceFill(['id' => 7, 'status' => 'approved', 'shop_pincode' => '395001']);
+        $this->app->instance(\App\Repositories\Contracts\QuickVendorRepositoryInterface::class, $vendors);
+        $this->sellable(2, 100, 5, ['is_express_30' => true, 'approval_status' => 'approved']);
+        $addAt = fn (string $place) => $this->call('POST', '/cart/add', ['product_variant_id' => 2, 'qty' => 1, 'delivery_type' => '30_min'],
+            [\App\Services\Quick\QuickLocation::COOKIE => $place], [], ['HTTP_ACCEPT' => 'application/json']);
+
+        // a place no shop serves: refused, with the reason the app gives
+        $addAt('110001,,')->assertStatus(422)->assertJsonPath('data.code', 'quick_item_unavailable')->assertJsonPath('data.availability_status', 'area_unserviceable');
+        $this->cart('30_min')->assertJsonPath('data.cart.items', []);
+
+        // the shop's own pincode: added
+        $addAt('395001,,')->assertOk();
+        $this->assertSame(1, $this->cart('30_min')->json('data.cart.items.0.qty'));
     }
 
     // ------------------------------------------------------------------ read + bill (D1, D5)

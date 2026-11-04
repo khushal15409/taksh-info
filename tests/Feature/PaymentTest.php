@@ -137,6 +137,20 @@ class PaymentTest extends OrderTestCase
         $this->assertSame([$orderId], $this->notifier->confirmed);
     }
 
+    public function test_a_paid_quick_order_enters_rider_dispatch_but_a_standard_one_does_not(): void
+    {
+        $this->checkoutStore->vendors[7]->forceFill(['shop_pincode' => '395001']);
+        $this->inCart($this->sold(2, 100, 10, ['is_express_30' => true, 'approval_status' => 'approved']), 1);
+        $quick = $this->place(['payment_method' => 'online', 'delivery_type' => '30_min'])->assertOk()->json('data.id');
+        $this->assertSame([], $this->dispatch->assigned);                 // not before it is paid
+
+        $this->create($quick);
+        $this->razorpay->remote = ['order_id' => 'order_rzp_1', 'amount' => 10000, 'currency' => 'INR', 'status' => 'captured', 'method' => 'upi'];
+        $this->verify('order_rzp_1', 'pay_88')->assertOk()->assertJsonPath('data.status', 'paid');
+
+        $this->assertSame([$quick], $this->dispatch->assigned);           // paid: a rider is tried
+    }
+
     public function test_verifying_twice_deducts_stock_once(): void
     {
         $orderId = $this->onlineOrder();

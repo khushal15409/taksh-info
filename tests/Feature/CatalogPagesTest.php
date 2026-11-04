@@ -184,6 +184,29 @@ class CatalogPagesTest extends CatalogTestCase
         $this->assertSame(12, $this->catalog->lastPerPage);
     }
 
+    public function test_several_categories_can_be_picked_at_once(): void
+    {
+        $this->shopProducts();
+        $this->categories->standardIds = [4 => [4, 6], 6 => [6]];
+
+        $html = $this->get('/shop?category[]=4&category[]=6')->assertOk()->assertSee('Grocery ✕', false)->assertSee('Flour ✕', false)->getContent();
+
+        $this->assertSame([4, 6], $this->catalog->lastFilters['category_ids']);   // 4 brings 6 along, no duplicates
+        $this->assertStringContainsString('type="checkbox" name="category[]" value="4"', $html);
+        $this->assertStringNotContainsString('type="radio"', $html);
+    }
+
+    public function test_quick_products_are_listed_on_their_own(): void
+    {
+        $this->shopProducts();
+
+        $this->get('/shop')->assertOk();
+        $this->assertFalse($this->catalog->lastFilters['express']);
+
+        $this->get('/shop?quick=1')->assertOk()->assertSee('Quick Products')->assertSee('name="quick" value="1"', false);
+        $this->assertTrue($this->catalog->lastFilters['express']);
+    }
+
     public function test_search_category_and_price_reach_the_catalogue_and_show_as_chips(): void
     {
         $this->shopProducts();

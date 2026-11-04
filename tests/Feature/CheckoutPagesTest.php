@@ -46,6 +46,38 @@ class CheckoutPagesTest extends OrderTestCase
 
     // ------------------------------------------------------------------ the checkout page
 
+    public function test_the_quick_checkout_only_lets_you_pick_an_address_the_shop_serves(): void
+    {
+        $vendors = new \Tests\Support\FakeQuickVendors;
+        $vendors->vendorRows[7] = (new \Tests\Support\FakeVendor)->forceFill(['id' => 7, 'status' => 'approved', 'shop_pincode' => '395001']);
+        $this->app->instance(\App\Repositories\Contracts\QuickVendorRepositoryInterface::class, $vendors);
+        app(AddressRepositoryInterface::class)->seed(5, ['pincode' => '110001', 'name' => 'Far']);   // id 2: no shop serves it
+        $this->inCart($this->sold(2, 90, 5, ['is_express_30' => true, 'approval_status' => 'approved']), 1);
+
+        $html = $this->me()->get('/checkout?type=30_min')->assertOk()->assertSee('30-minute delivery')->assertSee('name="type" value="30_min"', false)
+            ->assertSee('30-minute delivery is not available at this address.')->getContent();
+
+        $this->assertMatchesRegularExpression('/name="address_id" value="1"(?![^>]*disabled)/', $html);
+        $this->assertMatchesRegularExpression('/name="address_id" value="2"[^>]*disabled/', $html);
+    }
+
+    public function test_a_quick_order_is_placed_from_the_page_and_the_standard_cart_is_untouched(): void
+    {
+        $vendors = new \Tests\Support\FakeQuickVendors;
+        $vendors->vendorRows[7] = (new \Tests\Support\FakeVendor)->forceFill(['id' => 7, 'status' => 'approved', 'shop_pincode' => '395001']);
+        $this->app->instance(\App\Repositories\Contracts\QuickVendorRepositoryInterface::class, $vendors);
+        $this->checkoutStore->vendors[7]->forceFill(['shop_pincode' => '395001']);
+        $this->inCart($this->sold(2, 90, 5, ['is_express_30' => true, 'approval_status' => 'approved']), 1);
+        $this->inCart($this->sold(1, 100, 5), 1);
+
+        $this->submit(['type' => '30_min'])->assertRedirect('/order/placed?order=1');
+
+        $this->assertTrue($this->db->orders[1]->is_express);
+        $this->assertSame('30_min', $this->db->orders[1]->delivery_type);
+        $left = $this->cartStore->forUser(5);
+        $this->assertCount(1, $this->cartStore->lines[$left->id]);        // the standard line stays
+    }
+
     public function test_checkout_needs_a_login_and_a_cart(): void
     {
         $this->get('/checkout')->assertRedirect('/login?next=%2Fcheckout');

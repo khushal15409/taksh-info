@@ -20,14 +20,20 @@ class CartController extends Controller
 {
     use ApiResponseTrait;
 
-    public function __construct(private readonly CartService $cart, private readonly GuestCartSession $guest) {}
+    public function __construct(
+        private readonly CartService $cart,
+        private readonly GuestCartSession $guest,
+        private readonly \App\Services\Quick\QuickLocation $location,
+    ) {}
 
     /** POST /cart/add {product_variant_id, qty, delivery_type?} - a repeated add adds to the quantity */
     public function add(AddToCartRequest $request): JsonResponse
     {
         $v = $request->validated();
 
-        return $this->success($this->cart->add($this->owner($request), (int) $v['product_variant_id'], (int) $v['qty'], $request->deliveryType()), 'api.item_added_to_cart');
+        $quick = \App\Support\DeliveryBucket::isQuick($request->deliveryType());
+
+        return $this->success($this->cart->add($this->owner($request), (int) $v['product_variant_id'], (int) $v['qty'], $request->deliveryType(), $quick ? $this->location->for($request) : null), 'api.item_added_to_cart');
     }
 
     /** GET /cart/cart?delivery_type=normal|30_min */

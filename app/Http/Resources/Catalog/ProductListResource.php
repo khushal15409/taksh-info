@@ -33,6 +33,7 @@ class ProductListResource extends ApiResource
             'description' => $p->description,
             'short_description' => $p->short_description,
             'pricing_type' => $p->pricing_type,
+            'is_express_30' => (bool) $p->is_express_30,
             'status' => $p->status,
             'brand' => $p->relationLoaded('brand') && $p->brand ? ['id' => $p->brand->id, 'name' => $p->brand->name] : null,
             'category' => $p->relationLoaded('category') && $p->category ? ['id' => $p->category->id, 'name' => $p->category->name, 'slug' => $p->category->slug, 'parent_id' => $p->category->parent_id] : null,

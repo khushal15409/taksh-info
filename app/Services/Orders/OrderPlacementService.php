@@ -12,6 +12,10 @@ use App\Repositories\Contracts\CartRepositoryInterface;
 use App\Repositories\Contracts\CheckoutRepositoryInterface;
 use App\Services\PricingService;
 use App\Support\CartCoupon;
+use App\Helpers\QuickDelivery;
+use App\Services\Quick\QuickAvailability;
+use App\Services\Quick\QuickOrderDispatch;
+use App\Services\Quick\QuickServiceability;
 use App\Support\DeliveryBucket;
 use App\Support\PaymentOptions;
 use Illuminate\Support\Str;
@@ -20,7 +24,6 @@ use Illuminate\Support\Str;
  * Place order, step for step as taksh-admin's OrderController::store, for Standard delivery: the cart is locked first
  * (a double submit cannot create a second order), every line is checked, vendor stock is reserved under row locks,
  * one order is made per shop, fees and the coupon are worked out on the server and a payment record is created.
- * Quick (30 minute) orders are placed in the app for now.
  */
 class OrderPlacementService
 {
@@ -31,6 +34,8 @@ class OrderPlacementService
         private readonly PricingService $pricing,
         private readonly OrderChargeCalculator $charges,
         private readonly OrderNotifier $notifier,
+        private readonly QuickServiceability $quick,
+        private readonly QuickOrderDispatch $dispatch,
     ) {}
 
     /**
@@ -52,11 +57,23 @@ class OrderPlacementService
 
         // the delivery type decides which part of the cart is ordered; the other kind of item stays in the cart untouched
         $isQuick = DeliveryBucket::isQuick($deliveryCode);
-        if ($isQuick) {
-            throw CartProblemException::quickOnApp();
-        }
 
         $placed = $this->checkout->transaction(fn () => $this->placeInTransaction($user, $address, $deliveryCode, $method, $isQuick));
+
+        // a Quick order enters the delivery workflow: the first timeline row and, for cash orders, an immediate rider attempt (an online
+        // order gets its rider once it is paid). A dispatch problem must never look like a failed order.
+        if ($isQuick) {
+            foreach ($placed as $order) {
+                try {
+                    $this->dispatch->logPlaced($order);
+                    if ($method === 'cod') {
+                        $this->dispatch->tryAssignRider($order);
+                    }
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            }
+        }
 
         // telling the shop is an extra: the order is already placed and paid for as it stands, so a failure here must not look like a failed order
         try {
@@ -134,8 +151,17 @@ class OrderPlacementService
                 throw new CartProblemException('api.vendor_not_available', 422);
             }
 
-            // standard delivery: the address pincode must be one the vendor serves (the same rule as the product page check)
-            if (! $vendor->servesPincode($address->pincode)) {
+            if ($isQuick) {
+                // Quick: the saved address must have a usable place, and the shop must serve it (10 km, or the shop's own pincode);
+                // a place that cannot be judged is NOT served
+                if (! QuickDelivery::validCoordinates($address->latitude, $address->longitude) && QuickDelivery::normalizePincode($address->pincode) === null) {
+                    throw new CartProblemException('api.express.address_location_missing', 422, ['code' => 'quick_location_required']);
+                }
+                if (! $this->quick->vendorServes($vendor, $address->latitude, $address->longitude, $address->pincode)) {
+                    throw new CartProblemException('api.express.not_available', 400, ['code' => 'quick_not_serviceable']);
+                }
+            } elseif (! $vendor->servesPincode($address->pincode)) {
+                // standard delivery: the address pincode must be one the vendor serves (the same rule as the product page check)
                 throw new CartProblemException('api.delivery_not_serviceable', 422);
             }
 
@@ -156,11 +182,18 @@ class OrderPlacementService
                 if ($variant->status !== 'active' || $product->status !== 'active') {
                     throw CartProblemException::notAvailable();
                 }
+                // a Quick product the admin has since un-approved can no longer be ordered
+                if ($isQuick && $product->approval_status !== 'approved') {
+                    throw CartProblemException::quickUnavailable(QuickAvailability::PRODUCT_UNAVAILABLE);
+                }
 
-                $row = $stockRows->get($variant->id) ?? throw new CartProblemException('Product not available from vendor', 400);
+                $row = $stockRows->get($variant->id);
+                if (! $row) {
+                    throw $isQuick ? CartProblemException::quickUnavailable(QuickAvailability::OUT_OF_STOCK) : new CartProblemException('Product not available from vendor', 400);
+                }
 
                 if (($row->stock_qty ?? 0) - ($row->reserved_qty ?? 0) < $line->qty) {
-                    throw new CartProblemException('api.insufficient_stock', 400);
+                    throw $isQuick ? CartProblemException::quickUnavailable(QuickAvailability::OUT_OF_STOCK) : new CartProblemException('api.insufficient_stock', 400);
                 }
 
                 $this->checkout->reserveStock($row, $line->qty);
@@ -197,7 +230,7 @@ class OrderPlacementService
                 'delivery_type' => $deliveryCode,
                 'order_status' => 'pending',
                 'order_type' => 'fm',
-            ], $groupId ? ['checkout_group_id' => $groupId] : [], $this->charges->totals($orderItems, $extra, $grandTotal)));
+            ], $groupId ? ['checkout_group_id' => $groupId] : [], $isQuick ? ['is_express' => true] : [], $this->charges->totals($orderItems, $extra, $grandTotal)));
 
             foreach ($extra as $charge) {
                 $this->checkout->createCharge($order, $charge);

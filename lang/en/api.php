@@ -43,6 +43,7 @@ return [
     'delivery_check_not_mapped' => 'Product is not available for delivery to this pincode. Vendor is not mapped to this pincode.',
     'delivery_check_out_of_stock' => 'Product is out of stock',
     'delivery_check_ok' => 'Product is available for delivery to this pincode',
+    'delivery_check_quick_no_location' => 'Quick delivery cannot be checked for this pincode. Choose your delivery address to check.',
     'delivery_check_quick_on_app' => 'Quick (30-minute) delivery is available in the Taksh app. Please order this product there.',
     'review' => [
         'pending_listed' => 'Products waiting for your rating fetched successfully',
@@ -67,7 +68,23 @@ return [
     'product_vendor_not_set' => 'Product vendor is not set',
     'vendor_not_available' => 'This vendor is not available right now',
     'cart_quick_on_app' => 'Quick (30-minute) products can be ordered from the Taksh app for now.',
-    'express' => ['bucket_mismatch' => 'This product is not available with the selected delivery option'],
+    'express' => [
+        'bucket_mismatch' => 'This product is not available with the selected delivery option',
+        'order_placed' => 'Order placed with 30-minute delivery',
+        'not_available' => '30-minute delivery is not available in your area',
+        'location_required' => 'A valid delivery location is needed to check 30-minute delivery',
+        'address_location_missing' => 'Please re-save your address with its map location to use 30-minute delivery',
+        'item_unavailable' => 'An item in your cart is not available for 30-minute delivery',
+        'availability' => [
+            'available' => 'Available for 30-minute delivery',
+            'out_of_stock' => 'This product is out of stock right now',
+            'area_unserviceable' => 'This product is not available in your area right now',
+            'location_required' => 'Select an address with a map location to check availability',
+            'vendor_unavailable' => 'The seller of this product is not available right now',
+            'variant_unavailable' => 'This variant is not available right now',
+            'product_unavailable' => 'This product is not available for 30-minute delivery',
+        ],
+    ],
 
     // Wishlist
     'wishlist_item_added' => 'Product added to wishlist successfully',

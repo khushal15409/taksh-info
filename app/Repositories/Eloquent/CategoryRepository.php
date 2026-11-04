@@ -47,7 +47,12 @@ class CategoryRepository implements CategoryRepositoryInterface
 
     public function standardIdsWithChildren(int $categoryId): array
     {
-        return Category::forDeliveryType(Category::DELIVERY_STANDARD)
+        return $this->idsWithChildren($categoryId, Category::DELIVERY_STANDARD);
+    }
+
+    public function idsWithChildren(int $categoryId, string $type): array
+    {
+        return Category::forDeliveryType($type)
             ->where(fn ($q) => $q->where('categories.id', $categoryId)->orWhere('categories.parent_id', $categoryId))
             ->pluck('categories.id')
             ->all();

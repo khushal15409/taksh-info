@@ -12,7 +12,7 @@
 
 @if (! $cart['items'])
     <x-empty-state emoji="🛒" :title="$isNormal ? 'Your Cart is Currently Empty' : 'No Quick Delivery items'"
-        :text="$isNormal ? 'Looks like you haven\'t added anything yet. Explore top deals!' : 'Quick (30-minute) items you add in the Taksh app show up here.'"
+        :text="$isNormal ? 'Looks like you haven\'t added anything yet. Explore top deals!' : 'Add Quick (30-minute) products from the Quick Products page to see them here.'"
         cta-label="Start Shopping" :cta-href="route('listing')" />
 @else
     @php
@@ -22,7 +22,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2 space-y-4">
             @if (! ($isNormal))
-                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-xs font-semibold text-emerald-900">⚡ Quick delivery orders are placed in the Taksh app for now. You can still change or remove items here.</div>
+                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-xs font-semibold text-emerald-900">⚡ Quick delivery: your order reaches you in about 30 minutes, to an address one of these shops serves.</div>
             @endif
 
             @foreach ($cart['items'] as $i)
@@ -75,11 +75,7 @@
                 <div class="border-t pt-3 flex justify-between text-base font-extrabold text-gray-900"><span>Total Amount</span><span class="text-brand-600">@rupee2($cart['total_with_delivery'])</span></div>
             </div>
 
-            @if ($isNormal)
-                <a href="{{ route('checkout') }}" class="w-full bg-gradient-to-r from-brand-500 to-brand-600 hover:brightness-110 text-white font-extrabold py-3.5 rounded-2xl shadow-md transition flex items-center justify-center gap-2"><i data-lucide="lock" class="w-4 h-4"></i>Proceed to Checkout</a>
-            @else
-                <p class="text-[11px] text-gray-400 text-center">Order Quick delivery items in the Taksh app.</p>
-            @endif
+            <a href="{{ route('checkout', $isNormal ? [] : ['type' => '30_min']) }}" class="w-full bg-gradient-to-r from-brand-500 to-brand-600 hover:brightness-110 text-white font-extrabold py-3.5 rounded-2xl shadow-md transition flex items-center justify-center gap-2"><i data-lucide="lock" class="w-4 h-4"></i>Proceed to Checkout</a>
         </aside>
     </div>
 @endif

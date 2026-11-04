@@ -22,6 +22,7 @@ final class ProductCard
 
         return [
             'id' => $p['id'], 'name' => $p['name'], 'brand' => $p['brand'] ?? null, 'price' => $price, 'original_price' => $mrp,
+            'is_quick' => (bool) ($p['is_express_30'] ?? false),
             'variant_id' => $active->count() === 1 && $v && ($v['in_stock'] ?? false) ? $v['id'] : null,
             'discount' => self::discount($price, $mrp),
             'rating_summary' => $p['rating_summary'] ?? null, 'in_stock' => (bool) ($p['in_stock'] ?? false), 'out_of_stock_message' => $p['out_of_stock_message'] ?? null,

@@ -26,4 +26,7 @@ interface CategoryRepositoryInterface
 
     /** The category plus its sub-categories, as far as the Standard catalogue offers them. @return int[] */
     public function standardIdsWithChildren(int $categoryId): array;
+
+    /** The category plus its sub-categories, as far as the given delivery type offers them. @return int[] */
+    public function idsWithChildren(int $categoryId, string $type): array;
 }
