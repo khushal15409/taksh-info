@@ -68,6 +68,26 @@ class CartService
         return ['cart' => $this->cartData($cart, $deliveryType), 'guest_token' => $cart->guest_token];
     }
 
+    // ---------------------------------------------------------------- buy now
+
+    /**
+     * "Buy Now": the bill of ONE product, not the cart. Nothing is saved - the line exists only for this bill, so the customer's cart is
+     * neither read nor changed. Quick products are billed in the Quick bucket, the others in Standard; a cart coupon does not apply.
+     *
+     * @return array{type: string, cart: array}
+     */
+    public function buyNow(int $userId, int $variantId, int $qty): array
+    {
+        $variant = $this->catalog->variant($variantId) ?? throw CartProblemException::notAvailable();
+        $product = $variant->product ?? throw CartProblemException::notAvailable();
+        $type = $product->is_express_30 ? '30_min' : 'normal';
+
+        $line = (new CartItem)->forceFill(['product_variant_id' => $variant->id, 'qty' => max(1, min($qty, 99))]);
+        $line->setRelation('productVariant', $variant);
+
+        return ['type' => $type, 'cart' => $this->cartData((new Cart)->forceFill(['user_id' => $userId]), $type, collect([$line]))];
+    }
+
     // ---------------------------------------------------------------- read (D1, D5)
 
     /** @return array{cart: array, guest_token: ?string} */
@@ -224,9 +244,9 @@ class CartService
         ])->resolve();
     }
 
-    private function cartData(Cart $cart, ?string $deliveryType): array
+    private function cartData(Cart $cart, ?string $deliveryType, ?\Illuminate\Support\Collection $only = null): array
     {
-        $items = $this->carts->items($cart, $deliveryType);
+        $items = $only ?? $this->carts->items($cart, $deliveryType);
 
         if ($items->isEmpty()) {
             return $this->emptyData($deliveryType);

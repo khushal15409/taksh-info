@@ -19,12 +19,21 @@ class CartItemResource extends ApiResource
             'price' => $this->pricing['final_sell_price'],
             'qty' => $this->item->qty,
             'total' => $this->line_total,
-            'image' => $this->variant->images->first()?->image_url,
+            'image' => $this->image(),
             'vendor_id' => $this->product->vendor_id,
             'vendor_name' => $this->vendor_name,
             'available_stock' => $this->available_stock,
             'in_stock' => $this->in_stock,
             'is_express_30' => (bool) $this->product->is_express_30,
         ] + $this->pricing;
+    }
+
+    /** This option's own photo (primary first), else the product's - a variant without photos of its own still shows its product. */
+    private function image(): ?string
+    {
+        $own = $this->variant->images;
+        $all = $this->product->images ?? collect();
+
+        return ($own->where('is_primary', true)->first() ?? $own->first() ?? $all->where('is_primary', true)->first() ?? $all->first())?->image_url;
     }
 }

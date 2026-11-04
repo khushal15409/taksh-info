@@ -130,7 +130,7 @@ class CartRepository implements CartRepositoryInterface
 
     public function items(Cart $cart, ?string $deliveryType = null): Collection
     {
-        return $this->bucket($cart->items()->with(['productVariant.product', 'productVariant.images']), $deliveryType)->get();
+        return $this->bucket($cart->items()->with(['productVariant.product.images', 'productVariant.images']), $deliveryType)->get();
     }
 
     public function clear(Cart $cart, ?string $deliveryType = null): void

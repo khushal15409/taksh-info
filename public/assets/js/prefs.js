@@ -25,4 +25,4 @@ const Prefs = (() => {
 })();
 
 // dark mode as early as possible (the page head also applies it before first paint)
-document.documentElement.classList.toggle("dark", Prefs.state.theme === "dark");
+document.documentElement.classList.remove("dark");   // one (light) theme

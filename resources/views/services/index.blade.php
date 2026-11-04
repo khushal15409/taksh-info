@@ -11,7 +11,7 @@
         $phone = config('taksh.support_phone');
         $email = config('taksh.support_email');
     @endphp
-    <div class="space-y-14">
+    <div class="space-y-8">
         @if ($banners)
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @foreach ($banners as $b)<a href="{{ route('services') }}" class="block rounded-3xl overflow-hidden border border-purple-100 shadow-sm hover:shadow-md transition"><img src="{{ $b['image_url'] }}" alt="{{ $b['title'] ?? 'Service offer' }}" loading="lazy" class="w-full object-cover"></a>@endforeach

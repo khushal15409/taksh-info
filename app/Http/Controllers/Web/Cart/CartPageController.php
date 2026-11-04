@@ -29,11 +29,14 @@ class CartPageController extends WebController
     {
         $type = $this->typeOf($request->query('type'));
         $owner = $this->owner($request);
+        $carts = ['normal' => $this->cart->get($owner, 'normal')['cart'], '30_min' => $this->cart->get($owner, '30_min')['cart']];
 
-        return $this->page('cart.index', [
-            'type' => $type,
-            'carts' => ['normal' => $this->cart->get($owner, 'normal')['cart'], '30_min' => $this->cart->get($owner, '30_min')['cart']],
-        ]);
+        // no tab asked for: open the one that has something (Quick when Standard is empty)
+        if (! $request->query('type') && ! $carts['normal']['items'] && $carts['30_min']['items']) {
+            $type = '30_min';
+        }
+
+        return $this->page('cart.index', ['type' => $type, 'carts' => $carts]);
     }
 
     /** POST /cart/lines/{id}/quantity {qty, type} - a quantity of 0 removes the line */

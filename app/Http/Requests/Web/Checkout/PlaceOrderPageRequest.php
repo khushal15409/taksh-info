@@ -14,6 +14,8 @@ class PlaceOrderPageRequest extends WebFormRequest
             'payment_method' => ['required', 'in:cod,online'],
             'checkout_token' => ['required', 'uuid'],
             'type' => ['nullable', 'in:normal,30_min'],
+            'buy_variant' => ['nullable', 'integer', 'min:1'],
+            'buy_qty' => ['nullable', 'integer', 'min:1', 'max:99'],
         ];
     }
 
@@ -21,6 +23,12 @@ class PlaceOrderPageRequest extends WebFormRequest
     public function type(): string
     {
         return $this->input('type') === '30_min' ? '30_min' : 'normal';
+    }
+
+    /** "Buy Now": [variant id, quantity] of the one product being bought instead of the cart; null for a normal checkout. */
+    public function buyNow(): ?array
+    {
+        return $this->filled('buy_variant') ? ['variant_id' => (int) $this->input('buy_variant'), 'qty' => (int) ($this->input('buy_qty') ?: 1)] : null;
     }
 
     public function messages(): array

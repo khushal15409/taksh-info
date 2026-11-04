@@ -13,6 +13,7 @@
         @csrf
         <input type="hidden" name="checkout_token" value="{{ $token }}">
         <input type="hidden" name="type" value="{{ $type }}">
+        @if ($buy)<input type="hidden" name="buy_variant" value="{{ $buy['variant_id'] }}"><input type="hidden" name="buy_qty" value="{{ $buy['qty'] }}">@endif
 
         <div class="lg:col-span-2 space-y-6">
             <section class="bg-white p-6 rounded-3xl border border-orange-100 shadow-sm space-y-4">
@@ -20,13 +21,15 @@
                     <h3 class="font-extrabold text-base text-gray-900 flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-brand-500 text-white text-xs flex items-center justify-center">1</span>Delivery Address</h3>
                     <button type="button" data-address-new class="text-xs font-bold text-brand-600 hover:underline">+ Add New</button>
                 </div>
-                <div class="space-y-3">
-                    @forelse ($addresses as $a)
+                @php($sorted = collect($addresses)->sortBy(fn ($a) => (int) $selectedAddress === $a['id'] ? 0 : 1)->values())
+                <div id="address-list" class="space-y-3">
+                    @forelse ($sorted as $a)
                         @php($ok = ! $quick || ($serviceable[$a['id']] ?? false))
-                        <label class="block p-4 rounded-2xl border-2 transition {{ $ok ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed' }} {{ (int) $selectedAddress === $a['id'] ? 'border-brand-500 bg-orange-50/40' : 'border-gray-200 '.($ok ? 'hover:border-brand-500/50' : '') }}">
+                        @php($isSel = (int) $selectedAddress === $a['id'])
+                        <label data-address-card class="block p-4 rounded-2xl border-2 transition {{ $ok ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed' }} {{ $isSel ? 'border-brand-500 bg-orange-50/40' : 'border-gray-200 '.($ok ? 'hover:border-brand-500/50' : '') }}" @if (! $isSel) hidden @endif>
                             <div class="flex justify-between items-start gap-3">
                                 <div class="flex gap-3">
-                                    <input type="radio" name="address_id" value="{{ $a['id'] }}" class="accent-brand-500 mt-1" @checked((int) $selectedAddress === $a['id']) @disabled(! $ok)>
+                                    <input type="radio" name="address_id" value="{{ $a['id'] }}" class="accent-brand-500 mt-1" @checked($isSel) @disabled(! $ok)>
                                     <div>
                                         <span class="bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">{{ $a['address_type'] }}</span>
                                         <h4 class="font-bold text-sm text-gray-800 mt-2">{{ $a['name'] }}</h4>
@@ -42,6 +45,9 @@
                         <p class="text-sm text-gray-500">No saved addresses yet. Add one to continue.</p>
                     @endforelse
                 </div>
+                @if (count($addresses) > 1)
+                    <button type="button" id="address-toggle" class="text-xs font-bold text-brand-600 hover:underline" data-more="Change address ({{ count($addresses) - 1 }} more)" data-less="Hide other addresses">Change address ({{ count($addresses) - 1 }} more)</button>
+                @endif
             </section>
 
             <section class="bg-white p-6 rounded-3xl border border-orange-100 shadow-sm space-y-4">
@@ -84,7 +90,7 @@
                 @if ($unavailable)<p class="text-[11px] text-red-500 font-semibold">Some items are no longer available. Remove them from your cart to continue.</p>@endif
             </div>
             <button id="place-order" @disabled($unavailable || ! $addresses || ! $methods || ($quick && ! in_array(true, $serviceable, true))) class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 disabled:opacity-50"><i data-lucide="check-circle" class="w-5 h-5"></i><span>Confirm Order</span></button>
-            <a href="{{ route('cart', ['type' => $type]) }}" class="block text-center text-xs font-bold text-gray-500 hover:text-brand-600">← Back to cart</a>
+            @if ($buy)<a href="{{ route('product', ['id' => $cart['items'][0]['product_id'], 'variant' => $buy['variant_id']]) }}" class="block text-center text-xs font-bold text-gray-500 hover:text-brand-600">← Back to product</a>@else<a href="{{ route('cart', ['type' => $type]) }}" class="block text-center text-xs font-bold text-gray-500 hover:text-brand-600">← Back to cart</a>@endif
         </aside>
     </form>
 

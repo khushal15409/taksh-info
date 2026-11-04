@@ -22,30 +22,37 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2 space-y-4">
             @if (! ($isNormal))
-                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-xs font-semibold text-emerald-900">⚡ Quick delivery: your order reaches you in about 30 minutes, to an address one of these shops serves.</div>
+                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3 text-xs font-semibold text-emerald-900">⚡ Quick delivery: your order reaches you in about 30 minutes, to an address one of these shops serves.</div>
             @endif
 
             @foreach ($cart['items'] as $i)
-                <div class="bg-white p-4 rounded-3xl border border-orange-100 flex items-center gap-4 {{ $i['in_stock'] ? '' : 'opacity-70' }}">
-                    <a href="{{ route('product', ['id' => $i['product_id']]) }}">
-                        @if (! empty($i['image']))<img src="{{ $i['image'] }}" alt="" class="w-20 h-20 rounded-2xl object-contain bg-orange-50/50 p-1">@else<div class="w-20 h-20 rounded-2xl bg-orange-50/50 flex items-center justify-center text-2xl">🛍️</div>@endif
+                <div class="cart-line {{ $i['in_stock'] ? '' : 'opacity-70' }}">
+                    <a href="{{ route('product', ['id' => $i['product_id']]) }}" class="cart-line-media">
+                        <span class="cart-badge {{ ! empty($i['is_express_30']) ? 'cart-badge-quick' : 'cart-badge-std' }}"><i data-lucide="{{ ! empty($i['is_express_30']) ? 'zap' : 'truck' }}" class="w-3 h-3"></i>{{ ! empty($i['is_express_30']) ? '30-Min' : 'Standard' }}</span>
+                        <span class="pcard-img">
+                            @if (! empty($i['image']))
+                                <img src="{{ $i['image'] }}" alt="" aria-hidden="true" class="pcard-img-bg"><img src="{{ $i['image'] }}" alt="{{ $i['product_name'] }}" class="pcard-img-fg">
+                            @else
+                                <span class="absolute inset-0 flex items-center justify-center text-3xl">🛍️</span>
+                            @endif
+                        </span>
                     </a>
-                    <div class="flex-1 min-w-0">
-                        <a href="{{ route('product', ['id' => $i['product_id']]) }}" class="font-bold text-sm text-gray-800 hover:text-brand-600 line-clamp-2">{{ $i['product_name'] }}</a>
-                        <p class="text-[11px] text-gray-400">
-                            @if (! empty($i['sku']))SKU: {{ $i['sku'] }} • @endif
-                            @rupee2($i['price']) each
-                            @if (! empty($i['vendor_name']))• {{ $i['vendor_name'] }}@endif
-                        </p>
-                        @if (! ($i['in_stock']))<p class="text-[11px] font-bold text-red-500 mt-1">Currently unavailable - remove it to continue</p>@endif
-                        <form method="POST" action="{{ route('cart.line.remove', $i['id']) }}" data-cart-form class="inline">@csrf @method('DELETE')<input type="hidden" name="type" value="{{ $type }}"><button class="mt-1.5 text-[11px] font-bold text-gray-400 hover:text-red-500">Remove</button></form>
+                    <div class="flex-1 min-w-0 flex flex-col gap-1.5">
+                        <a href="{{ route('product', ['id' => $i['product_id']]) }}" class="font-bold text-sm text-gray-900 hover:text-brand-600 line-clamp-2 leading-snug">{{ $i['product_name'] }}</a>
+                        <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
+                            <span class="cart-chip">@rupee2($i['price']) each</span>
+                            @if (! empty($i['vendor_name']))<span class="cart-chip cart-chip-soft"><i data-lucide="store" class="w-3 h-3"></i>{{ $i['vendor_name'] }}</span>@endif
+                            @if (! empty($i['sku']))<span class="cart-chip cart-chip-soft">SKU: {{ $i['sku'] }}</span>@endif
+                        </div>
+                        @if (! ($i['in_stock']))<p class="text-[11px] font-bold text-red-500">Currently unavailable - remove it to continue</p>@endif
+                        <form method="POST" action="{{ route('cart.line.remove', $i['id']) }}" data-cart-form class="mt-auto">@csrf @method('DELETE')<input type="hidden" name="type" value="{{ $type }}"><button class="inline-flex items-center gap-1 text-[11px] font-bold text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i>Remove</button></form>
                     </div>
-                    <div class="flex flex-col items-end gap-2">
-                        <div class="font-extrabold text-brand-600">@rupee2($i['total'])</div>
-                        <div class="flex items-center gap-2 border rounded-xl px-1 py-0.5">
-                            <form method="POST" action="{{ route('cart.line.update', $i['id']) }}" data-cart-form>@csrf<input type="hidden" name="type" value="{{ $type }}"><input type="hidden" name="qty" value="{{ $i['qty'] - 1 }}"><button class="w-7 h-7 text-brand-600 font-bold" aria-label="Decrease">−</button></form>
-                            <span class="text-xs font-bold w-5 text-center">{{ $i['qty'] }}</span>
-                            <form method="POST" action="{{ route('cart.line.update', $i['id']) }}" data-cart-form>@csrf<input type="hidden" name="type" value="{{ $type }}"><input type="hidden" name="qty" value="{{ $i['qty'] + 1 }}"><button @disabled($i['qty'] >= $i['available_stock']) class="w-7 h-7 text-brand-600 font-bold disabled:opacity-30" aria-label="Increase">+</button></form>
+                    <div class="flex flex-col items-end justify-between gap-2">
+                        <div class="font-extrabold text-lg text-gray-900">@rupee2($i['total'])</div>
+                        <div class="qty-pill">
+                            <form method="POST" action="{{ route('cart.line.update', $i['id']) }}" data-cart-form>@csrf<input type="hidden" name="type" value="{{ $type }}"><input type="hidden" name="qty" value="{{ $i['qty'] - 1 }}"><button aria-label="Decrease">−</button></form>
+                            <span>{{ $i['qty'] }}</span>
+                            <form method="POST" action="{{ route('cart.line.update', $i['id']) }}" data-cart-form>@csrf<input type="hidden" name="type" value="{{ $type }}"><input type="hidden" name="qty" value="{{ $i['qty'] + 1 }}"><button @disabled($i['qty'] >= $i['available_stock']) aria-label="Increase">+</button></form>
                         </div>
                     </div>
                 </div>

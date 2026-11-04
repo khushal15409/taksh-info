@@ -1,5 +1,5 @@
 {{-- Site footer: contact, a few shop categories (from the catalogue), quick links, partner links, help and legal. --}}
-<footer class="bg-gray-900 text-white mt-16 border-t border-gray-800">
+<footer class="site-footer text-white mt-4 border-t border-gray-800">
     <div class="max-w-7xl mx-auto px-4 lg:px-8 py-12 grid grid-cols-2 lg:grid-cols-5 gap-8 text-xs">
         <div class="col-span-2 space-y-4">
             <a href="{{ route('home') }}" class="inline-block bg-white rounded-2xl px-4 py-2.5 shadow-lg shadow-black/20" aria-label="TakshAllInOne - Home">
@@ -52,7 +52,7 @@
             <p class="text-[11px] text-gray-500 mt-2">Android app launching soon - <a href="{{ route('home') }}#app" class="text-brand-500 hover:underline">notify me</a></p>
         </div>
     </div>
-    <div class="border-t border-gray-800">
+    <div class="border-t border-white/10 bg-[#0F172A]/80 backdrop-blur-sm">
         <div class="max-w-7xl mx-auto px-4 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-gray-500">
             <p>© {{ date('Y') }} TakshAllInOne. All rights reserved.</p>
             <div class="flex items-center gap-2 font-bold text-gray-400">

@@ -16,6 +16,20 @@ ready(() => {
         btn.querySelector("span").textContent = "Placing your order…";
     });
 
+    // only the chosen address is shown; "Change address" opens the others, and picking one makes it the shown one
+    const list = qs("#address-list"), toggle = qs("#address-toggle");
+    const cards = () => qsa("[data-address-card]", list || form);
+    const collapse = () => {
+        cards().forEach(c => { c.hidden = !c.querySelector("[name=address_id]").checked; });
+        if (toggle) { toggle.textContent = toggle.dataset.more; toggle.dataset.open = ""; }
+    };
+    if (toggle) toggle.addEventListener("click", () => {
+        const open = !toggle.dataset.open;
+        cards().forEach(c => { c.hidden = open ? false : !c.querySelector("[name=address_id]").checked; });
+        toggle.textContent = open ? toggle.dataset.less : toggle.dataset.more;
+        toggle.dataset.open = open ? "1" : "";
+    });
+
     // keep the highlighted card in step with the chosen radio
     form.addEventListener("change", e => {
         if (e.target.name !== "address_id" && e.target.name !== "payment_method") return;
@@ -24,12 +38,21 @@ ready(() => {
             card.classList.toggle("border-brand-500", r.checked); card.classList.toggle("bg-orange-50/40", r.checked);
             card.classList.toggle("border-gray-200", !r.checked);
         });
+        if (e.target.name === "address_id" && list) {
+            list.prepend(e.target.closest("label"));
+            collapse();
+        }
     });
 
+    // adding / editing an address reloads the page on the address that was just worked on
+    const back = id => { const u = new URL(location.href); if (id) u.searchParams.set("address", id); location.href = u.toString(); };
     document.addEventListener("click", e => {
         const add = e.target.closest("[data-address-new]"), edit = e.target.closest("[data-address-edit]");
-        if (add) Addresses.openForm(null, () => location.reload());
-        if (edit) { e.preventDefault(); Addresses.openForm(JSON.parse(edit.dataset.addressEdit), () => location.reload()); }
+        if (add) {
+            const before = new Set((Addresses.all() || []).map(a => a.id));
+            Addresses.openForm(null, () => { const fresh = (Addresses.all() || []).find(a => !before.has(a.id)); back(fresh ? fresh.id : (form.querySelector("[name=address_id]:checked") || {}).value); });
+        }
+        if (edit) { e.preventDefault(); const a = JSON.parse(edit.dataset.addressEdit); Addresses.openForm(a, () => back(a.id)); }
     });
     refreshIcons();
 });

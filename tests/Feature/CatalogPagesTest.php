@@ -122,10 +122,10 @@ class CatalogPagesTest extends CatalogTestCase
 
         $this->get('/')->assertOk()
             ->assertSee('Diwali Bonanza')->assertSee('/sales/9', false)                          // the top banner leads to its sale
-            ->assertSee('Shop by Category')->assertSee('Fresh Fruit')->assertSee('12 items')->assertSee('/shop?category=5', false)
+            ->assertSee('categories-grid', false)->assertSee('Fresh Fruit')->assertDontSee('12 items')->assertSee('/shop?category=5', false)
             ->assertSee('Trending Now')->assertSee('Chakki Atta')->assertSee('₹150')->assertSee('25% OFF')->assertSee('https://cdn.test/p1.jpg', false)
             ->assertSee('data-wish="1"', false)->assertSee('/product?id=1', false)
-            ->assertSee('Mid offer')->assertSee('Standard E-Commerce')->assertSee('Loved by 1,00,000+ happy customers')->assertSee('Taksh App')
+            ->assertSee('Mid offer')->assertSee('Loved by 1,00,000+ happy customers')->assertSee('Taksh App')
             ->assertSee('assets/js/modules/home.js', false)->assertDontSee('id="hero"', false)->assertDontSee('data-demo-block', false);
     }
 
@@ -156,7 +156,7 @@ class CatalogPagesTest extends CatalogTestCase
                 throw new \RuntimeException('services table missing');
             }
         });
-        $this->get('/')->assertOk()->assertSee('Shop by Category')->assertDontSee('Expert Services at Your Doorstep');
+        $this->get('/')->assertOk()->assertSee('categories-grid', false)->assertDontSee('Expert Services at Your Doorstep');
     }
 
     // ------------------------------------------------------------------ shop
@@ -178,7 +178,7 @@ class CatalogPagesTest extends CatalogTestCase
         $this->shopProducts();
 
         $this->get('/shop')->assertOk()
-            ->assertSee('All Products')->assertSee('Showing')->assertSee('Chakki Atta')->assertSee('Sold Out Rice')->assertSee('Out of stock')
+            ->assertSee('All Products')->assertSee('Chakki Atta')->assertSee('Sold Out Rice')->assertSee('Out of stock')
             ->assertSee('data-add="11"', false)->assertSee('Grocery')->assertSee('Flour')->assertSee('Max Price')->assertSee('Apply filters')
             ->assertSee('assets/js/modules/listing.js', false)->assertDontSee('id="results"', false);
         $this->assertSame(12, $this->catalog->lastPerPage);

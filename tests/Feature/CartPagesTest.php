@@ -75,6 +75,15 @@ class CartPagesTest extends CartTestCase
         $this->get('/cart?type=bogus')->assertOk()->assertSee('Your Cart is Currently Empty');   // an unknown tab is the standard cart
     }
 
+    public function test_the_cart_opens_on_the_quick_tab_when_only_quick_has_items(): void
+    {
+        $this->sellable(2, 90, 5, ['is_express_30' => true, 'approval_status' => 'approved']);
+        $this->postJson('/cart/add', ['product_variant_id' => 2, 'qty' => 1, 'delivery_type' => '30_min'])->assertOk();
+
+        $this->get('/cart')->assertOk()->assertSee('Quick delivery: your order reaches you')->assertSee('30-Min')->assertSee('checkout?type=30_min', false);
+        $this->get('/cart?type=normal')->assertOk()->assertSee('Your Cart is Currently Empty');   // an asked-for tab is respected
+    }
+
     // ------------------------------------------------------------------ actions
 
     public function test_changing_a_quantity_comes_back_to_the_cart(): void

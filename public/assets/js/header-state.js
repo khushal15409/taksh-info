@@ -31,7 +31,13 @@ const Cart = (() => {
         b.disabled = false;
     });
 
-    return { count, totals, seed, add };
+    // "Buy Now": straight to a checkout of THIS product only - the cart is not touched and its items are not part of the order
+    function buyNow(variantId, qty) {
+        location.href = url("checkout", { buy: variantId, qty });
+        return Promise.resolve();
+    }
+
+    return { count, totals, seed, add, buyNow };
 })();
 
 const Wishlist = (() => {

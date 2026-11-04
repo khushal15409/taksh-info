@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-[#FFFBEF]">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-[#FFF9EC]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>try{if(JSON.parse(localStorage.getItem("taksh_v2")).theme==="dark")document.documentElement.classList.add("dark")}catch(e){}</script>
     @if (app()->getLocale() !== 'en')<script>window.TAKSH_I18N = @json(app(\App\Services\HindiPage::class)->dictionary());</script>@endif
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'TakshAllInOne')</title>
@@ -24,11 +23,11 @@
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <style>[hidden]{display:none!important}</style>
 </head>
-<body class="font-sans antialiased text-gray-800 bg-[#FFFBEF] min-h-screen flex flex-col selection:bg-brand-500 selection:text-white" data-root="{{ url('/') }}/" data-page="@yield('page', 'home')" data-quick="{{ request()->routeIs('listing') && request()->query('quick') === '1' ? 1 : 0 }}" data-version="{{ config('taksh.version') }}" data-cart-count="{{ $headerState['cart_count'] }}" data-cart-total="{{ $headerState['cart_total'] }}" data-wish-ids="{{ json_encode($headerState['wish_ids']) }}" data-otp-length="{{ \App\Helpers\Otp::length() }}" data-user="{{ $authUser ? json_encode($authUser) : '' }}">
+<body class="font-sans antialiased text-gray-800 min-h-screen flex flex-col selection:bg-brand-500 selection:text-white" data-root="{{ url('/') }}/" data-page="@yield('page', 'home')" data-quick="{{ request()->routeIs('listing') && request()->query('quick') === '1' ? 1 : 0 }}" data-version="{{ config('taksh.version') }}" data-cart-count="{{ $headerState['cart_count'] }}" data-cart-total="{{ $headerState['cart_total'] }}" data-wish-ids="{{ json_encode($headerState['wish_ids']) }}" data-otp-length="{{ \App\Helpers\Otp::length() }}" data-user="{{ $authUser ? json_encode($authUser) : '' }}">
 
     @include('layouts.partials.header')
 
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 pt-5 pb-8">
 @yield('content')
     </main>
 

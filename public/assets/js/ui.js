@@ -30,7 +30,7 @@ function ready(fn) {
 }
 function refreshIcons() { if (window.lucide) lucide.createIcons(); }
 const lang = () => (document.documentElement.lang === "hi" ? "hi" : "en");
-function applyTheme() { document.documentElement.classList.toggle("dark", Prefs.state.theme === "dark"); }
+function applyTheme() { document.documentElement.classList.remove("dark"); }   // the site has one (light) theme
 
 // ---------- Toast ----------
 function toast(message, type = "success") {
@@ -38,12 +38,12 @@ function toast(message, type = "success") {
     if (!box) {
         box = document.createElement("div");
         box.id = "toast-container";
-        box.className = "fixed bottom-6 right-6 z-[90] flex flex-col space-y-2 pointer-events-none";
+        box.className = "fixed top-4 left-1/2 -translate-x-1/2 z-[90] flex flex-col items-center space-y-2 pointer-events-none w-[calc(100%-2rem)] max-w-sm";
         document.body.appendChild(box);
     }
     const el = document.createElement("div");
     const tone = type === "error" ? "border-red-400/40 text-red-200" : "border-yellow-500/30 text-yellow-300";
-    el.className = `toast-in bg-gray-900 ${tone} text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl border pointer-events-auto max-w-xs`;
+    el.className = `toast-in bg-gray-900 ${tone} text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl border pointer-events-auto text-center max-w-full`;
     el.textContent = message;
     box.appendChild(el);
     setTimeout(() => { el.classList.add("opacity-0", "transition"); setTimeout(() => el.remove(), 300); }, 2800);
@@ -264,14 +264,13 @@ function detectLocation(modal, btn) {
     }, err => { toast(err.code === 1 ? "Location permission denied. Enter your pincode instead." : "Couldn't detect location", "error"); reset(); }, { timeout: 10000 });
 }
 
-// Language + theme preferences
+// Language preference
 function openPrefsModal() {
     const m = Modal.open({
         title: "Preferences",
         body: `<form id="prefs-form" class="space-y-5 text-xs">
             <div><p class="font-bold text-gray-500 mb-2">Language</p><div class="grid grid-cols-2 gap-3">${[["en", "English"], ["hi", "हिन्दी (Hindi)"]].map(([k, l]) => `<label class="flex items-center gap-2 p-3 rounded-xl border-2 border-gray-200 cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-orange-50/40"><input type="radio" name="lang" value="${k}" class="accent-brand-500" ${lang() === k ? "checked" : ""}><span class="font-bold text-gray-700">${l}</span></label>`).join("")}</div>
                 <p class="text-[11px] text-gray-400 mt-2">The whole page is shown in the language you choose.</p></div>
-            <div><p class="font-bold text-gray-500 mb-2">Theme</p><div class="grid grid-cols-2 gap-3">${[["light", "☀️ Light"], ["dark", "🌙 Dark"]].map(([k, l]) => `<label class="flex items-center gap-2 p-3 rounded-xl border-2 border-gray-200 cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-orange-50/40"><input type="radio" name="theme" value="${k}" class="accent-brand-500" ${Prefs.state.theme === k ? "checked" : ""}><span class="font-bold text-gray-700">${l}</span></label>`).join("")}</div></div>
             <button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-2xl">Save preferences</button>
             <p class="text-center text-[11px] text-gray-400">TakshAllInOne Web • version ${esc(document.body.dataset.version || "1.0.0")}</p></form>`
     });
@@ -279,7 +278,7 @@ function openPrefsModal() {
         e.preventDefault();
         const f = new FormData(e.target);
         const langChanged = lang() !== f.get("lang");
-        Prefs.state.lang = f.get("lang"); Prefs.state.theme = f.get("theme");
+        Prefs.state.lang = f.get("lang");
         document.cookie = `taksh_lang=${f.get("lang")}; path=/; max-age=31536000; SameSite=Lax`;   // the server renders the page in this language
         Prefs.save(); applyTheme(); Modal.close();
         if (langChanged) { location.reload(); return; }

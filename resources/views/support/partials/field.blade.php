@@ -1,7 +1,8 @@
 {{-- One field of an enquiry form. $f = [name, label, type, options?, value?, hint?, wide?, maxlength?]; $bag holds this form's errors, $defaults what we know of the customer. --}}
 @php
     $name = $f['name'];
-    $value = old($name, $f['value'] ?? ($defaults[$name] ?? ''));
+    // a select can be preselected by the link that brought the customer here (?kind=Create Website)
+    $value = old($name, ($f['type'] === 'select' ? request()->query($name) : null) ?? $f['value'] ?? ($defaults[$name] ?? ''));
     $error = $bag->first($name);
     $base = 'field mt-1'.($error ? ' border-red-400' : '');
     $span = ! empty($f['wide']) ? 'col-span-2' : 'col-span-2 sm:col-span-1';

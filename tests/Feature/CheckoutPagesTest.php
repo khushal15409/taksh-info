@@ -136,6 +136,42 @@ class CheckoutPagesTest extends OrderTestCase
 
     // ------------------------------------------------------------------ placing an order
 
+    public function test_only_the_chosen_address_is_shown_and_the_others_wait_behind_change(): void
+    {
+        app(AddressRepositoryInterface::class)->seed(5, ['pincode' => '395001', 'name' => 'Office Oleg']);   // id 2
+        $this->cartWith();
+
+        $html = $this->me()->get('/checkout?address=2')->assertOk()->assertSee('Change address (1 more)')->getContent();
+
+        // the asked-for address is the checked one and is shown; the other one is in the page but hidden
+        $this->assertMatchesRegularExpression('/<label data-address-card[^>]*>\s*<div[^>]*>\s*<div[^>]*>\s*<input type="radio" name="address_id" value="2"[^>]*checked/s', $html);
+        $this->assertMatchesRegularExpression('/<label data-address-card[^>]*hidden[^>]*>\s*<div[^>]*>\s*<div[^>]*>\s*<input type="radio" name="address_id" value="1"/s', $html);
+    }
+
+    public function test_buy_now_orders_only_that_product_and_leaves_the_cart_alone(): void
+    {
+        $this->inCart($this->sold(1, 100, 10), 3);          // already in the cart
+        $this->sold(2, 50, 10);                             // the one being bought now
+
+        $this->me()->get('/checkout?buy=2&qty=2')->assertOk()
+            ->assertSee('name="buy_variant" value="2"', false)->assertSee('name="buy_qty" value="2"', false)->assertSee('₹100.00')->assertSee('Back to product');
+
+        $this->submit(['buy_variant' => 2, 'buy_qty' => 2])->assertRedirect('/order/placed?order=1');
+
+        $this->assertCount(1, $this->db->orders);
+        $this->assertEquals(100, $this->db->orders[1]->grand_total);                       // 2 x 50, not the cart's 3 x 100
+        $this->assertSame(2, $this->db->stock['7_2']->reserved_qty);
+        $this->assertSame(0, $this->db->stock['7_1']->reserved_qty ?? 0);                  // the cart product was not reserved
+        $left = $this->cartStore->forUser(5);
+        $this->assertNotNull($left);
+        $this->assertSame(3, array_values($this->cartStore->lines[$left->id])[0]->qty);     // the cart is exactly as it was
+    }
+
+    public function test_buy_now_of_an_unavailable_product_goes_home_with_a_message(): void
+    {
+        $this->me()->get('/checkout?buy=999')->assertRedirect('/');
+    }
+
     public function test_a_cod_order_is_placed_and_the_customer_lands_on_the_confirmation(): void
     {
         $this->cartWith(2, 100);

@@ -21,6 +21,13 @@ ready(() => {
         const qb = e.target.closest("[data-lp-q]");
         if (qb) { qty = Math.min(Math.max(1, qty + Number(qb.dataset.lpQ)), maxQty); qs("#lp-qty").textContent = qty; return; }
 
+        const bb = e.target.closest("[data-lp-buy]");
+        if (bb) {
+            bb.disabled = true;
+            Cart.buyNow(variantId, qty).catch(err => { toast(err.message, "error"); bb.disabled = false; });
+            return;
+        }
+
         const ab = e.target.closest("[data-lp-add]");
         if (ab) {
             ab.disabled = true;

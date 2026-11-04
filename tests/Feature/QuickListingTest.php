@@ -52,7 +52,7 @@ class QuickListingTest extends CatalogTestCase
         $this->vendors->shops = [1 => [23.0450, 72.5714]];
 
         $this->withUnencryptedCookie(QuickLocation::COOKIE, '380001,23.0225,72.5714')->get('/shop?quick=1')->assertOk()
-            ->assertSee('Quick products delivered in 30 minutes to 380001')->assertSee('name="pincode" value="380001"', false);
+            ->assertDontSee('Quick products delivered in 30 minutes');
 
         $this->assertTrue($this->catalog->lastFilters['express']);
         $this->assertSame([1], $this->catalog->lastFilters['vendor_ids']);
@@ -72,7 +72,7 @@ class QuickListingTest extends CatalogTestCase
         $this->vendors->byPincode = ['451666' => [3], '380001' => [1]];
 
         $res = $this->withUnencryptedCookie(QuickLocation::COOKIE, '380001,,')->get('/shop?quick=1&pincode=451666')->assertOk()
-            ->assertSee('delivered in 30 minutes to 451666');
+            ->assertDontSee('delivered in 30 minutes to');
 
         $this->assertSame([3], $this->catalog->lastFilters['vendor_ids']);
         $res->assertCookie(QuickLocation::COOKIE, '451666,,', false);

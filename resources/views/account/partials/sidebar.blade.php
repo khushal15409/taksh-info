@@ -15,13 +15,19 @@
         <a href="{{ route('wishlist') }}" class="{{ $link }}"><i data-lucide="heart" class="w-4 h-4"></i>Wishlist</a>
         <a href="{{ route('notifications') }}" class="{{ $link }}"><i data-lucide="bell" class="w-4 h-4"></i>Notifications</a>
         <a href="{{ route('wallet') }}" class="{{ $link }}"><i data-lucide="wallet" class="w-4 h-4"></i>Wallet</a>
-        <a href="{{ route('help') }}" class="{{ $link }}"><i data-lucide="life-buoy" class="w-4 h-4"></i>Help &amp; Support</a>
-        <button type="button" data-open-prefs class="{{ $link }} text-left"><i data-lucide="settings" class="w-4 h-4"></i>Language &amp; Theme</button>
-        <a href="{{ route('about') }}" class="{{ $link }}"><i data-lucide="info" class="w-4 h-4"></i>About, Refund &amp; Legal</a>
+        <button type="button" data-open-prefs class="{{ $link }} text-left"><i data-lucide="globe" class="w-4 h-4"></i>Language</button>
         <div class="border-t border-gray-100 my-2"></div>
-        <a href="{{ route('delivery') }}" class="{{ $link }}"><i data-lucide="bike" class="w-4 h-4"></i>Join as Delivery Partner</a>
-        <a href="{{ route('vendor') }}" class="{{ $link }}"><i data-lucide="store" class="w-4 h-4"></i>Become a Vendor</a>
-        <a href="{{ route('devrequest') }}" class="{{ $link }}"><i data-lucide="code-2" class="w-4 h-4"></i>Development Request</a>
+        <a href="{{ route('help') }}" class="{{ $link }}"><i data-lucide="life-buoy" class="w-4 h-4"></i>Help &amp; Support</a>
+        <a href="https://wa.me/{{ preg_replace('/\D/', '', (string) config('taksh.live_chat_whatsapp')) }}" target="_blank" rel="noopener" class="{{ $link }}"><i data-lucide="message-square-text" class="w-4 h-4"></i>Live Chat</a>
+        <a href="{{ route('about') }}" class="{{ $link }}"><i data-lucide="building-2" class="w-4 h-4"></i>About Us</a>
+        <a href="{{ route('terms') }}" class="{{ $link }}"><i data-lucide="file-text" class="w-4 h-4"></i>Terms &amp; Conditions</a>
+        <a href="{{ route('privacy') }}" class="{{ $link }}"><i data-lucide="shield" class="w-4 h-4"></i>Privacy Policy</a>
+        <a href="{{ route('refund') }}" class="{{ $link }}"><i data-lucide="badge-indian-rupee" class="w-4 h-4"></i>Refund Policy</a>
+        <div class="border-t border-gray-100 my-2"></div>
+        <a href="{{ route('delivery') }}" class="{{ $link }}"><i data-lucide="bike" class="w-4 h-4"></i>Join as Delivery Man</a>
+        <a href="{{ route('vendor') }}" class="{{ $link }}"><i data-lucide="store" class="w-4 h-4"></i>Open Vendor</a>
+        <a href="{{ route('devrequest', ['kind' => 'Create Application']) }}" class="{{ $link }}"><i data-lucide="smartphone" class="w-4 h-4"></i>Create Application</a>
+        <a href="{{ route('devrequest', ['kind' => 'Create Website']) }}" class="{{ $link }}"><i data-lucide="layout-template" class="w-4 h-4"></i>Create Website</a>
         <div class="border-t border-gray-100 my-2"></div>
         <form method="POST" action="{{ route('logout') }}">@csrf
             <button class="w-full text-left px-3 py-2 rounded-xl flex items-center gap-2 text-red-500 hover:bg-red-50"><i data-lucide="log-out" class="w-4 h-4"></i>Logout</button>

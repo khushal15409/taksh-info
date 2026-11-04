@@ -38,9 +38,21 @@ class CheckoutPageController extends WebController
     public function show(Request $request): View|RedirectResponse
     {
         $user = $request->user();
-        $type = $request->query('type') === '30_min' ? '30_min' : 'normal';
+        $buy = $request->filled('buy') ? ['variant_id' => (int) $request->query('buy'), 'qty' => max(1, (int) $request->query('qty', 1))] : null;
+
+        if ($buy) {
+            // Buy Now: the bill of this one product; the cart is not involved
+            try {
+                ['type' => $type, 'cart' => $cart] = $this->cart->buyNow($user->id, $buy['variant_id'], $buy['qty']);
+            } catch (ApiException $e) {
+                return $this->redirectWith('home', 'error', Lang::has($e->getMessage()) ? __($e->getMessage()) : $e->getMessage());
+            }
+            $buy['qty'] = $cart['items'][0]['qty'];
+        } else {
+            $type = $request->query('type') === '30_min' ? '30_min' : 'normal';
+            $cart = $this->cart->get($this->cartOwner($request), $type)['cart'];
+        }
         $quick = $type === '30_min';
-        $cart = $this->cart->get($this->cartOwner($request), $type)['cart'];
 
         if (! $cart['items']) {
             return $this->redirectWith('cart', 'error', 'Your cart is empty - add something to check out', ['type' => $type]);
@@ -60,9 +72,15 @@ class CheckoutPageController extends WebController
         }
         $usable = fn ($a) => ! $quick || ($serviceable[$a['id']] ?? false);
         $first = collect([$book['default_address'], ...$all])->filter()->first($usable);
+        // after adding / editing an address the page returns with ?address= so the customer keeps the one they were on
+        $asked = collect($all)->first(fn ($a) => (int) $a['id'] === (int) $request->query('address'));
+        if ($asked && $usable($asked)) {
+            $first = $asked;
+        }
 
         return $this->page('checkout.index', [
             'type' => $type,
+            'buy' => $buy,
             'quick' => $quick,
             'serviceable' => $serviceable,
             'cart' => $cart,
@@ -80,15 +98,29 @@ class CheckoutPageController extends WebController
         $user = $request->user();
         $v = $request->validated();
 
-        $type = $request->type();
-        $cart = $this->cart->get($this->cartOwner($request), $type)['cart'];
-        if (collect($cart['items'])->contains(fn ($i) => ! $i['in_stock'])) {
-            return $this->redirectWith('cart', 'error', 'Some items in your cart are unavailable. Please review your cart.', ['type' => $type]);
+        $buy = $request->buyNow();
+        if ($buy) {
+            // Buy Now: back to this checkout (not the cart) when something is wrong, and the type comes from the product itself
+            try {
+                ['type' => $type, 'cart' => $cart] = $this->cart->buyNow($user->id, $buy['variant_id'], $buy['qty']);
+            } catch (ApiException $e) {
+                return $this->redirectWith('home', 'error', Lang::has($e->getMessage()) ? __($e->getMessage()) : $e->getMessage());
+            }
+            if (collect($cart['items'])->contains(fn ($i) => ! $i['in_stock'])) {
+                return $this->redirectWith('home', 'error', 'This product is not available right now.');
+            }
+        } else {
+            $type = $request->type();
+            $cart = $this->cart->get($this->cartOwner($request), $type)['cart'];
+            if (collect($cart['items'])->contains(fn ($i) => ! $i['in_stock'])) {
+                return $this->redirectWith('cart', 'error', 'Some items in your cart are unavailable. Please review your cart.', ['type' => $type]);
+            }
         }
+        $back = $buy ? ['buy' => $buy['variant_id'], 'qty' => $buy['qty']] : ($type === '30_min' ? ['type' => $type] : []);
 
         try {
-            $result = $this->idempotency->run($user, $v['checkout_token'], function () use ($user, $v, $type) {
-                $placed = $this->placement->place($user, ['address_id' => (int) $v['address_id'], 'delivery_type' => $type, 'payment_method' => $v['payment_method']]);
+            $result = $this->idempotency->run($user, $v['checkout_token'], function () use ($user, $v, $type, $buy) {
+                $placed = $this->placement->place($user, ['address_id' => (int) $v['address_id'], 'delivery_type' => $type, 'payment_method' => $v['payment_method']] + ($buy ? ['buy_now' => $buy] : []));
 
                 return collect($placed['placed'])->pluck('id')->map(fn ($id) => (int) $id)->all();
             });
@@ -96,13 +128,13 @@ class CheckoutPageController extends WebController
             // not placed (empty cart, no stock, address not found, method switched off ...): nothing was charged and the cart is as it was
             $this->flash('error', Lang::has($e->getMessage()) ? __($e->getMessage()) : $e->getMessage());
 
-            return $e->getMessage() === 'api.cart_empty' ? redirect()->route('cart', $type === '30_min' ? ['type' => $type] : []) : redirect()->route('checkout', $type === '30_min' ? ['type' => $type] : []);
+            return $e->getMessage() === 'api.cart_empty' && ! $buy ? redirect()->route('cart', $type === '30_min' ? ['type' => $type] : []) : redirect()->route('checkout', $back);
         } catch (\Throwable $e) {
             report($e);
             Log::error('Order placement failed', ['user_id' => $user->id, 'error' => $e->getMessage()]);
             $this->flash('error', 'We could not place your order. Please try again.');
 
-            return redirect()->route('checkout', $type === '30_min' ? ['type' => $type] : []);
+            return redirect()->route('checkout', $back);
         }
 
         $ids = $result['order_ids'];

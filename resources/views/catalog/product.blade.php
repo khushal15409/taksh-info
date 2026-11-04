@@ -68,9 +68,7 @@
                         <div class="text-sm text-gray-400 line-through">@rupee2($v['price'])</div>
                         <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-lg">You save @rupee($v['price'] - $v['sale_price'])</span>
                     @endif
-                    @if ($rs['total_reviews'])
-                        <div class="flex items-center gap-1 bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-lg"><i data-lucide="star" class="w-3.5 h-3.5 fill-current text-amber-500"></i>{{ $rs['average_rating'] }} ({{ $rs['total_reviews'] }} reviews)</div>
-                    @endif
+                    <div class="flex items-center gap-1 bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-lg"><i data-lucide="star" class="w-3.5 h-3.5 fill-current text-amber-500"></i>@if ($rs['total_reviews']){{ $rs['average_rating'] }} ({{ $rs['total_reviews'] }} reviews)@else 3.5 @endif</div>
                 </div>
                 <p class="text-xs text-gray-500">Inclusive of all taxes.</p>
 
@@ -98,6 +96,7 @@
                         <button type="button" data-lp-q="1" class="w-9 h-9 rounded-xl hover:bg-orange-100 font-bold text-brand-600" aria-label="Increase">+</button>
                     </div>
                     <button type="button" data-lp-add @disabled(! ($v['in_stock'] && $v['id'])) class="flex-1 min-w-[150px] bg-gradient-to-r from-brand-500 to-brand-600 text-white font-extrabold py-3 px-6 rounded-2xl shadow-md hover:brightness-110 transition disabled:opacity-50 flex items-center justify-center gap-2"><i data-lucide="shopping-cart" class="w-5 h-5"></i>{{ $v['in_stock'] ? 'Add to Cart' : 'Out of Stock' }}</button>
+                    @if ($v['in_stock'] && $v['id'])<button type="button" data-lp-buy class="flex-1 min-w-[150px] bg-[#FFF3E3] text-brand-600 border-2 border-brand-500/60 font-extrabold py-3 px-6 rounded-2xl hover:bg-brand-500 hover:text-white transition disabled:opacity-50 flex items-center justify-center gap-2"><i data-lucide="zap" class="w-5 h-5"></i>Buy Now</button>@endif
                     <p id="lp-in-cart" class="w-full text-[11px] text-emerald-700 font-semibold"></p>
                 </div>
 

@@ -62,6 +62,26 @@ class AccountPagesTest extends AccountTestCase
             ->assertSee('My Orders')->assertSee('Logout')->assertSee('assets/js/modules/account.js', false)->assertDontSee('id="profile-root"', false);
     }
 
+    public function test_the_sidebar_has_every_option_of_the_app_profile_and_no_theme(): void
+    {
+        $html = $this->actingAs($this->me())->get('/profile')->assertOk()
+            ->assertSee('My Profile')->assertSee('Addresses')->assertSee('My Orders')->assertSee('Wishlist')->assertSee('Wallet')->assertSee('Language')
+            ->assertSee('Help &amp; Support', false)->assertSee('Live Chat')->assertSee('About Us')->assertSee('Terms &amp; Conditions', false)->assertSee('Privacy Policy')->assertSee('Refund Policy')
+            ->assertSee('Join as Delivery Man')->assertSee('Open Vendor')->assertSee('Create Application')->assertSee('Create Website')->assertSee('Logout')
+            ->assertSee('https://wa.me/919518365510', false)->assertSee('/development-request?kind=Create%20Website', false)
+            ->assertDontSee('Theme')->getContent();
+
+        $this->assertStringNotContainsString('Dark', $html);
+    }
+
+    public function test_the_legal_pages_carry_the_apps_text(): void
+    {
+        $this->get('/about')->assertOk()->assertSee('Your Trusted Shopping Partner')->assertSee('Our Story')->assertSee('Trust &amp; Transparency', false)->assertSee('50K+')->assertSee('info@takshllinone.in');
+        $this->get('/terms')->assertOk()->assertSee('Last Updated: January 22, 2026')->assertSee('15. Contact Information')->assertSee('Governing Law')->assertSee('you acknowledge that you have read and understood');
+        $this->get('/privacy-policy')->assertOk()->assertSee('1. Information We Collect')->assertSee('12. Contact Us')->assertSee('Your Privacy Matters');
+        $this->get('/refund-policy')->assertOk()->assertSee('1. Return Eligibility')->assertSee('Day 5-7')->assertSee('100% Satisfaction Guarantee');
+    }
+
     public function test_an_unknown_tab_falls_back_to_the_profile(): void
     {
         $this->actingAs($this->me())->get('/profile?tab=hacked')->assertOk()->assertSee('Account Details');

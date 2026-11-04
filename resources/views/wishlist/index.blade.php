@@ -13,12 +13,13 @@
         <div><h1 class="text-2xl font-extrabold text-gray-900">My Wishlist ❤️</h1><p class="text-xs text-gray-500 mt-1">{{ $paginator->total() }} saved item(s)</p></div>
     </div>
     @if ($items)
-        <div id="wish-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
+        <div id="wish-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             @foreach ($items as $i)
                 @php($card = ['id' => $i['product_id'], 'name' => $i['name'], 'price' => $i['price'], 'original_price' => $i['original_price'], 'discount' => \App\Support\Presenters\ProductCard::discount((float) $i['price'], (float) $i['original_price']), 'brand' => null, 'rating_summary' => ['total_reviews' => 0], 'in_stock' => $i['in_stock'], 'variant_id' => null, 'out_of_stock_message' => null, 'image_url' => $i['thumbnail']])
                 <div class="relative" data-wish-card="{{ $i['product_id'] }}">
-                    <x-product-card :product="$card" />
-                    <form method="POST" action="{{ route('wishlist.forget', $i['product_id']) }}" class="mt-2 text-center">@csrf @method('DELETE')<button class="text-[11px] font-bold text-gray-400 hover:text-red-500">Remove</button></form>
+                    <x-product-card :product="$card" compact>
+                        <form method="POST" action="{{ route('wishlist.forget', $i['product_id']) }}">@csrf @method('DELETE')<button class="pcard-remove"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i>Remove</button></form>
+                    </x-product-card>
                 </div>
             @endforeach
         </div>

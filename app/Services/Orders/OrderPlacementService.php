@@ -39,7 +39,7 @@ class OrderPlacementService
     ) {}
 
     /**
-     * @param  array{address_id: int, delivery_type: string, payment_method: string}  $input
+     * @param  array{address_id: int, delivery_type: string, payment_method: string, buy_now?: array{variant_id: int, qty: int}}  $input  buy_now: order only that product, leaving the cart alone
      * @return array{order: Order, placed: list<Order>}
      */
     public function place(User $user, array $input): array
@@ -58,7 +58,8 @@ class OrderPlacementService
         // the delivery type decides which part of the cart is ordered; the other kind of item stays in the cart untouched
         $isQuick = DeliveryBucket::isQuick($deliveryCode);
 
-        $placed = $this->checkout->transaction(fn () => $this->placeInTransaction($user, $address, $deliveryCode, $method, $isQuick));
+        $buyNow = $input['buy_now'] ?? null;
+        $placed = $this->checkout->transaction(fn () => $this->placeInTransaction($user, $address, $deliveryCode, $method, $isQuick, $buyNow));
 
         // a Quick order enters the delivery workflow: the first timeline row and, for cash orders, an immediate rider attempt (an online
         // order gets its rider once it is paid). A dispatch problem must never look like a failed order.
@@ -86,10 +87,19 @@ class OrderPlacementService
     }
 
     /** @return list<Order> */
-    private function placeInTransaction(User $user, $address, string $deliveryCode, string $method, bool $isQuick): array
+    private function placeInTransaction(User $user, $address, string $deliveryCode, string $method, bool $isQuick, ?array $buyNow = null): array
     {
-        $cart = $this->checkout->lockedCart($user->id);
-        $allItems = $cart ? $this->checkout->cartItems($cart) : collect();
+        if ($buyNow) {
+            // Buy Now: one product, one line made here; the customer's cart is not read, locked or changed
+            $variant = $this->catalog->variant((int) $buyNow['variant_id']) ?? throw CartProblemException::notAvailable();
+            $line = (new \App\Models\CartItem)->forceFill(['product_variant_id' => $variant->id, 'qty' => max(1, min((int) $buyNow['qty'], 99))]);
+            $line->setRelation('productVariant', $variant);
+            $cart = (new \App\Models\Cart)->forceFill(['user_id' => $user->id]);
+            $allItems = collect([$line]);
+        } else {
+            $cart = $this->checkout->lockedCart($user->id);
+            $allItems = $cart ? $this->checkout->cartItems($cart) : collect();
+        }
 
         if ($allItems->isEmpty()) {
             throw CartProblemException::emptyCart();
@@ -257,6 +267,10 @@ class OrderPlacementService
             }
 
             $placed[] = $order;
+        }
+
+        if ($buyNow) {
+            return $placed;
         }
 
         // remove only the lines that were ordered; the cart goes when nothing is left, and the used coupon is cleared from a cart that remains
