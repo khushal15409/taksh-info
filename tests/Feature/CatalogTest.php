@@ -345,7 +345,7 @@ class CatalogTest extends CatalogTestCase
         $stock->free['7_31'] = 5;
         $this->app->instance(\App\Repositories\Contracts\CartCatalogRepositoryInterface::class, $stock);
 
-        $this->delivery->product = Make::product(3, ['vendor_id' => 7, 'is_express_30' => true, 'approval_status' => 'approved', 'status' => 'active'], [Make::variant(['id' => 31, 'status' => 'active'])]);
+        $this->delivery->product = Make::product(3, ['vendor_id' => 7, 'is_express_30' => true, 'express_30_status' => 'active', 'approval_status' => 'approved', 'status' => 'active'], [Make::variant(['id' => 31, 'status' => 'active'])]);
         $this->delivery->vendor = (new FakeVendor)->forceFill(['id' => 7, 'vendor_name' => 'V', 'shop_name' => 'Shop']);
         $post = fn (array $extra) => $this->postJson('/ecommerce/products/3/check-delivery', $extra);
 

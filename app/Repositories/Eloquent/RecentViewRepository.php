@@ -16,7 +16,7 @@ class RecentViewRepository implements RecentViewRepositoryInterface
                 $p->whereIn('category_id', Category::forDeliveryType($deliveryType)->select('categories.id'));
 
                 if ($deliveryType === Category::DELIVERY_EXPRESS) {
-                    $p->where('is_express_30', true)->where('express_30_status', 'active');
+                    $p->where('is_express_30', true)->where('status', 'active');
                 }
             }))
             ->with(['product' => function ($query) {

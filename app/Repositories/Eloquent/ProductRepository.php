@@ -42,7 +42,7 @@ class ProductRepository implements ProductRepositoryInterface
         return Product::with(['images', 'variants'])
             ->where('status', 'active')
             ->where('fulfillment_center_id', $fcId)
-            ->when($quickOnly, fn ($q) => $q->where('is_express_30', true)->where('express_30_status', 'active'))
+            ->when($quickOnly, fn ($q) => $q->where('is_express_30', true))
             ->get();
     }
 }

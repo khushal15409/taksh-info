@@ -103,7 +103,7 @@ class CartTest extends CartTestCase
     public function test_delivery_buckets_are_kept_apart(): void
     {
         $this->sellable(1);
-        $this->sellable(2, 100, 5, ['is_express_30' => true, 'approval_status' => 'approved']);
+        $this->sellable(2, 100, 5, ['is_express_30' => true, 'express_30_status' => 'active', 'approval_status' => 'approved']);
 
         $this->add(1, 1, ['delivery_type' => '30_min'])->assertStatus(422)
             ->assertJsonPath('data.code', 'delivery_bucket_mismatch')->assertJsonPath('data.product_delivery_type', 'normal');
@@ -119,7 +119,7 @@ class CartTest extends CartTestCase
         $vendors = new \Tests\Support\FakeQuickVendors;
         $vendors->vendorRows[7] = (new \Tests\Support\FakeVendor)->forceFill(['id' => 7, 'status' => 'approved', 'shop_pincode' => '395001']);
         $this->app->instance(\App\Repositories\Contracts\QuickVendorRepositoryInterface::class, $vendors);
-        $this->sellable(2, 100, 5, ['is_express_30' => true, 'approval_status' => 'approved']);
+        $this->sellable(2, 100, 5, ['is_express_30' => true, 'express_30_status' => 'active', 'approval_status' => 'approved']);
         $addAt = fn (string $place) => $this->call('POST', '/cart/add', ['product_variant_id' => 2, 'qty' => 1, 'delivery_type' => '30_min'],
             [\App\Services\Quick\QuickLocation::COOKIE => $place], [], ['HTTP_ACCEPT' => 'application/json']);
 

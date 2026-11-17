@@ -56,14 +56,11 @@ class CatalogRepository implements CatalogRepositoryInterface
     }
 
     /**
-     * Quick: sold by a vendor that serves the location, with free stock in that vendor's own row. The admin's Quick on/off switch
-     * (express_30_status) is honoured only when asked for (TAKSH_QUICK_REQUIRE_ACTIVE): the Taksh app currently lists a quick
-     * product that is switched off, and the website follows the app.
+     * Quick: sold by a vendor that serves the location, with free stock in that vendor's own row. Same as the Taksh app.
      */
     private function quickEligible($query, array $vendorIds)
     {
-        return $query->when(config('taksh.quick_require_active'), fn ($q) => $q->where('express_30_status', 'active'))
-            ->whereIn('products.vendor_id', $vendorIds)
+        return $query->whereIn('products.vendor_id', $vendorIds)
             ->whereHas('variants', fn ($v) => $v->where('status', 'active')->whereHas('vendorProducts', fn ($vp) => $vp
                 ->whereColumn('vendor_products.vendor_id', 'products.vendor_id')
                 ->whereRaw('(vendor_products.stock_qty - vendor_products.reserved_qty) > 0')));

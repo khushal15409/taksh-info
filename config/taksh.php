@@ -24,8 +24,6 @@ return [
     'version' => env('TAKSH_WEB_VERSION', '1.0.0'),
 
     // Where customers reach Taksh (the help links on order pages, the footer).
-    // Hide a quick product the admin switched off (Express 30 status = inactive). Off: it is listed, as the Taksh app lists it.
-    'quick_require_active' => (bool) env('TAKSH_QUICK_REQUIRE_ACTIVE', false),
     // The app's "Live Chat" opens WhatsApp on this number (country code + number, no +)
     'live_chat_whatsapp' => env('TAKSH_LIVE_CHAT_WHATSAPP', '919518365510'),
     'support_phone' => env('TAKSH_SUPPORT_PHONE', '+91 99999 12345'),
