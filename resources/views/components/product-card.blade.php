@@ -38,7 +38,7 @@
     <div class="px-4 pb-4 pt-2 flex-1 flex flex-col gap-1.5">
         @if (! empty($p['brand']))<span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide truncate">{{ $p['brand']['name'] }}</span>@endif
         <a href="{{ $href }}" class="font-bold text-[13px] leading-snug line-clamp-2 hover:text-brand-600 min-h-[2.4rem]">{{ $p['name'] }}</a>
-        <span class="flex items-center gap-1 text-[11px] font-semibold text-gray-500"><i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400 text-amber-400"></i><b class="text-amber-500">{{ $reviews ? $p['rating_summary']['average_rating'] : '3.5' }}</b>@if ($reviews) ({{ $reviewText }} Reviews)@endif</span>
+        @if ($reviews)<span class="flex items-center gap-1 text-[11px] font-semibold text-gray-500"><i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400 text-amber-400"></i><b class="text-amber-500">{{ $p['rating_summary']['average_rating'] }}</b>({{ $reviewText }} Reviews)</span>@endif
         <div class="flex items-center flex-wrap gap-x-2 gap-y-1 mt-auto pt-1">
             <span class="font-extrabold text-lg text-gray-900">@rupee($p['price'])</span>
             @if ($off > 0)<span class="text-xs text-gray-400 line-through">@rupee($p['original_price'])</span><span class="pcard-off">{{ $off }}% OFF</span>@endif

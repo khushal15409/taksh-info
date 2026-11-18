@@ -71,7 +71,7 @@ class CartPagesTest extends CartTestCase
 
     public function test_the_quick_tab_explains_quick_orders(): void
     {
-        $this->get('/cart?type=30_min')->assertOk()->assertSee('No Quick Delivery items')->assertSee('Taksh app');
+        $this->get('/cart?type=30_min')->assertOk()->assertSee('No Quick Delivery items');
         $this->get('/cart?type=bogus')->assertOk()->assertSee('Your Cart is Currently Empty');   // an unknown tab is the standard cart
     }
 

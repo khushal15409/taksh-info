@@ -16,15 +16,6 @@
         [route('services'), 'wrench', 'Services', $isServices, 'bg-purple-100 text-purple-600'],
     ];
 @endphp
-<div id="coming-soon" class="coming-soon-banner text-center text-white text-xs sm:text-sm font-bold tracking-wide py-2.5 px-10 relative z-50">
-    <a href="{{ route('home') }}#app" class="hover:underline underline-offset-4 decoration-yellow-300">
-        <span class="mr-1">📱</span><span class="uppercase tracking-widest">App Coming Soon</span>
-        <span class="mx-2 text-yellow-300 hidden sm:inline">•</span>
-        <span class="font-medium text-orange-100 hidden sm:inline">Taksh app is coming soon to Google Play - <u>Get notified</u></span>
-    </a>
-    <button type="button" data-close-banner class="absolute right-3 top-1/2 -translate-y-1/2 text-orange-200 hover:text-white w-6 h-6" aria-label="Dismiss">✕</button>
-</div>
-
 <div class="header-gradient text-white text-xs py-2 px-4 relative z-40">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
         <div class="flex items-center gap-2 min-w-0">

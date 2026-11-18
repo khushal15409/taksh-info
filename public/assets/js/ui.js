@@ -293,13 +293,13 @@ document.addEventListener("click", e => {
     if (t.matches("[data-open-location]")) return openLocationModal();
     if (t.matches("[data-open-prefs]")) return openPrefsModal();
     if (t.matches("[data-close-banner]")) {
-        qs("#coming-soon").classList.add("hidden");
+        qs("#coming-soon")?.classList.add("hidden");
         try { sessionStorage.setItem("taksh_banner_closed", "1"); } catch (err) { /* ignore */ }
     }
 });
 
 ready(() => {
-    try { if (sessionStorage.getItem("taksh_banner_closed") === "1") qs("#coming-soon").classList.add("hidden"); } catch (e) { /* ignore */ }
+    try { if (sessionStorage.getItem("taksh_banner_closed") === "1") qs("#coming-soon")?.classList.add("hidden"); } catch (e) { /* ignore */ }
     initSearch();
     updateHeader();
     Wishlist.paint();

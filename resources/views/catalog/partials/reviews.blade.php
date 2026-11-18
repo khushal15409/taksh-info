@@ -2,9 +2,13 @@
 @php($breakup = (array) ($rs['rating_breakup'] ?? []))
 <div class="grid md:grid-cols-3 gap-8">
     <div class="space-y-3">
-        <div class="text-5xl font-extrabold text-gray-900">{{ $rs['average_rating'] }}</div>
-        <div class="flex gap-0.5"><x-stars :rating="$rs['average_rating']" size="w-5 h-5" /></div>
-        <p class="text-xs text-gray-400">Based on {{ $rs['total_reviews'] }} review(s)</p>
+        @if ($rs['total_reviews'])
+            <div class="text-5xl font-extrabold text-gray-900">{{ $rs['average_rating'] }}</div>
+            <div class="flex gap-0.5"><x-stars :rating="$rs['average_rating']" size="w-5 h-5" /></div>
+            <p class="text-xs text-gray-400">Based on {{ $rs['total_reviews'] }} review(s)</p>
+        @else
+            <p class="text-sm font-semibold text-gray-500">No ratings yet</p>
+        @endif
         @foreach ([5, 4, 3, 2, 1] as $s)
             @php($n = $breakup[$s] ?? $breakup[(string) $s] ?? 0)
             <div class="flex items-center gap-2 text-xs"><span class="w-6">{{ $s }}★</span><div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden"><div class="h-full bg-amber-400" style="width:{{ $rs['total_reviews'] ? round($n / $rs['total_reviews'] * 100) : 0 }}%"></div></div><span class="w-8 text-right text-gray-400">{{ $n }}</span></div>

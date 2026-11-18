@@ -125,7 +125,7 @@ class CatalogPagesTest extends CatalogTestCase
             ->assertSee('categories-grid', false)->assertSee('Fresh Fruit')->assertDontSee('12 items')->assertSee('/shop?category=5', false)
             ->assertSee('Trending Now')->assertSee('Chakki Atta')->assertSee('₹150')->assertSee('25% OFF')->assertSee('https://cdn.test/p1.jpg', false)
             ->assertSee('data-wish="1"', false)->assertSee('/product?id=1', false)
-            ->assertSee('Mid offer')->assertSee('Loved by 1,00,000+ happy customers')->assertSee('Taksh App')
+            ->assertSee('Mid offer')->assertDontSee('Loved by 1,00,000+ happy customers')->assertDontSee('Coming Soon')
             ->assertSee('assets/js/modules/home.js', false)->assertDontSee('id="hero"', false)->assertDontSee('data-demo-block', false);
     }
 
@@ -138,12 +138,12 @@ class CatalogPagesTest extends CatalogTestCase
         $this->actingAs($this->customer(5))->get('/')->assertSee('Recently Viewed')->assertSee('Seen Atta')->assertSee('₹120');
     }
 
-    public function test_the_home_lists_the_first_services_and_survives_a_services_failure(): void
+    public function test_the_home_no_longer_lists_services(): void
     {
         $this->dashboard->parents = collect([Make::category(5)]);
         $this->services->service(1, ['name' => 'AC Repair', 'short_description' => 'Cooling fixed', 'service_charge' => 499]);
 
-        $this->get('/')->assertOk()->assertSee('Expert Services at Your Doorstep')->assertSee('AC Repair')->assertSee('From ₹499')->assertSee('/services/1/book', false);
+        $this->get('/')->assertOk()->assertDontSee('Expert Services at Your Doorstep')->assertDontSee('AC Repair');
     }
 
     public function test_a_services_failure_does_not_take_the_home_down(): void

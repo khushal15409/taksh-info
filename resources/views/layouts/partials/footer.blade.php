@@ -47,9 +47,6 @@
                 <li><a href="{{ route('terms') }}" class="hover:text-brand-500">Terms &amp; Conditions</a></li>
                 <li><a href="{{ route('refund') }}" class="hover:text-brand-500">Refund Policy</a></li>
             </ul>
-            <h4 class="font-bold mt-5 mb-3 uppercase tracking-wider">Download App</h4>
-            <a href="{{ route('home') }}#app" class="inline-block" aria-label="Taksh app coming soon on Google Play"><span data-play-badge></span></a>
-            <p class="text-[11px] text-gray-500 mt-2">Android app launching soon - <a href="{{ route('home') }}#app" class="text-brand-500 hover:underline">notify me</a></p>
         </div>
     </div>
     <div class="border-t border-white/10 bg-[#0F172A]/80 backdrop-blur-sm">
