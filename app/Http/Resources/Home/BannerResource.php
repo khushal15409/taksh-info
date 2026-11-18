@@ -13,6 +13,8 @@ class BannerResource extends ApiResource
         return [
             'id' => $this->id,
             'type' => $this->type,
+            'device_type' => $this->device_type,
+            'recommended_size' => $this->recommendedSize(),
             'title' => $this->title,
             'description' => $this->description,
             'image_url' => $this->image_url,

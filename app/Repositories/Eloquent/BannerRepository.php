@@ -12,7 +12,8 @@ class BannerRepository implements BannerRepositoryInterface
 {
     public function active(array $filters = []): Collection
     {
-        $query = $this->liveQuery();
+        // The website shows desktop banners; `device_type` can ask for the mobile ones instead.
+        $query = $this->liveQuery()->where('device_type', $this->device($filters['device_type'] ?? null));
 
         if (! empty($filters['position'])) {
             $query->where('position', $filters['position']);
@@ -38,7 +39,13 @@ class BannerRepository implements BannerRepositoryInterface
     {
         return $this->ordered(
             $this->liveQuery()->with('afterSection:id,section_name,is_active')->where('type', Banner::TYPE_STANDARD)
+                ->where('device_type', Banner::DEVICE_DESKTOP)
         )->get();
+    }
+
+    private function device(?string $device): string
+    {
+        return in_array($device, Banner::DEVICES, true) ? $device : Banner::DEVICE_DESKTOP;
     }
 
     /** Switched on and inside its optional start/end dates. */
