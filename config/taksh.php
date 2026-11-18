@@ -25,7 +25,8 @@ return [
 
     // Where customers reach Taksh (the help links on order pages, the footer).
     // The app's "Live Chat" opens WhatsApp on this number (country code + number, no +)
-    'live_chat_whatsapp' => env('TAKSH_LIVE_CHAT_WHATSAPP', '919518365510'),
-    'support_phone' => env('TAKSH_SUPPORT_PHONE', '+91 99999 12345'),
-    'support_email' => env('TAKSH_SUPPORT_EMAIL', 'care@takshallinone.com'),
+    'live_chat_whatsapp' => env('TAKSH_LIVE_CHAT_WHATSAPP', '918982893690'),
+    'support_phone' => env('TAKSH_SUPPORT_PHONE', '+91 89828 93690'),
+    'support_address' => env('TAKSH_SUPPORT_ADDRESS', 'Sendhwa, Madhya Pradesh, India'),
+    'support_email' => env('TAKSH_SUPPORT_EMAIL', 'customersupport@takshallinone.in'),
 ];

@@ -45,7 +45,7 @@
                 <ul class="space-y-1.5 text-sm text-gray-600 leading-relaxed"><li class="flex gap-2"><span class="text-brand-500 font-bold">•</span><span>Full refund for pre-shipment cancellations</span></li><li class="flex gap-2"><span class="text-brand-500 font-bold">•</span><span>Instant processing to original payment method</span></li><li class="flex gap-2"><span class="text-brand-500 font-bold">•</span><span>No cancellation charges</span></li><li class="flex gap-2"><span class="text-brand-500 font-bold">•</span><span>Refund within 3-5 business days</span></li></ul></section>
             <section class="space-y-2"><h2 class="font-extrabold text-gray-900 text-base">11. Contact for Returns</h2>
                 <p class="text-sm text-gray-600 leading-relaxed">Need help with returns or refunds? Reach out to us:</p>
-                <p class="text-sm text-gray-600 leading-relaxed">Email: returns@taksh-ecommerce.com<br>Live Chat: Available 24/7 in the app</p>
+                <p class="text-sm text-gray-600 leading-relaxed">Email: {{ config('taksh.support_email') }}<br>Phone: {{ config('taksh.support_phone') }}<br>Live Chat: Available 24/7 in the app</p>
                 <p class="text-sm text-gray-600 leading-relaxed">Our customer support team is here to assist you throughout the return and refund process.</p></section>
             <div class="rounded-2xl border bg-orange-50 border-orange-200 p-5"><h3 class="font-extrabold text-gray-900 mb-1">100% Satisfaction Guarantee</h3><p class="text-sm text-gray-700 leading-relaxed">We stand behind our products and are committed to your satisfaction.</p></div>
         </article>

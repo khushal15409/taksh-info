@@ -45,7 +45,7 @@
                 <p class="text-sm text-gray-600 leading-relaxed">These terms are governed by and construed in accordance with the laws of India, without regard to its conflict of law provisions.</p></section>
             <section class="space-y-2"><h2 class="font-extrabold text-gray-900 text-base">15. Contact Information</h2>
                 <p class="text-sm text-gray-600 leading-relaxed">If you have any questions about these Terms and Conditions, please contact us:</p>
-                <p class="text-sm text-gray-600 leading-relaxed">Email: support@taksh-ecommerce.com<br>Phone: +91 1800-123-4567<br>Address: Mumbai, Maharashtra, India</p></section>
+                <p class="text-sm text-gray-600 leading-relaxed">Email: {{ config('taksh.support_email') }}<br>Phone: {{ config('taksh.support_phone') }}<br>Address: {{ config('taksh.support_address') }}</p></section>
             <div class="rounded-2xl border bg-emerald-50 border-emerald-200 p-5"><p class="text-sm text-gray-700 leading-relaxed">By using our service, you acknowledge that you have read and understood these Terms &amp; Conditions.</p></div>
         </article>
 @endsection

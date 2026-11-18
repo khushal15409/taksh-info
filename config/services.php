@@ -46,7 +46,7 @@ return [
     // Place search / reverse lookup for the address map (OpenStreetMap Nominatim). Keep the contact e-mail set: their usage policy asks for it.
     'nominatim' => [
         'base_url' => env('NOMINATIM_BASE_URL', 'https://nominatim.openstreetmap.org'),
-        'contact' => env('NOMINATIM_CONTACT', 'care@takshallinone.com'),
+        'contact' => env('NOMINATIM_CONTACT', 'customersupport@takshallinone.in'),
         'country' => env('NOMINATIM_COUNTRY', 'in'),
         'timeout' => (int) env('NOMINATIM_TIMEOUT', 8),
     ],

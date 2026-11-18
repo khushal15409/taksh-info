@@ -9,7 +9,7 @@
             <div class="space-y-1.5 text-gray-400">
                 <p class="flex items-center gap-2"><i data-lucide="phone" class="w-3.5 h-3.5 text-brand-500"></i>{{ config('taksh.support_phone') }}</p>
                 <p class="flex items-center gap-2"><i data-lucide="mail" class="w-3.5 h-3.5 text-brand-500"></i>{{ config('taksh.support_email') }}</p>
-                <p class="flex items-center gap-2"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-500"></i>Ghatlodiya, Ahmedabad 380061</p>
+                <p class="flex items-center gap-2"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-500"></i>{{ config('taksh.support_address') }}</p>
             </div>
         </div>
         <div>

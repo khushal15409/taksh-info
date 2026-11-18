@@ -103,7 +103,7 @@
             <div class="flex flex-wrap gap-2">
                 @foreach ($issues as $label => $text)<a target="_blank" rel="noopener" href="{{ $wa.rawurlencode('Hi Taksh, order #'.$o['order_number'].': '.$text.'.') }}" class="text-xs font-bold border border-gray-200 hover:border-brand-500 hover:text-brand-600 rounded-full px-3 py-1.5">{{ $label }}</a>@endforeach
             </div>
-            <p class="text-[11px] text-gray-400">Chat on WhatsApp, <a class="underline" href="mailto:{{ config('taksh.support_email', 'care@takshallinone.com') }}?subject={{ rawurlencode('Order #'.$o['order_number']) }}">email us</a> or <a class="underline" href="{{ route('help') }}">request a callback</a>.</p>
+            <p class="text-[11px] text-gray-400">Chat on WhatsApp, <a class="underline" href="mailto:{{ config('taksh.support_email', 'customersupport@takshallinone.in') }}?subject={{ rawurlencode('Order #'.$o['order_number']) }}">email us</a> or <a class="underline" href="{{ route('help') }}">request a callback</a>.</p>
         </div>
     </div>
 

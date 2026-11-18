@@ -76,7 +76,7 @@ class AccountPagesTest extends AccountTestCase
 
     public function test_the_legal_pages_carry_the_apps_text(): void
     {
-        $this->get('/about')->assertOk()->assertSee('Your Trusted Shopping Partner')->assertSee('Our Story')->assertSee('Trust &amp; Transparency', false)->assertSee('50K+')->assertSee('info@takshllinone.in');
+        $this->get('/about')->assertOk()->assertSee('Your Trusted Shopping Partner')->assertSee('Our Story')->assertSee('Trust &amp; Transparency', false)->assertSee('50K+')->assertSee(config('taksh.support_email'));
         $this->get('/terms')->assertOk()->assertSee('Last Updated: January 22, 2026')->assertSee('15. Contact Information')->assertSee('Governing Law')->assertSee('you acknowledge that you have read and understood');
         $this->get('/privacy-policy')->assertOk()->assertSee('1. Information We Collect')->assertSee('12. Contact Us')->assertSee('Your Privacy Matters');
         $this->get('/refund-policy')->assertOk()->assertSee('1. Return Eligibility')->assertSee('Day 5-7')->assertSee('100% Satisfaction Guarantee');
