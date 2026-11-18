@@ -20,9 +20,10 @@ class OrderChargeCalculator
      *
      * @param  bool  $withFees  the fees go on the first order of a basket only
      * @param  array|null|false  $couponShare  null: judge the coupon on $itemsTotal; array: this order's share of the basket coupon; false: no coupon
+     * @param  list<array<string, mixed>>  $extraLines  the admin's labelled charges for this order's items (ExtraCharge::linesFor), always billed
      * @return array{0: list<array<string, mixed>>, 1: ?array{coupon: Coupon, discount_amount: float}}
      */
-    public function charges(Cart $cart, bool $couponApplies, float $itemsTotal, ?int $userId, bool $isQuick, bool $withCoupon, bool $withFees, array|null|false $couponShare = null): array
+    public function charges(Cart $cart, bool $couponApplies, float $itemsTotal, ?int $userId, bool $isQuick, bool $withCoupon, bool $withFees, array|null|false $couponShare = null, array $extraLines = []): array
     {
         $fees = $withFees ? AppCharges::forOrder($isQuick) : ['platform_fee' => 0, 'quick_delivery_fee' => 0];
         $charges = [];
@@ -48,6 +49,10 @@ class OrderChargeCalculator
                 $charges[] = ['type' => 'coupon', 'label' => 'Coupon ('.$result['coupon']->code.')', 'amount' => -$result['discount_amount'], 'is_discount' => true];
                 $applied = ['coupon' => $result['coupon'], 'discount_amount' => $result['discount_amount']];
             }
+        }
+
+        foreach ($extraLines as $line) {
+            $charges[] = $line;
         }
 
         return [$charges, $applied];

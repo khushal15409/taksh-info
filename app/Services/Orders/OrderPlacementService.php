@@ -3,6 +3,7 @@
 namespace App\Services\Orders;
 
 use App\Exceptions\CartProblemException;
+use App\Helpers\ExtraCharge;
 use App\Helpers\Money;
 use App\Helpers\PriceBreakup;
 use App\Models\Order;
@@ -179,6 +180,7 @@ class OrderPlacementService
             $stockRows = $this->checkout->lockedStock($vendor->id, $groupItems->pluck('product_variant_id')->all());
 
             $orderItems = [];
+            $extraInputs = [];
             $itemsTotal = 0.0;
 
             foreach ($groupItems as $line) {
@@ -211,6 +213,7 @@ class OrderPlacementService
                 $price = $this->pricing->calculateCheckoutPrice($product, $variant)['final_sell_price'];
                 // the same paisa rounding as the cart view, so the cart total and the order total agree
                 $itemsTotal = round($itemsTotal + round($price * $line->qty, 2), 2);
+                $extraInputs[] = [$product, (int) $line->qty, (float) $price];
 
                 // the order keeps its own copy of the money, so a later price change cannot move an old payout or refund
                 $orderItems[] = array_merge(
@@ -229,6 +232,8 @@ class OrderPlacementService
             [$extra, $appliedCoupon] = $this->charges->charges(
                 $cart, $couponApplies, $itemsTotal, $user->id, $isQuick, ! $couponUsed, $isFirst,
                 $couponShares === null ? null : ($couponShares[$vendorId] ?? false),
+                // the admin's labelled charges (Settings > App Charges) for the items of this order, as the cart showed them
+                ExtraCharge::linesFor($extraInputs, $isQuick),
             );
             $grandTotal = $itemsTotal + collect($extra)->sum(fn ($c) => (float) ($c['amount'] ?? 0));
 
