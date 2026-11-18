@@ -10,11 +10,10 @@
     <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('assets/img/favicon.png') }}">
 
-    <!-- Tailwind CSS (CDN) + theme config -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('assets/js/tailwind-config.js') }}"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tailwind CSS: compiled locally (npm run build:css), no CDN -->
+    <link rel="stylesheet" href="{{ asset('assets/css/tailwind.css') }}?v={{ @filemtime(public_path('assets/css/tailwind.css')) }}">
+    <!-- Lucide Icons (self-hosted) -->
+    <script src="{{ asset('assets/vendor/lucide.min.js') }}"></script>
     <!-- Google Fonts: Inter & Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

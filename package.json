@@ -4,6 +4,7 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
+        "build:css": "npx --yes tailwindcss@3.4.17 -c tailwind.config.cjs -i resources/css/tailwind-src.css -o public/assets/css/tailwind.css --minify",
         "dev": "vite"
     },
     "devDependencies": {
