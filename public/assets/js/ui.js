@@ -179,6 +179,15 @@ function initSearch() {
 }
 
 // ---------- Location + address modals ----------
+// Reload after the place changed. A ?pincode= / ?location=saved in the address bar wins over the new place (QuickLocation), so drop them first.
+function reloadForNewPlace() {
+    const u = new URL(location.href);
+    const had = u.searchParams.has("pincode") || u.searchParams.has("location");
+    u.searchParams.delete("pincode");
+    u.searchParams.delete("location");
+    if (had) location.replace(u.toString()); else location.reload();
+}
+
 function openLocationModal() {
     if (Auth.loggedIn) return openAddressPicker();
     openPincodeForm();
@@ -209,7 +218,7 @@ async function openAddressPicker() {
         try {
             await Api.addressDefault(Number(b.dataset.pick));
             document.cookie = "taksh_loc=; max-age=0; path=/";   // a saved address replaces a pincode typed earlier
-            location.reload();
+            reloadForNewPlace();
         } catch (err) { b.disabled = false; toast(err.message || "Couldn't change the address", "error"); }
     });
 }
@@ -239,7 +248,7 @@ function openPincodeForm() {
         document.cookie = `taksh_loc=${f.get("pincode")},${here}; path=/; max-age=31536000; SameSite=Lax`;
         Modal.close();
         toast("📍 Delivery location updated");
-        setTimeout(() => location.reload(), 400);   // the header and Quick products follow the new place
+        setTimeout(reloadForNewPlace, 400);   // the header and Quick products follow the new place
     });
 }
 

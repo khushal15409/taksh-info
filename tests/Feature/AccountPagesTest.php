@@ -68,7 +68,7 @@ class AccountPagesTest extends AccountTestCase
             ->assertSee('My Profile')->assertSee('Addresses')->assertSee('My Orders')->assertSee('Wishlist')->assertSee('Wallet')->assertSee('Language')
             ->assertSee('Help &amp; Support', false)->assertSee('Live Chat')->assertSee('About Us')->assertSee('Terms &amp; Conditions', false)->assertSee('Privacy Policy')->assertSee('Refund Policy')
             ->assertSee('Join as Delivery Man')->assertSee('Open Vendor')->assertSee('Create Application')->assertSee('Create Website')->assertSee('Logout')
-            ->assertSee('https://wa.me/919518365510', false)->assertSee('/development-request?kind=Create%20Website', false)
+            ->assertSee('https://wa.me/918982893690', false)->assertSee('/development-request?kind=Create%20Website', false)
             ->assertDontSee('Theme')->getContent();
 
         $this->assertStringNotContainsString('Dark', $html);

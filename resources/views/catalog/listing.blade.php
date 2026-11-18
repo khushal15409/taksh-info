@@ -20,12 +20,8 @@
                 @elseif (! $quickLocation['serviceable'])⚡ Quick delivery is not available at {{ $quickLocation['pincode'] ? 'pincode '.$quickLocation['pincode'] : 'your location' }} yet. We deliver within {{ \App\Helpers\QuickDelivery::RADIUS_KM }} km of our shops.
                 @endif
             </span>
-            <form method="GET" action="{{ route('listing') }}" class="flex items-center gap-2">
-                <input type="hidden" name="quick" value="1">
-                <input name="pincode" value="{{ $quickLocation['pincode'] }}" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="Pincode" aria-label="Delivery pincode" class="w-28 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs text-gray-800">
-                <button class="font-bold underline">{{ $quickLocation['located'] ? 'Change' : 'Check' }}</button>
-                @auth<a href="{{ route('listing', ['quick' => 1, 'location' => 'saved']) }}" class="underline">Saved address</a>@endauth
-            </form>
+            {{-- opens the address popup: a signed-in customer picks a saved address, a guest types a pincode --}}
+            <button type="button" data-open-location class="inline-flex items-center gap-1.5 bg-white border border-amber-300 hover:bg-amber-100 text-amber-900 font-bold px-4 py-1.5 rounded-xl"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i>{{ $quickLocation['located'] ? 'Change address' : 'Choose location' }}</button>
         </div>
     @endif
 
