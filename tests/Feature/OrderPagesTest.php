@@ -128,7 +128,7 @@ class OrderPagesTest extends OrderTestCase
             ->assertSee('Platform Fees')->assertSee('Total')->assertSee('₹205.00')->assertSee('Item 1')->assertSee('Qty: 2 × ₹100.00', false)->assertSee('₹200.00')
             ->assertSee('Online')->assertSee('Paid')
             ->assertSee('Download Invoice')->assertSee('/orders/'.$o->order_number.'/invoice', false)
-            ->assertSee('Need help with this order?')->assertSee('wa.me/919999912345', false)->assertSee('Cancel Order')->assertSee('id="cancel-order"', false)
+            ->assertSee('Need help with this order?')->assertSee('wa.me/918982893690', false)->assertSee('Cancel Order')->assertSee('id="cancel-order"', false)
             ->assertDontSee('Return Items')->assertDontSee('id="tracking-root"', false);
     }
 
