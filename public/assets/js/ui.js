@@ -295,6 +295,12 @@ function openPrefsModal() {
     });
 }
 
+// A form with data-confirm="..." asks first (replaces inline onsubmit handlers, which the Content-Security-Policy does not allow)
+document.addEventListener("submit", e => {
+    const f = e.target.closest && e.target.closest("form[data-confirm]");
+    if (f && !confirm(f.dataset.confirm)) e.preventDefault();
+});
+
 // ---------- Global event delegation ----------
 document.addEventListener("click", e => {
     const t = e.target.closest("[data-open-location], [data-close-banner], [data-open-prefs]");

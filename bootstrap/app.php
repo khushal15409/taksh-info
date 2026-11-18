@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(except: [\App\Http\Middleware\SetLocale::COOKIE, \App\Services\Quick\QuickLocation::COOKIE]);
         $middleware->web(prepend: [\App\Http\Middleware\SetLocale::class], append: [\App\Http\Middleware\TranslateHtml::class]);
 
+        // security headers + Content-Security-Policy on every response
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
         $middleware->redirectGuestsTo(fn (Request $request) => route('login', ['next' => $request->getRequestUri()]));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
