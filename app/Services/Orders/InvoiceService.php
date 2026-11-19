@@ -37,7 +37,15 @@ class InvoiceService
         }
 
         if ($response->failed() || ! str_contains((string) $response->header('Content-Type'), 'pdf')) {
-            \Illuminate\Support\Facades\Log::warning('Invoice PDF not available from taksh-admin', ['status' => $response->status()]);
+            \Illuminate\Support\Facades\Log::warning('Invoice PDF not available from taksh-admin', [
+                'status' => $response->status(),
+                'hint' => in_array($response->status(), [401, 403], true)
+                    ? 'taksh-admin refused the X-Site-Key: TAKSH_SITE_API_KEY must be the SAME value in the website .env and the taksh-admin .env (then php artisan config:clear on both)'
+                    : ($response->status() === 404 ? 'order not found for this customer, or taksh-admin has no /api/site/orders route yet (deploy it)' : 'see the taksh-admin log'),
+                'key_configured_on_website' => (string) config('taksh.site_api_key') !== '',
+                'admin_url' => config('taksh.admin_url'),
+                'body' => mb_substr((string) $response->body(), 0, 200),
+            ]);
 
             return null;
         }
