@@ -18,6 +18,22 @@ class Category extends Model
      * Categories offered for one delivery type: a parent whose type is that type (or none = both), and the
      * sub-categories under such a parent. A Standard parent and everything under it never shows for Quick.
      */
+    /**
+     * The order categories are listed in (set in taksh-admin: lowest display order first, then A-Z), the same as the app.
+     * Falls back to A-Z alone on a database that has not got the column yet, so nothing breaks before taksh-admin is migrated.
+     */
+    public function scopeOrdered($query)
+    {
+        static $has = null;
+        $has ??= \Illuminate\Support\Facades\Schema::hasColumn('categories', 'sort_order');
+
+        if ($has) {
+            $query->orderBy('categories.sort_order', 'asc');
+        }
+
+        return $query->orderBy('categories.name', 'asc');
+    }
+
     public function scopeForDeliveryType($query, string $type)
     {
         $offered = fn ($q, string $col) => $q->where(fn ($w) => $w->whereNull($col)->orWhere($col, $type));
