@@ -190,6 +190,7 @@ class OrdersTest extends OrderTestCase
 
         \Illuminate\Support\Facades\Http::swap(new \Illuminate\Http\Client\Factory);
         \Illuminate\Support\Facades\Http::fake(['admin.test/*' => \Illuminate\Support\Facades\Http::response('oops', 500)]);
-        $this->actingAs($this->user())->get('/orders/ORDABC12345/invoice')->assertStatus(503);
+        $this->actingAs($this->user())->from('/tracking')->get('/orders/ORDABC12345/invoice')->assertRedirect('/tracking')
+            ->assertSessionHas('toast.message', fn ($m) => str_contains($m, 'code: admin-5xx'));
     }
 }
