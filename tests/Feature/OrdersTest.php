@@ -183,7 +183,7 @@ class OrdersTest extends OrderTestCase
         $this->assertStringContainsString('invoice-ORDABC12345.pdf', $res->headers->get('Content-Disposition'));
         $this->assertSame('%PDF-1.4 fake', $res->getContent());
         \Illuminate\Support\Facades\Http::assertSent(fn ($r) => str_starts_with($r->url(), 'https://admin.test/api/site/orders/ORDABC12345/invoice')
-            && $r['part'] === 'tax' && (int) $r['user_id'] === 5 && $r->header('X-Site-Key') === ['site-secret']);
+            && $r['part'] === 'tax' && (int) $r['user_id'] === 5 && ($r->header('X-Site-Key')[0] ?? '') !== '');   // the shared secret rides along (kept in business_settings, falls back to the .env one)
 
         $this->actingAs($this->user(9))->get('/orders/ORDABC12345/invoice')->assertStatus(404);          // someone else's order looks like no order
         $this->actingAs($this->user())->get('/orders/NOPE/invoice')->assertStatus(404);

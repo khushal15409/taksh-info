@@ -22,6 +22,29 @@ class InvoiceService
     }
 
     /**
+     * The secret that proves the call comes from the website. It lives in the business_settings table the website and taksh-admin
+     * share (created on first use), so it never depends on two .env files holding the same value. Falls back to TAKSH_SITE_API_KEY.
+     */
+    private function siteKey(): string
+    {
+        try {
+            $row = \Illuminate\Support\Facades\DB::table('business_settings')->where('key', 'site_api_key')->first();
+            if ($row && (string) $row->value !== '') {
+                return (string) $row->value;
+            }
+
+            $key = bin2hex(random_bytes(32));
+            \Illuminate\Support\Facades\DB::table('business_settings')->updateOrInsert(['key' => 'site_api_key'], ['value' => $key, 'created_at' => now(), 'updated_at' => now()]);
+
+            return (string) \Illuminate\Support\Facades\DB::table('business_settings')->where('key', 'site_api_key')->value('value');
+        } catch (\Throwable $e) {
+            report($e);
+
+            return (string) config('taksh.site_api_key');
+        }
+    }
+
+    /**
      * @return array{body: string, filename: string}
      *
      * @throws \RuntimeException message = a short reason code the customer can quote: admin-unreachable, admin-401 (the shared key is
@@ -33,7 +56,7 @@ class InvoiceService
         // identifies itself with the shared secret and names the customer; taksh-admin checks the order is theirs again.
         try {
             $response = Http::timeout(60)->connectTimeout(10)->accept('application/pdf')
-                ->withHeaders(['X-Site-Key' => (string) config('taksh.site_api_key')])
+                ->withHeaders(['X-Site-Key' => $this->siteKey()])
                 ->get(rtrim((string) config('taksh.admin_url'), '/').'/api/site/orders/'.rawurlencode(trim($orderNumber)).'/invoice', ['user_id' => $userId, 'part' => $part]);
         } catch (\Throwable $e) {
             report($e);
