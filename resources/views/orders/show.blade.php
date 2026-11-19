@@ -124,6 +124,6 @@
 
 @push('scripts')
 
-    <script src="{{ asset('assets/js/modules/order.js') }}"></script>
+    <script src="{{ \App\Helpers\Asset::v('assets/js/modules/order.js') }}"></script>
 
 @endpush

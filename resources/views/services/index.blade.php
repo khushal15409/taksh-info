@@ -107,6 +107,6 @@
 
 @push('scripts')
 
-    <script src="{{ asset('assets/js/modules/courier.js') }}"></script>
+    <script src="{{ \App\Helpers\Asset::v('assets/js/modules/courier.js') }}"></script>
 
 @endpush

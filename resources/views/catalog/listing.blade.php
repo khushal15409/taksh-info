@@ -76,6 +76,6 @@
 
 @push('scripts')
 
-    <script src="{{ asset('assets/js/modules/listing.js') }}"></script>
+    <script src="{{ \App\Helpers\Asset::v('assets/js/modules/listing.js') }}"></script>
 
 @endpush

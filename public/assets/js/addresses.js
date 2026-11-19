@@ -3,7 +3,8 @@
 
 const Addresses = (() => {
     let data = { default_address: null, addresses: [] };
-    const LEAFLET = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/";
+    // Leaflet is served from this site (assets/vendor/leaflet), not a CDN, so the map still loads when a third-party host is slow or blocked
+    const LEAFLET = (document.body.dataset.root || "/") + "assets/vendor/leaflet/";
     const TYPES = [["home", "Home"], ["office", "Office"], ["other", "Other"]];
     const DEFAULT_CENTER = [22.9734, 78.6569];      // India
 
