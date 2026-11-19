@@ -62,13 +62,36 @@ const Addresses = (() => {
     // ------------------------------------------------------------ add / edit form with the map
 
     let leafletReady = null;
+    // Leaflet needs BOTH its stylesheet and script before a map is drawn - with the style still loading the tiles and the pin land in the wrong
+    // places. So the map is only built once both are in.
     function loadLeaflet() {
-        if (window.L) return Promise.resolve();
+        if (window.L && document.querySelector("link[data-leaflet-css][data-ready]")) return Promise.resolve();
         return leafletReady ||= new Promise((resolve, reject) => {
-            const css = document.createElement("link"); css.rel = "stylesheet"; css.href = LEAFLET + "leaflet.min.css"; document.head.appendChild(css);
-            const js = document.createElement("script"); js.src = LEAFLET + "leaflet.min.js"; js.onload = resolve; js.onerror = () => { leafletReady = null; reject(new Error("Map could not be loaded")); };
-            document.head.appendChild(js);
+            const fail = () => { leafletReady = null; reject(new Error("Map could not be loaded")); };
+            let pending = 2;
+            const done = () => { if (--pending === 0) resolve(); };
+
+            let css = document.querySelector("link[data-leaflet-css]");
+            if (css && css.dataset.ready) done();
+            else {
+                if (!css) { css = document.createElement("link"); css.rel = "stylesheet"; css.href = LEAFLET + "leaflet.min.css"; css.dataset.leafletCss = "1"; document.head.appendChild(css); }
+                css.addEventListener("load", () => { css.dataset.ready = "1"; done(); }, { once: true });
+                css.addEventListener("error", fail, { once: true });
+            }
+
+            if (window.L) done();
+            else {
+                const js = document.createElement("script"); js.src = LEAFLET + "leaflet.min.js"; js.onload = done; js.onerror = fail;
+                document.head.appendChild(js);
+            }
         });
+    }
+
+    // The dialog / page may still be sizing itself when the map is created; keep the map in step with its box.
+    function keepSized(map, box) {
+        const fix = () => { try { map.invalidateSize(); } catch (e) { /* map removed */ } };
+        [100, 300, 700].forEach(t => setTimeout(fix, t));
+        if (window.ResizeObserver) new ResizeObserver(fix).observe(box);
     }
 
     function openForm(existing, onSaved) {
@@ -123,6 +146,7 @@ const Addresses = (() => {
         const box = qs("#la-map", modal);
         try { await loadLeaflet(); } catch (e) { box.textContent = "Map unavailable - type your address below."; return; }
         box.textContent = "";
+        box.classList.remove("flex", "items-center", "justify-center");   // the "Loading map…" centring must not sit on the map itself
         const start = a.latitude != null && a.longitude != null ? [a.latitude, a.longitude] : null;
         const map = L.map(box).setView(start || DEFAULT_CENTER, start ? 16 : 5);
         L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
@@ -143,7 +167,7 @@ const Addresses = (() => {
 
         map.on("click", e => setPoint(e.latlng.lat, e.latlng.lng));
         pin.on("dragend", () => { const p = pin.getLatLng(); setPoint(p.lat, p.lng); });
-        setTimeout(() => map.invalidateSize(), 200);
+        keepSized(map, box);
 
         const results = qs("#la-results", modal);
         const search = async () => {
@@ -169,5 +193,5 @@ const Addresses = (() => {
         };
     }
 
-    return { refresh, mount, openForm, all, loadLeaflet, get default() { return data.default_address; } };
+    return { refresh, mount, openForm, all, loadLeaflet, keepSized, get default() { return data.default_address; } };
 })();

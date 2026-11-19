@@ -14,8 +14,10 @@ ready(() => {
     (async () => {
         try { await Addresses.loadLeaflet(); } catch (e) { box.textContent = "Map unavailable"; return; }
         box.textContent = "";
+        box.classList.remove("flex", "items-center", "justify-center");
         const map = L.map(box).setView([22.9734, 78.6569], 5);
         L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
+        Addresses.keepSized(map, box);
         let rider = null, home = null, timer = null;
         const tick = async () => {
             let d; try { d = await Api.deliveryLocation(orderId); } catch (e) { return; }

@@ -18,7 +18,7 @@ class InvoiceController extends Controller
         abort_unless($this->invoices->owns($request->user(), $orderNumber), 404);
 
         $part = in_array($request->query('part'), ['both', 'tax', 'label'], true) ? $request->query('part') : 'both';
-        $pdf = $this->invoices->pdf($orderNumber, $part);
+        $pdf = $this->invoices->pdf((int) $request->user()->id, $orderNumber, $part);
 
         abort_if($pdf === null, 503, 'The invoice is not available right now. Please try again shortly.');
 

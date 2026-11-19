@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 /** The customer's notification inbox: the list (filter tabs, pages), one notification, and "mark all as read". */
 class NotificationPageController extends WebController
 {
-    public const FILTERS = ['all', 'offers', 'orders', 'unread'];
+    public const FILTERS = ['all', 'unread', 'offers', 'orders'];
     private const PER_PAGE = 15;
 
     public function __construct(private readonly NotificationService $notifications) {}

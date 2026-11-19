@@ -14,7 +14,10 @@ return [
     'media_disk' => env('TAKSH_MEDIA_DISK', 'public'),
 
     // taksh-admin's base URL; the invoice PDF is rendered by taksh-admin (the template and its tax rules live there).
-    'admin_url' => env('TAKSH_ADMIN_URL', 'https://taksh-admin.takshallinone.in'),
+    // (an empty TAKSH_ADMIN_URL in .env falls back to the live admin instead of an unusable blank address)
+    'admin_url' => env('TAKSH_ADMIN_URL') ?: 'https://taksh-admin.takshallinone.in',
+    // shared secret the website sends (X-Site-Key) when it calls taksh-admin for a signed-in customer; the same value is in taksh-admin's .env
+    'site_api_key' => env('TAKSH_SITE_API_KEY'),
 
     // Customer/vendor push for new orders is sent by taksh-admin's queue; the website does not send it (see docs). Set to true only
     // after pointing QUEUE_CONNECTION at the queue taksh-admin's worker reads, so the SendPushNotification job can be handed over.

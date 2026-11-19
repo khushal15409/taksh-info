@@ -22,12 +22,23 @@ class InvoiceService
     }
 
     /** @return array{body: string, filename: string}|null null when taksh-admin could not produce it */
-    public function pdf(string $orderNumber, string $part = 'both'): ?array
+    public function pdf(int $userId, string $orderNumber, string $part = 'both'): ?array
     {
-        $response = Http::timeout(30)->accept('application/pdf')
-            ->get(rtrim((string) config('taksh.admin_url'), '/').'/api/orders/'.rawurlencode(trim($orderNumber)).'/invoice', ['part' => $part]);
+        // taksh-admin only serves an invoice to the signed-in customer. The website has already checked who this is, so it
+        // identifies itself with the shared secret and names the customer; taksh-admin checks the order is theirs again.
+        try {
+            $response = Http::timeout(30)->accept('application/pdf')
+                ->withHeaders(['X-Site-Key' => (string) config('taksh.site_api_key')])
+                ->get(rtrim((string) config('taksh.admin_url'), '/').'/api/site/orders/'.rawurlencode(trim($orderNumber)).'/invoice', ['user_id' => $userId, 'part' => $part]);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return null;
+        }
 
         if ($response->failed() || ! str_contains((string) $response->header('Content-Type'), 'pdf')) {
+            \Illuminate\Support\Facades\Log::warning('Invoice PDF not available from taksh-admin', ['status' => $response->status()]);
+
             return null;
         }
 

@@ -192,7 +192,7 @@ class AccountPagesTest extends AccountTestCase
         $this->notes->markSeen($this->notes->rows[1], 5);
 
         $this->actingAs($this->customer(5))->get('/notifications')->assertOk()
-            ->assertSee('Notifications Hub')->assertSee('Diwali sale')->assertSee('Order shipped')->assertSee('Mark all as read')
+            ->assertSee('Notifications')->assertSee('Diwali sale')->assertSee('Order shipped')->assertSee('Mark all as read')
             ->assertSee('/notifications/2', false)->assertSee('bg-orange-50/60', false)   // the unread one is highlighted
             ->assertDontSee('id="notif-list"', false);
     }
