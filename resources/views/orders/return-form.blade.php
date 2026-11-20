@@ -22,7 +22,7 @@
         <div>
             <a href="{{ route('tracking', ['id' => $o['id']]) }}" class="text-xs font-bold text-gray-500 hover:text-brand-600">← Back to order</a>
             <h1 class="text-2xl font-extrabold text-gray-900 mt-1">Return Items</h1>
-            <p class="text-xs text-gray-400">Order #{{ $o['order_number'] }} • <a class="underline" href="{{ route('refund') }}">Refund policy</a></p>
+            <p class="text-xs text-gray-400">Order #{{ $o['order_number'] }} • <a class="underline" target="_blank" rel="noopener" href="{{ route('refund') }}">Refund policy</a></p>
         </div>
 
         <section class="bg-white p-6 rounded-3xl border border-orange-100 shadow-sm space-y-3">

@@ -19,10 +19,10 @@
         <div class="border-t border-gray-100 my-2"></div>
         <a href="{{ route('help') }}" class="{{ $link }}"><i data-lucide="life-buoy" class="w-4 h-4"></i>Help &amp; Support</a>
         <a href="https://wa.me/{{ preg_replace('/\D/', '', (string) config('taksh.live_chat_whatsapp')) }}" target="_blank" rel="noopener" class="{{ $link }}"><i data-lucide="message-square-text" class="w-4 h-4"></i>Live Chat</a>
-        <a href="{{ route('about') }}" class="{{ $link }}"><i data-lucide="building-2" class="w-4 h-4"></i>About Us</a>
-        <a href="{{ route('terms') }}" class="{{ $link }}"><i data-lucide="file-text" class="w-4 h-4"></i>Terms &amp; Conditions</a>
-        <a href="{{ route('privacy') }}" class="{{ $link }}"><i data-lucide="shield" class="w-4 h-4"></i>Privacy Policy</a>
-        <a href="{{ route('refund') }}" class="{{ $link }}"><i data-lucide="badge-indian-rupee" class="w-4 h-4"></i>Refund Policy</a>
+        <a href="{{ route('about') }}" target="_blank" rel="noopener" class="{{ $link }}"><i data-lucide="building-2" class="w-4 h-4"></i>About Us</a>
+        <a href="{{ route('terms') }}" target="_blank" rel="noopener" class="{{ $link }}"><i data-lucide="file-text" class="w-4 h-4"></i>Terms &amp; Conditions</a>
+        <a href="{{ route('privacy') }}" target="_blank" rel="noopener" class="{{ $link }}"><i data-lucide="shield" class="w-4 h-4"></i>Privacy Policy</a>
+        <a href="{{ route('refund') }}" target="_blank" rel="noopener" class="{{ $link }}"><i data-lucide="badge-indian-rupee" class="w-4 h-4"></i>Refund Policy</a>
         <div class="border-t border-gray-100 my-2"></div>
         <a href="{{ route('delivery') }}" class="{{ $link }}"><i data-lucide="bike" class="w-4 h-4"></i>Join as Delivery Man</a>
         <a href="{{ route('vendor') }}" class="{{ $link }}"><i data-lucide="store" class="w-4 h-4"></i>Open Vendor</a>
