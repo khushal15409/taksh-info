@@ -4,7 +4,7 @@
 @php
     $p = $product;
     $rs = $p['rating_summary'] ?? ['total_reviews' => 0];
-    $href = route('product', ['id' => $p['id']]);
+    $href = route('product', ['id' => \App\Support\UrlKey::enabled() ? \App\Support\UrlKey::slug('product', (int) $p['id'], $p['name'] ?? null) : $p['id']]);
     $reviews = (int) ($rs['total_reviews'] ?? 0);
     $avg = (float) ($rs['average_rating'] ?? 0);
     $off = (int) ($p['discount'] ?? 0);

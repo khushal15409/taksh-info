@@ -113,6 +113,9 @@ html.h-full { background: #FFF9EC; }
 .nav-tab { background: transparent; }
 .nav-tab[aria-current="page"] { background: #fff; color: #E65100; box-shadow: 0 6px 16px -8px rgba(230, 81, 0, .5); border: 1px solid #FFD7AA; }
 
+/* the Shops tab is the filled orange one only while a Shops page is open (specificity beats .nav-tab / [aria-current]) */
+.nav-tab.nav-tab-shops[aria-current="page"] { background: linear-gradient(180deg, #FF8A1F 0%, #F26A00 100%); color: #fff; border: 0; box-shadow: 0 6px 14px -6px rgba(230, 81, 0, .65), inset 0 1px 0 rgba(255,255,255,.25); }
+
 /* section headings */
 .sec-title { display: flex; align-items: center; gap: .6rem; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.35rem; color: #1F2937; }
 .sec-ico { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(180deg, #FF8A1F, #F26A00); color: #fff; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 6px 12px -6px rgba(230, 81, 0, .7); flex: none; }
@@ -195,3 +198,22 @@ html.h-full { background: #FFF9EC; }
 .site-footer { position: relative; background: #0F172A; overflow: hidden; }
 .auth-bg { background: #FFF9EC url("../img/bg/hero-diwali.svg") center/cover no-repeat; }
 
+
+/* Shop page: two-handle price slider (two range inputs on one track) */
+.dual-range { position: relative; height: 22px; }
+.dual-range::before { content: ""; position: absolute; left: 0; right: 0; top: 9px; height: 4px; border-radius: 4px; background: #E5E7EB; }
+.dual-range .dual-fill { position: absolute; top: 9px; height: 4px; border-radius: 4px; background: #FF7A00; }
+.dual-range input[type=range] { position: absolute; left: 0; top: 0; width: 100%; height: 22px; margin: 0; background: none; pointer-events: none; -webkit-appearance: none; appearance: none; }
+.dual-range input[type=range]::-webkit-slider-thumb { pointer-events: auto; -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #FF7A00; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); cursor: pointer; }
+.dual-range input[type=range]::-moz-range-thumb { pointer-events: auto; width: 14px; height: 14px; border-radius: 50%; background: #FF7A00; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); cursor: pointer; }
+.dual-range input[type=range]::-webkit-slider-runnable-track { background: transparent; }
+.dual-range input[type=range]::-moz-range-track { background: transparent; }
+
+/* Shop page: grid / list switch for the products (the choice is remembered in the browser) */
+.view-btn { color: #6B7280; transition: background .15s, color .15s; }
+.view-btn[aria-pressed="true"] { background: linear-gradient(180deg, #FF8A1F 0%, #F26A00 100%); color: #fff; }
+.shop-products.is-list .shop-grid { grid-template-columns: 1fr; }
+.shop-products.is-list .pcard { flex-direction: row; }
+.shop-products.is-list .pcard-media { width: 190px; flex: none; padding: 16px; }
+.shop-products.is-list .pcard > div.flex-1 { justify-content: center; padding-top: 1rem; }
+@media (max-width: 520px) { .shop-products.is-list .pcard-media { width: 130px; padding: 10px; } }

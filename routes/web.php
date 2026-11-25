@@ -25,6 +25,7 @@ require __DIR__.'/web/auth.php';
 require __DIR__.'/web/account.php';
 require __DIR__.'/web/notifications.php';
 require __DIR__.'/web/catalog.php';
+require __DIR__.'/web/shops.php';
 require __DIR__.'/web/cart.php';
 require __DIR__.'/web/wishlist.php';
 require __DIR__.'/web/checkout.php';

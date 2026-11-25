@@ -131,12 +131,13 @@ function initSearch() {
     const popup = qs("#search-popup");
     const initial = new URLSearchParams(location.search).get("q");
 
-    form.addEventListener("submit", e => {
-        e.preventDefault();
+    // The search is a POST form (the words never go into the address bar): remember the search, then let the form submit.
+    form.addEventListener("submit", () => {
         const q = input.value.trim();
         if (q) { Prefs.state.searches = [q, ...(Prefs.state.searches || []).filter(x => x.toLowerCase() !== q.toLowerCase())].slice(0, 6); Prefs.save(); }
-        location.href = q ? url("listing", { q }) : url("listing");
+        input.value = q;
     });
+    const searchFor = q => { input.value = q; form.requestSubmit(); };
 
     // Live catalogue: suggestions come from GET /products/search, recent searches from the account when logged in
     let suggestTimer = null, suggestSeq = 0;
@@ -153,7 +154,7 @@ function initSearch() {
                     <div class="min-w-0 flex-1"><div class="text-xs font-bold text-gray-800 truncate">${esc(r.name)}</div><div class="text-[11px] text-gray-400">${r.brand ? esc(r.brand) : ""}${r.in_stock ? "" : " · Out of stock"}</div></div>
                     <div class="text-xs font-extrabold text-brand-600">${money(r.price)}</div></a>`).join("")
                 : `<div class="p-4 text-xs text-gray-400">No products found matching "${esc(raw)}"</div>`) +
-                `<a href="${url("listing", { q: raw })}" class="block text-center text-xs font-bold text-brand-600 py-2.5 hover:underline">See all results for "${esc(raw)}"</a>`;
+                `<button type="button" data-search="${esc(raw)}" class="block w-full text-center text-xs font-bold text-brand-600 py-2.5 hover:underline">See all results for "${esc(raw)}"</button>`;
             popup.classList.remove("hidden");
         }, 250);
     };
@@ -164,11 +165,11 @@ function initSearch() {
         if (Auth.loggedIn) { try { list = await Api.recentSearches(); } catch (e) { /* fall back to this browser's list */ } }
         if (input.value.trim() || !list.length) return;
         popup.innerHTML = `<div class="flex items-center justify-between px-3 pt-2 pb-1"><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Recent searches</p><button type="button" data-clear-searches class="text-[10px] font-bold text-brand-600 hover:underline">Clear</button></div>` +
-            list.map(q => `<a href="${url("listing", { q })}" class="flex items-center gap-3 p-2.5 hover:bg-orange-50 rounded-xl text-sm font-semibold text-gray-700"><i data-lucide="history" class="w-4 h-4 text-gray-400"></i>${esc(q)}</a>`).join("");
+            list.map(q => `<button type="button" data-search="${esc(q)}" class="w-full text-left flex items-center gap-3 p-2.5 hover:bg-orange-50 rounded-xl text-sm font-semibold text-gray-700"><i data-lucide="history" class="w-4 h-4 text-gray-400"></i>${esc(q)}</button>`).join("");
         popup.classList.remove("hidden"); refreshIcons();
     };
     input.addEventListener("focus", showRecent);
-    popup.addEventListener("click", e => { if (e.target.closest("[data-clear-searches]")) { Prefs.state.searches = []; Prefs.save(); popup.classList.add("hidden"); } });
+    popup.addEventListener("click", e => { const s = e.target.closest("[data-search]"); if (s) { searchFor(s.dataset.search); return; } if (e.target.closest("[data-clear-searches]")) { Prefs.state.searches = []; Prefs.save(); popup.classList.add("hidden"); } });
 
     input.addEventListener("input", () => {
         const q = input.value.trim().toLowerCase();

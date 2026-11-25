@@ -124,7 +124,7 @@ class CatalogPagesTest extends CatalogTestCase
             ->assertSee('Diwali Bonanza')->assertSee('/sales/9', false)                          // the top banner leads to its sale
             ->assertSee('categories-grid', false)->assertSee('Fresh Fruit')->assertDontSee('12 items')->assertSee('/shop?category=5', false)
             ->assertSee('Trending Now')->assertSee('Chakki Atta')->assertSee('₹150')->assertSee('25% OFF')->assertSee('https://cdn.test/p1.jpg', false)
-            ->assertSee('data-wish="1"', false)->assertSee('/product?id=1', false)
+            ->assertSee('data-wish="1"', false)->assertSee('/product/1', false)
             ->assertSee('Mid offer')->assertSee('Loved by 1,00,000+ happy customers')->assertSee('Taksh App')
             ->assertSee('assets/js/modules/home.js', false)->assertDontSee('id="hero"', false)->assertDontSee('data-demo-block', false);
     }
@@ -303,11 +303,11 @@ class CatalogPagesTest extends CatalogTestCase
     {
         $this->listedProduct();
 
-        $this->get('/product?id=3')->assertOk()
+        $this->get('/product/3')->assertOk()
             ->assertSee('<title>Premium Basmati | TakshAllInOne</title>', false)
             ->assertSee('https://cdn.test/p.jpg', false)->assertSee('IN STOCK')->assertSee('SKU: BAS-1')
             ->assertSee('₹250.00')->assertSee('₹300.00')->assertSee('17% OFF')->assertSee('You save ₹50')
-            ->assertSee('Choose option')->assertSee('1 kg · ₹250', false)->assertSee('/product?id=3&amp;variant=32', false)
+            ->assertSee('Choose option')->assertSee('1 kg · ₹250', false)->assertSee('/product/3?variant=32', false)
             ->assertSee('10 Day Returns')->assertSee('Fresh Mart')->assertSee('Ring Road, 395001')->assertSee('Origin:')
             ->assertSee('Aged long grain rice.')->assertSee('Reviews (2)')->assertSee('4.5')->assertSee('Great stuff')->assertSee('Verified purchase')
             ->assertSee('Is it fresh?')->assertSee('Yes, packed this week')
@@ -319,8 +319,8 @@ class CatalogPagesTest extends CatalogTestCase
     {
         $this->listedProduct();
 
-        $this->get('/product?id=3&variant=32')->assertOk()->assertSee('SKU: BAS-5')->assertSee('₹1,000.00')->assertSee('₹1,200.00')->assertSee('data-variant-id="32"', false);
-        $this->get('/product?id=3&variant=999')->assertOk()->assertSee('SKU: BAS-1');     // an unknown option falls back to the best one
+        $this->get('/product/3?variant=32')->assertOk()->assertSee('SKU: BAS-5')->assertSee('₹1,000.00')->assertSee('₹1,200.00')->assertSee('data-variant-id="32"', false);
+        $this->get('/product/3?variant=999')->assertOk()->assertSee('SKU: BAS-1');     // an unknown option falls back to the best one
     }
 
     public function test_the_cheapest_in_stock_option_is_the_default(): void
@@ -328,40 +328,40 @@ class CatalogPagesTest extends CatalogTestCase
         $this->listedProduct();
         $this->catalog->stock = collect(['7_31' => $this->stock(31, 0), '7_32' => $this->stock(32, 3)]);   // the cheap one sold out
 
-        $this->get('/product?id=3')->assertOk()->assertSee('SKU: BAS-5')->assertSee('data-variant-id="32"', false);
+        $this->get('/product/3')->assertOk()->assertSee('SKU: BAS-5')->assertSee('data-variant-id="32"', false);
     }
 
     public function test_a_missing_product_is_an_explained_404(): void
     {
-        $this->get('/product?id=99')->assertNotFound()->assertSee('Product not found')->assertSee('Browse products')->assertSee('<title>Product not found | TakshAllInOne</title>', false);
+        $this->get('/product/99')->assertNotFound()->assertSee('Product not found')->assertSee('Browse products')->assertSee('<title>Product not found | TakshAllInOne</title>', false);
         $this->get('/product')->assertNotFound()->assertSee('Product not found');
-        $this->get('/product?id=abc')->assertNotFound();
+        $this->get('/product/abc')->assertNotFound();
     }
 
     public function test_a_guest_is_asked_to_log_in_to_review_and_a_buyer_sees_the_form(): void
     {
         $this->listedProduct();
 
-        $this->get('/product?id=3')->assertSee('to rate this product after it has been delivered')->assertDontSee('id="lp-rf"', false);
+        $this->get('/product/3')->assertSee('to rate this product after it has been delivered')->assertDontSee('id="lp-rf"', false);
 
         $this->reviews->delivered = false;
-        $this->actingAs($this->customer(5))->get('/product?id=3')->assertSee('You can rate this product after it has been delivered')->assertDontSee('id="lp-rf"', false);
+        $this->actingAs($this->customer(5))->get('/product/3')->assertSee('You can rate this product after it has been delivered')->assertDontSee('id="lp-rf"', false);
 
         $this->reviews->delivered = true;
-        $this->actingAs($this->customer(5))->get('/product?id=3')->assertSee('id="lp-rf"', false)->assertSee('Rate this product')->assertSee('Submit review');
+        $this->actingAs($this->customer(5))->get('/product/3')->assertSee('id="lp-rf"', false)->assertSee('Rate this product')->assertSee('Submit review');
 
         $this->reviews->existing = $this->review(4);
-        $this->actingAs($this->customer(5))->get('/product?id=3')->assertSee('Edit your review')->assertSee('Update review');
+        $this->actingAs($this->customer(5))->get('/product/3')->assertSee('Edit your review')->assertSee('Update review');
     }
 
     public function test_viewing_a_product_is_remembered_for_a_customer_but_not_a_guest(): void
     {
         $this->listedProduct();
 
-        $this->get('/product?id=3')->assertOk();
+        $this->get('/product/3')->assertOk();
         $this->assertSame([], $this->recent->recorded);
 
-        $this->actingAs($this->customer(5))->get('/product?id=3')->assertOk();
+        $this->actingAs($this->customer(5))->get('/product/3')->assertOk();
         $this->assertSame([[5, 3]], $this->recent->recorded);
     }
 
@@ -371,7 +371,7 @@ class CatalogPagesTest extends CatalogTestCase
         $this->catalog->active = Make::product(3)->setRelation('category', Make::category(1));
         $this->catalog->similarRows = collect([Make::product(8, ['name' => 'Sona Masoori'], [Make::variant(['price' => 100, 'customer_price' => 80])], [$this->img('https://cdn.test/s.jpg')], [$this->review(4)])]);
 
-        $this->get('/product?id=3')->assertSee('Similar Products')->assertSee('Sona Masoori')->assertSee('/product?id=8', false)->assertSee('https://cdn.test/s.jpg', false);
+        $this->get('/product/3')->assertSee('Similar Products')->assertSee('Sona Masoori')->assertSee('/product/8', false)->assertSee('https://cdn.test/s.jpg', false);
     }
 
     // ------------------------------------------------------------------ sales
@@ -395,7 +395,7 @@ class CatalogPagesTest extends CatalogTestCase
         $this->sales->saleProducts = [1 => [Make::product(3, ['name' => 'Sale Lamp'], [Make::variant(['price' => 200])], [$this->img('https://cdn.test/x.jpg')])]];
 
         $this->get('/sales/1')->assertOk()
-            ->assertSee('<title>Diwali Dhamaka | TakshAllInOne</title>', false)->assertSee('Valid till')->assertSee('Sale Lamp')->assertSee('₹100')->assertSee('₹200')->assertSee('/product?id=3', false)->assertSee('← All offers');
+            ->assertSee('<title>Diwali Dhamaka | TakshAllInOne</title>', false)->assertSee('Valid till')->assertSee('Sale Lamp')->assertSee('₹100')->assertSee('₹200')->assertSee('/product/3', false)->assertSee('← All offers');
     }
 
     public function test_an_ended_sale_is_an_explained_404(): void

@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Repositories\Contracts\CatalogRepositoryInterface;
 use App\Repositories\Contracts\QuickVendorRepositoryInterface;
+use App\Repositories\Contracts\ShopRepositoryInterface;
+use App\Repositories\Eloquent\ShopRepository;
 use App\Repositories\Eloquent\QuickVendorRepository;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
 use App\Repositories\Contracts\DeliveryCheckRepositoryInterface;
@@ -100,6 +102,7 @@ class RepositoryServiceProvider extends ServiceProvider
         CartRepositoryInterface::class => CartRepository::class,
         CartCatalogRepositoryInterface::class => CartCatalogRepository::class,
         QuickVendorRepositoryInterface::class => QuickVendorRepository::class,
+        ShopRepositoryInterface::class => ShopRepository::class,
         CouponRepositoryInterface::class => CouponRepository::class,
         BannerRepositoryInterface::class => BannerRepository::class,
         BankDetailRepositoryInterface::class => BankDetailRepository::class,

@@ -6,6 +6,7 @@
     $isQuick = $page === 'listing' && request()->query('quick') === '1';
     $isStandard = $page === 'listing' && request()->query('quick') !== '1';
     $isServices = $page === 'services';
+    $isShops = $page === 'shops';
     $name = trim((string) ($authUser['name'] ?? ''));
     $cartCount = (int) $headerState['cart_count'];
     $wishCount = count($headerState['wish_ids']);
@@ -14,6 +15,7 @@
         [route('listing'), 'package', 'Standard Products', $isStandard, 'bg-sky-100 text-sky-600'],
         [route('listing', ['quick' => 1]), 'zap', 'Quick Products', $isQuick, 'bg-emerald-100 text-emerald-600'],
         [route('services'), 'wrench', 'Services', $isServices, 'bg-purple-100 text-purple-600'],
+        [route('shops'), 'store', 'Shops', $isShops, 'bg-orange-100 text-brand-600'],
     ];
 @endphp
 <div id="coming-soon" class="coming-soon-banner text-center text-white text-xs sm:text-sm font-bold tracking-wide py-2.5 px-10 relative z-50">
@@ -53,10 +55,11 @@
             </div>
         </button>
 
-        <form id="search-form" action="{{ route('listing') }}" method="GET" class="order-last lg:order-none w-full lg:w-auto lg:flex-1 relative" role="search" autocomplete="off">
+        <form id="search-form" action="{{ route('listing') }}" method="POST" class="order-last lg:order-none w-full lg:w-auto lg:flex-1 relative" role="search" autocomplete="off">
+            @csrf
             <div class="search-shell flex items-center">
                 <i data-lucide="search" class="w-5 h-5 text-gray-400 ml-4 mr-2 shrink-0"></i>
-                <input id="search-input" name="q" type="search" value="{{ request()->routeIs('listing') ? request()->query('q') : '' }}" placeholder="Search for products, brands and more" class="w-full py-2.5 text-sm bg-transparent focus:outline-none text-gray-800 placeholder-gray-400 font-medium">
+                <input id="search-input" name="q" type="search" value="{{ request()->routeIs('listing') ? request()->query('q') : '' }}" placeholder="Search for products, brands, shops and more" class="w-full py-2.5 text-sm bg-transparent focus:outline-none text-gray-800 placeholder-gray-400 font-medium">
                 <button type="submit" class="btn-saffron px-6 py-3 font-bold text-sm transition">Search</button>
             </div>
             <div id="search-popup" class="hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-2 max-h-96 overflow-y-auto"></div>
@@ -92,9 +95,9 @@
     </div>
 
     <nav id="main-nav" class="nav-tab-row border-t border-orange-100/70" aria-label="Main">
-        <div class="max-w-7xl mx-auto px-4 lg:px-8 py-3 grid grid-cols-4 gap-1.5 sm:gap-4">
+        <div class="max-w-7xl mx-auto px-4 lg:px-8 py-3 grid grid-cols-5 gap-1.5 sm:gap-4">
             @foreach ($tabs as [$href, $icon, $label, $active, $tint])
-                <a href="{{ $href }}" @if ($active) aria-current="page" @endif class="nav-tab group flex items-center justify-center gap-2 sm:gap-3 px-2 sm:px-4 py-2.5 rounded-2xl text-xs min-[400px]:text-sm leading-tight text-center transition {{ $active ? 'text-brand-600 font-bold' : 'text-gray-700 hover:bg-white/70 font-semibold' }}">
+                <a href="{{ $href }}" @if ($active) aria-current="page" @endif class="nav-tab group flex items-center justify-center gap-2 sm:gap-3 px-2 sm:px-4 py-2.5 rounded-2xl text-xs min-[400px]:text-sm leading-tight text-center transition {{ $label === 'Shops' && $active ? 'nav-tab-shops font-bold' : ($active ? 'text-brand-600 font-bold' : 'text-gray-700 hover:bg-white/70 font-semibold') }}">
                     <span class="hidden min-[400px]:flex w-8 h-8 shrink-0 rounded-xl items-center justify-center transition {{ $tint.' group-hover:scale-110' }}"><i data-lucide="{{ $icon }}" class="w-4 h-4"></i></span>
                     <span>{{ $label }}</span>
                 </a>

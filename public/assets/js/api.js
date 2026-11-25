@@ -51,8 +51,8 @@ const Api = (() => {
         addressUpdate: (id, body) => post(`address/${id}`, body, "PUT"),
         addressDefault: (id) => post("address/user/addresses/set-default", { address_id: id }),
         addressDelete: (id) => post("address/user/addresses/delete", { address_id: id }),
-        placeSearch: (q) => get("location/search", { q }),                  // F3
-        reverseGeocode: (latitude, longitude) => get("location/reverse-geocode", { latitude, longitude }),
+        placeSearch: (q) => post("location/search", { q }),                 // F3 (POST: what is typed never goes into a URL)
+        reverseGeocode: (latitude, longitude) => post("location/reverse-geocode", { latitude, longitude }),
         paymentCreate: (orderId) => post("payments/create", { order_id: orderId }),   // G6 G8
         paymentVerify: (body) => post("payments/verify", body),
         deliveryLocation: (id) => get(`order/orders/${id}/delivery-location`),  // H7
@@ -64,7 +64,7 @@ const Api = (() => {
         courierPaymentVerify: (body) => post("service/courier/payment/verify", body),
         checkDelivery: (id, body) => post(`ecommerce/products/${id}/check-delivery`, body),   // C7
         submitReview: (id, body) => post(`product/${id}/review`, body),
-        search: async (keyword, limit = 6) => { const r = await fetch(base() + "products/search?" + new URLSearchParams({ keyword, limit }), { credentials: "same-origin", headers: { "Accept": "application/json" } }); const j = await r.json(); return j.status ? j.data : []; },  // C11 (plain {status,data})
+        search: async (keyword, limit = 6) => { try { return await post("products/search", { keyword, limit }); } catch (e) { return []; } },  // C11 (POST, plain {status,data}: the words are not put in a URL)
         recentSearches: () => get("product/recent-searches")                // C12 (login required)
     };
 })();

@@ -15,7 +15,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // The URL generator that writes opaque keys for routes marked `urlkey:` (see App\Routing\KeyedUrlGenerator). Built exactly like the
+        // framework's own; its "extend" steps (signed URLs, session, key resolver) still apply to this binding.
+        $this->app->singleton('url', function ($app) {
+            $routes = $app['router']->getRoutes();
+            $app->instance('routes', $routes);
+
+            return new \App\Routing\KeyedUrlGenerator(
+                $routes,
+                $app->rebinding('request', fn ($app, $request) => $app['url']->setRequest($request)),
+                $app['config']['app.asset_url']
+            );
+        });
     }
 
     /**

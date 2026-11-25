@@ -11,7 +11,7 @@
         <div><h1 class="text-2xl font-extrabold text-gray-900">Sales &amp; Offers 🏷️</h1><p class="text-xs text-gray-400">Running right now</p></div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             @foreach ($sales as $s)
-                <a href="{{ route('sales.detail', $s['id']) }}" class="relative overflow-hidden rounded-3xl p-6 bg-gradient-to-r from-red-600 to-orange-500 text-white group hover:shadow-xl transition">
+                <a href="{{ route('sales.detail', \App\Support\UrlKey::enabled() ? \App\Support\UrlKey::slug('sale', (int) $s['id'], $s['name'] ?? $s['title'] ?? null) : $s['id']) }}" class="relative overflow-hidden rounded-3xl p-6 bg-gradient-to-r from-red-600 to-orange-500 text-white group hover:shadow-xl transition">
                     <div class="absolute -right-3 -bottom-5 text-[100px] opacity-25 group-hover:scale-110 transition">🏷️</div>
                     <span class="inline-block bg-white/20 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full">{{ $s['discount_label'] }}</span>
                     <h3 class="font-festive font-extrabold text-xl mt-3 relative">{{ $s['name'] }}</h3>

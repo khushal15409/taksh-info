@@ -49,7 +49,7 @@ class ListingPageController extends WebController
         }
 
         $page = $this->catalog->list($filters->toCatalog() + ['vendor_ids' => $vendorIds]);
-        $page->withPath(route('listing'))->appends($filters->query());
+        $page->withPath(route('listing'))->appends(\App\Support\FilterToken::pageQuery('listing', $request, ['quick' => $filters->quick ? 1 : null]));
 
         return $this->page('catalog.listing', [
             'filters' => $filters,

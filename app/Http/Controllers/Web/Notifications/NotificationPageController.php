@@ -24,7 +24,7 @@ class NotificationPageController extends WebController
 
         return $this->page('notifications.index', [
             'filter' => $filter,
-            'notifications' => $user ? $this->notifications->page($user, $filter, self::PER_PAGE)->withQueryString() : null,
+            'notifications' => $user ? $this->notifications->page($user, $filter, self::PER_PAGE)->withPath(route('notifications'))->appends(\App\Support\FilterToken::pageQuery('notifications', $request)) : null,
             'unread' => $user ? $this->notifications->unreadCount($user) : 0,
         ]);
     }

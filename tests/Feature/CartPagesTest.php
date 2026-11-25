@@ -255,7 +255,7 @@ class CartPagesTest extends CartTestCase
 
         $this->actingAs($this->customer(5))->get('/wishlist')->assertOk()
             ->assertSee('My Wishlist')->assertSee('2 saved item(s)')->assertSee('Saved Atta')->assertSee('Saved Rice')->assertSee('₹180')
-            ->assertSee('/product?id=1', false)->assertSee(route('wishlist.forget', 1), false)->assertSee('data-wish-card="2"', false)
+            ->assertSee('/product/1', false)->assertSee(route('wishlist.forget', 1), false)->assertSee('data-wish-card="2"', false)
             ->assertSee('assets/js/modules/wishlist.js', false)->assertDontSee('id="wish-root"', false);
     }
 

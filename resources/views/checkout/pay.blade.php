@@ -23,7 +23,7 @@
             <h1 class="text-xl font-extrabold text-gray-900">Pay for your order</h1>
             <p class="text-sm text-gray-500">@if ($state['amount'])Amount payable <b class="text-gray-900">@rupee2($state['amount'])</b>. @endif Pay securely online with Razorpay.</p>
             @if ($state['payment_status'] === 'failed')<p class="text-xs font-semibold text-red-500">Your last attempt did not go through. Nothing was charged for it.</p>@endif
-            <button type="button" id="pay-now" data-order="{{ $orderId }}" data-start="{{ $start ? 1 : 0 }}" data-placed-url="{{ route('order.placed', ['order' => $orderId]) }}" data-result-url="{{ route('payresult') }}"
+            <button type="button" id="pay-now" data-order="{{ $orderId }}" data-order-key="{{ \App\Support\UrlKey::encode('order', (int) $orderId) }}" data-start="{{ $start ? 1 : 0 }}" data-placed-url="{{ route('order.placed', ['order' => $orderId]) }}" data-result-url="{{ route('payresult') }}"
                 class="w-full bg-brand-500 hover:bg-brand-600 text-white font-extrabold py-3.5 rounded-2xl transition disabled:opacity-60">Pay now</button>
             <a href="{{ $orders }}" class="block text-xs font-bold text-gray-500 hover:text-brand-600">Pay later from My Orders</a>
         @endif

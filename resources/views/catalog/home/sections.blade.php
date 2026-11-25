@@ -50,6 +50,21 @@
         @endif
     </section>
 
+    {{-- Shop by Store: the approved shops (vendors); each opens that shop's own products page --}}
+    @if (! empty($shops))
+        <section aria-label="Shop by Store">
+            <div class="flex flex-wrap items-center gap-3 bg-white/80 border border-orange-100 rounded-3xl shadow-sm px-4 py-4 mb-8 text-xs font-bold text-gray-700 justify-around">
+                <span class="flex items-center gap-2"><i data-lucide="store" class="w-5 h-5 text-brand-500"></i>Wide Range of Shops</span>
+                <span class="flex items-center gap-2"><i data-lucide="badge-check" class="w-5 h-5 text-brand-500"></i>Trusted Local &amp; Brand Stores</span>
+                <span class="flex items-center gap-2"><i data-lucide="heart" class="w-5 h-5 text-brand-500"></i>Shop by Your Favorite Store</span>
+                <span class="flex items-center gap-2"><i data-lucide="truck" class="w-5 h-5 text-brand-500"></i>Fast &amp; Safe Delivery</span>
+            </div>
+            <div class="flex items-center justify-between mb-4"><div><h2 class="sec-title"><span class="sec-ico"><i data-lucide="store" class="w-4 h-4"></i></span>Shop by Store</h2><p class="text-xs text-gray-500 mt-1 ml-10">Explore products from your favorite shops</p></div><a href="{{ route('shops') }}" class="sec-link">View All Shops <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></a></div>
+            <div class="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory py-1">@foreach ($shops as $s)@include('shops.partials.card', ['s' => $s, 'rail' => true])@endforeach</div>
+        </section>
+    @endif
+
+
     @foreach ($home['blocks'] as $block)
         @if ($block['type'] === 'banner')
             @include('catalog.home.banner', ['b' => $block['banner']])

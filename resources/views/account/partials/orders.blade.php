@@ -1,10 +1,11 @@
-{{-- "My Orders": a GET filter form (status, delivery, dates), the orders of the page, and the pages. --}}
+{{-- "My Orders": a filter form (POSTed: the terms never go into the address bar) (status, delivery, dates), the orders of the page, and the pages. --}}
 @php
     $statuses = ['' => 'All statuses', 'pending' => 'Pending', 'confirmed' => 'Confirmed', 'shipped' => 'Shipped', 'out_for_delivery' => 'Out for delivery', 'delivered' => 'Delivered', 'cancelled' => 'Cancelled'];
     $modes = ['' => 'All delivery', 'standard' => 'Standard', 'quick' => 'Quick'];
 @endphp
 <h2 class="text-xl font-extrabold text-gray-900">My Orders</h2>
-<form method="GET" action="{{ route('profile') }}" data-auto-submit class="flex flex-wrap gap-2 text-xs mt-4">
+<form method="POST" action="{{ route('profile') }}" data-auto-submit class="flex flex-wrap gap-2 text-xs mt-4">
+    @csrf
     <input type="hidden" name="tab" value="orders">
     <select name="status" class="field !w-auto !py-2">@foreach ($statuses as $v => $l)<option value="{{ $v }}" @selected($filters->status === $v)>{{ $l }}</option>@endforeach</select>
     <select name="mode" class="field !w-auto !py-2">@foreach ($modes as $v => $l)<option value="{{ $v }}" @selected($filters->mode === $v)>{{ $l }}</option>@endforeach</select>

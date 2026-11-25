@@ -29,4 +29,7 @@ Route::prefix('location')->middleware('throttle:30,1')->name('location.')->group
     Route::get('search', [LocationController::class, 'search'])->name('search');
     Route::get('geocode', [LocationController::class, 'geocode'])->name('geocode');
     Route::get('reverse-geocode', [LocationController::class, 'reverse'])->name('reverse');
+    // the website posts these (an address or a position is not put in a URL); the app keeps using GET
+    Route::post('search', [LocationController::class, 'search'])->name('search.post');
+    Route::post('reverse-geocode', [LocationController::class, 'reverse'])->name('reverse.post');
 });

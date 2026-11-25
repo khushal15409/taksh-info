@@ -15,7 +15,7 @@ ready(() => {
             if (r.paid) { location.href = btn.dataset.placedUrl; return; }
             toast(r.reason, "error");
             // a payment that failed inside Razorpay's window is reported on the result page; a closed window just stays here
-            if (r.reason && !/closed the payment window/i.test(r.reason)) { location.href = `${btn.dataset.resultUrl}?status=failed&order=${orderId}&reason=${encodeURIComponent(r.reason)}`; return; }
+            if (r.reason && !/closed the payment window/i.test(r.reason)) { location.href = `${btn.dataset.resultUrl}?status=failed&order=${btn.dataset.orderKey || orderId}&reason=${encodeURIComponent(r.reason)}`; return; }
         } catch (err) { toast(err.message, "error"); }
         busy = false; btn.disabled = false; btn.textContent = "Pay now";
     }

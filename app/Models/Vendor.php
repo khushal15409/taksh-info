@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Vendor extends Model
 {
+    protected function casts(): array
+    {
+        return ['shop_images' => 'array'];
+    }
+
     public function pincodes(): BelongsToMany
     {
         return $this->belongsToMany(Pincode::class, 'vendor_pincode', 'vendor_id', 'pincode_id');

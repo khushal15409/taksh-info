@@ -2,6 +2,32 @@
 
 return [
 
+    // Search / filter terms never show in the address bar: a form POSTs them and the page URL carries only `?f=<opaque token>`
+    // (App\Support\FilterToken: encrypted + tamper-proof, no session needed, so a copied URL still works). `scopes` lists, per page, the
+    // keys that are packed into the token; any other query key (quick=1, tab=orders, page=2) stays visible. Off = plain ?q=... again.
+    'hide_filters' => [
+        'enabled' => (bool) env('TAKSH_HIDE_FILTERS', true),
+        'scopes' => [
+            'listing' => ['q', 'category', 'max', 'pincode', 'location'],
+            'shops' => ['q'],
+            'shop' => ['q', 'category', 'min', 'max'],
+            'orders' => ['status', 'mode', 'from', 'to'],
+            'notifications' => ['filter'],
+            'services' => ['category'],
+            'payresult' => ['status', 'reason'],
+        ],
+        // kept visible when a form is POSTed (the page's mode/tab, not a search term)
+        'carry' => ['quick', 'tab'],
+    ],
+
+    // Opaque page URLs: ids in page URLs (/shops/relish-k3x9..., /tracking?id=...) are keyed codes, not row numbers. `enabled` off = plain
+    // numeric ids again (instant rollback). `legacy_numeric` = old numeric links keep working (a GET is redirected to the opaque URL;
+    // ownership checks still apply). Turn legacy off once old links are no longer needed.
+    'opaque_urls' => [
+        'enabled' => (bool) env('TAKSH_OPAQUE_URLS', true),
+        'legacy_numeric' => (bool) env('TAKSH_LEGACY_NUMERIC_URLS', true),
+    ],
+
     // Where the shared product/banner/category images live. taksh-admin stores a path like
     // "banner/xyz.jpg" in the database; the site builds <media_url>/<path>. Full URLs are used as they are.
     'media_url' => env('TAKSH_MEDIA_URL', 'https://taksh-admin.takshallinone.in/storage'),

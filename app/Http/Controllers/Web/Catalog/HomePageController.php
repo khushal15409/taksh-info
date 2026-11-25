@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\WebController;
 use App\Services\DashboardService;
 use App\Services\Marketplace\ServiceBookingQueryService;
 use App\Services\RecentViewService;
+use App\Services\ShopService;
 use App\Support\Presenters\HomeLayout;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ class HomePageController extends WebController
         private readonly DashboardService $dashboard,
         private readonly RecentViewService $recent,
         private readonly ServiceBookingQueryService $services,
+        private readonly ShopService $shops,
     ) {}
 
     public function show(Request $request): View
@@ -31,6 +33,7 @@ class HomePageController extends WebController
             'home' => $home,
             'recent' => $user ? $this->recent->forUser($user->id, 'standard_delivery') : [],
             'services' => $this->serviceStrip(),
+            'shops' => $this->shops->featured(6),
         ]);
     }
 

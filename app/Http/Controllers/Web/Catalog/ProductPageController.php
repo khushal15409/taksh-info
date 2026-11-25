@@ -7,11 +7,12 @@ use App\Services\CatalogService;
 use App\Services\ReviewService;
 use App\Support\Presenters\ProductCard;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 
 /**
- * One product: /product?id= (&variant= picks an option). The gallery, price, stock, description, details, reviews, Q&A and similar
+ * One product: /product/{key} (?variant= picks an option). The gallery, price, stock, description, details, reviews, Q&A and similar
  * products are rendered here; the delivery-pincode check, add to cart and posting a review are small calls from the page.
  * Opening the page also remembers it for the customer's "recently viewed" (CatalogService::detail does that).
  */
@@ -22,9 +23,19 @@ class ProductPageController extends WebController
         private readonly ReviewService $reviews,
     ) {}
 
-    public function show(Request $request): View|Response
+    /** The old /product?id= (and the page scripts' links): sent on to the keyed address, keeping ?variant=. */
+    public function legacy(Request $request): RedirectResponse|Response
     {
-        $id = max(0, (int) $request->query('id'));
+        $raw = (string) $request->query('id', '');
+        $id = ctype_digit($raw) ? (int) $raw : (\App\Support\UrlKey::decode('product', $raw) ?? 0);
+
+        return $id
+            ? redirect()->route('product', array_filter(['id' => $id, 'variant' => $request->query('variant')]), 301)
+            : $this->notFound('catalog.product', ['product' => null]);
+    }
+
+    public function show(Request $request, int $id): View|Response
+    {
         $user = $request->user();
         $product = $id ? $this->catalog->detail($id, $user) : null;
 

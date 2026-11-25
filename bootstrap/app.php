@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(except: [\App\Http\Middleware\SetLocale::COOKIE, \App\Services\Quick\QuickLocation::COOKIE]);
         $middleware->web(prepend: [\App\Http\Middleware\SetLocale::class], append: [\App\Http\Middleware\TranslateHtml::class]);
 
+        // `urlkey:scope[,param]` / `hidefilters:scope` on a route: opaque keys and hidden search terms in its URL (see App\Support\UrlKey, FilterToken)
+        $middleware->alias(['urlkey' => \App\Http\Middleware\ResolveUrlKey::class, 'hidefilters' => \App\Http\Middleware\HideFilters::class]);
+
         $middleware->redirectGuestsTo(fn (Request $request) => route('login', ['next' => $request->getRequestUri()]));
     })
     ->withExceptions(function (Exceptions $exceptions): void {

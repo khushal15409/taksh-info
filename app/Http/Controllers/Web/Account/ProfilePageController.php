@@ -42,7 +42,7 @@ class ProfilePageController extends WebController
             'user' => $user,
             'addressBook' => $user && $tab === 'addresses' ? $this->addresses->list($user->id) : null,
             'filters' => $filters,
-            'orders' => $user && $tab === 'orders' ? $this->orders->list($user, $filters->toService())->withPath(route('profile'))->appends($filters->query()) : null,
+            'orders' => $user && $tab === 'orders' ? $this->orders->list($user, $filters->toService())->withPath(route('profile'))->appends(\App\Support\FilterToken::pageQuery('orders', $request, ['tab' => 'orders'])) : null,
             'returns' => $user && $tab === 'returns' ? $this->returnsPage($user, $request) : null,
         ]);
     }

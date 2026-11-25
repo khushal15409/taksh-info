@@ -34,7 +34,7 @@ class CatalogService
 
     // ---------------------------------------------------------------- list (C2)
 
-    /** @param array{category_id?: ?int, category_ids?: ?int[], express?: ?bool, vendor_ids?: int[], search?: ?string, min_price?: ?float, max_price?: ?float, limit?: ?int} $filters */
+    /** @param array{category_id?: ?int, category_ids?: ?int[], express?: ?bool, vendor_ids?: int[], vendor_id?: ?int, search?: ?string, min_price?: ?float, max_price?: ?float, limit?: ?int} $filters */
     public function list(array $filters): LengthAwarePaginator
     {
         $query = [
@@ -43,6 +43,8 @@ class CatalogService
             'max_price' => $filters['max_price'] ?? null,
             'express' => ! empty($filters['express']),
             'vendor_ids' => $filters['vendor_ids'] ?? [],
+            'vendor_id' => $filters['vendor_id'] ?? null,
+            'newest' => ! empty($filters['newest']),
         ];
 
         // A parent category also lists the products of its sub-categories; a sub-category lists only its own. Several can be picked.

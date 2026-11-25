@@ -52,7 +52,7 @@ class ServicePageController extends WebController
             'banners' => $this->serviceBanners(),
             'services' => $this->query->catalog(),
             'category' => $category,
-            'bookings' => $history ? (new LengthAwarePaginator($history['bookings'], $history['pagination']['total'], $history['pagination']['per_page'], $history['pagination']['current_page'], ['path' => route('services')]))->appends(array_filter(['category' => $category])) : null,
+            'bookings' => $history ? (new LengthAwarePaginator($history['bookings'], $history['pagination']['total'], $history['pagination']['per_page'], $history['pagination']['current_page'], ['path' => route('services')]))->appends(\App\Support\FilterToken::pageQuery('services', $request)) : null,
             'courierBookings' => $user ? $this->courier->history($user, 5)['bookings'] : [],
             'courierBag' => $request->session()->get('errors')?->getBag('courier') ?? new \Illuminate\Support\MessageBag,
             'faqs' => config('faq.items'),

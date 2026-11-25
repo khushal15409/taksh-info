@@ -20,6 +20,7 @@ Route::prefix('ecommerce')->name('ecommerce.')->group(function () {
 });
 
 Route::get('products/search', [SearchController::class, 'search'])->name('search');
+Route::post('products/search', [SearchController::class, 'search'])->name('search.post');   // the website's suggestions: same answer, the words in the body instead of the URL
 Route::get('product/attributes', [ProductController::class, 'attributes'])->name('attributes');
 
 // Signed-in customers

@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutPageController::class, 'show'])->name('checkout');
     Route::post('/checkout', [CheckoutPageController::class, 'place'])->middleware('throttle:20,1')->name('checkout.place');
-    Route::get('/order/placed', [OrderPlacedPageController::class, 'show'])->name('order.placed');
-    Route::get('/order/pay', [OrderPayPageController::class, 'show'])->name('order.pay');
+    Route::get('/order/placed', [OrderPlacedPageController::class, 'show'])->middleware('urlkey:order,order')->name('order.placed');
+    Route::get('/order/pay', [OrderPayPageController::class, 'show'])->middleware('urlkey:order,order_id')->name('order.pay');
 });
 
-Route::get('/payment/result', [PaymentResultPageController::class, 'show'])->name('payresult');
+Route::get('/payment/result', [PaymentResultPageController::class, 'show'])->middleware(['urlkey:order,order', 'hidefilters:payresult'])->name('payresult');

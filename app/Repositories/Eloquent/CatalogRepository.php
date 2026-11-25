@@ -27,6 +27,10 @@ class CatalogRepository implements CatalogRepositoryInterface
             $this->quickEligible($query, $filters['vendor_ids'] ?? []);
         }
 
+        if (! empty($filters['vendor_id'])) {
+            $query->where('products.vendor_id', (int) $filters['vendor_id']);   // one shop's products
+        }
+
         if (isset($filters['category_ids'])) {
             $query->whereIn('category_id', $filters['category_ids']);
         }
@@ -52,7 +56,7 @@ class CatalogRepository implements CatalogRepositoryInterface
             });
         }
 
-        return $query->orderBy('products.id', 'asc')->paginate($perPage);
+        return $query->orderBy('products.id', ! empty($filters['newest']) ? 'desc' : 'asc')->paginate($perPage);
     }
 
     /**

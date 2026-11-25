@@ -38,7 +38,8 @@
     @endif
 
     <div class="grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] gap-6 lg:gap-8">
-        <form id="filters" method="GET" action="{{ route('listing') }}" class="hidden lg:block bg-white p-6 rounded-3xl border border-orange-100 shadow-sm space-y-6 h-fit lg:sticky lg:top-40">
+        <form id="filters" method="POST" action="{{ route('listing') }}" class="hidden lg:block bg-white p-6 rounded-3xl border border-orange-100 shadow-sm space-y-6 h-fit lg:sticky lg:top-40">
+            @csrf
             @if ($filters->q)<input type="hidden" name="q" value="{{ $filters->q }}">@endif
             @if ($filters->quick)<input type="hidden" name="quick" value="1">@endif
             <div class="flex items-center justify-between border-b pb-4 border-gray-100">
