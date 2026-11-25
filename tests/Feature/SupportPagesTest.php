@@ -146,7 +146,7 @@ class SupportPagesTest extends CatalogTestCase
 
     public function test_the_help_page_shows_contacts_faqs_and_the_links_to_the_forms(): void
     {
-        $this->get('/help')->assertOk()->assertSee('Help &amp; Support', false)->assertSee('Live chat on WhatsApp')->assertSee('wa.me/919999912345', false)->assertSee('care@takshallinone.com')->assertSee('How fast is Quick Delivery?')
+        $this->get('/help')->assertOk()->assertSee('Help &amp; Support', false)->assertSee('Live chat on WhatsApp')->assertSee('wa.me/918982893690', false)->assertSee('customersupport@takshallinone.in')->assertSee('How fast is Quick Delivery?')
             ->assertSee('Join as Delivery Partner')->assertSee('Log in so we know whom to call')->assertDontSee('id="help-root"', false);
     }
 

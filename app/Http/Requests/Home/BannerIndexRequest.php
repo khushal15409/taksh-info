@@ -11,6 +11,7 @@ class BannerIndexRequest extends ApiFormRequest
         return [
             'position' => ['nullable', 'string', 'max:50'],
             'type' => ['nullable', 'string', 'max:20'],   // anything other than standard|quick|service is ignored, like the API
+            'device_type' => ['nullable', 'in:desktop,mobile'],
             'fc_id' => ['nullable', 'integer', 'min:1'],
         ];
     }

@@ -13,8 +13,8 @@
     @endphp
     <div class="space-y-8">
         @if ($banners)
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                @foreach ($banners as $b)<a href="{{ route('services') }}" class="block rounded-3xl overflow-hidden border border-purple-100 shadow-sm hover:shadow-md transition"><img src="{{ $b['image_url'] }}" alt="{{ $b['title'] ?? 'Service offer' }}" loading="lazy" class="w-full object-cover"></a>@endforeach
+            <div class="max-w-5xl mx-auto w-full space-y-4">
+                @foreach ($banners as $b)<a href="{{ route('services') }}" class="banner-frame rounded-3xl border border-purple-100 shadow-sm hover:shadow-md transition"><img src="{{ $b['image_url'] }}" alt="{{ $b['title'] ?? 'Service offer' }}" loading="lazy"></a>@endforeach
             </div>
         @endif
 
@@ -93,7 +93,7 @@
             <div class="grid md:grid-cols-3 gap-5 max-w-4xl mx-auto w-full">
                 <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center"><div class="text-3xl mb-2">📞</div><div class="font-bold text-sm">Call us</div><div class="text-xs text-gray-500 mt-1">{{ $phone }}</div></div>
                 <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center"><div class="text-3xl mb-2">✉️</div><div class="font-bold text-sm">Email</div><div class="text-xs text-gray-500 mt-1">{{ $email }}</div></div>
-                <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center"><div class="text-3xl mb-2">📍</div><div class="font-bold text-sm">Visit</div><div class="text-xs text-gray-500 mt-1">Ghatlodiya, Ahmedabad 380061</div></div>
+                <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center"><div class="text-3xl mb-2">📍</div><div class="font-bold text-sm">Visit</div><div class="text-xs text-gray-500 mt-1">{{ config('taksh.support_address') }}</div></div>
             </div>
             <div class="max-w-3xl mx-auto w-full space-y-3">
                 @foreach ($faqs as $f)
@@ -107,6 +107,6 @@
 
 @push('scripts')
 
-    <script src="{{ asset('assets/js/modules/courier.js') }}"></script>
+    <script src="{{ \App\Helpers\Asset::v('assets/js/modules/courier.js') }}"></script>
 
 @endpush

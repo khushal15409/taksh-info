@@ -98,6 +98,6 @@
 
 @push('scripts')
 
-    <script src="{{ asset('assets/js/modules/checkout.js') }}"></script>
+    <script src="{{ \App\Helpers\Asset::v('assets/js/modules/checkout.js') }}"></script>
 
 @endpush

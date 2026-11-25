@@ -26,4 +26,18 @@ class PageController extends Controller
         return view('pages.refund');
     }
 
+    public function shipping(): View
+    {
+        return view('pages.shipping');
+    }
+
+    public function contact(): View
+    {
+        return view('pages.contact');
+    }
+
+    public function deleteAccount(): View
+    {
+        return view('pages.delete-account');
+    }
 }

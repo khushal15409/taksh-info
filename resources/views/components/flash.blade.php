@@ -3,7 +3,7 @@
 @if ($toast)
     {{-- also readable by the in-place refresh scripts, which show the toast themselves --}}
     <div id="flash-data" hidden data-type="{{ $toast['type'] }}" data-message="{{ $toast['message'] }}"></div>
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         document.addEventListener("DOMContentLoaded", function () {
             if (typeof toast === "function") toast(@json($toast['message'])@if ($toast['type'] === 'error'), "error"@endif);
         });

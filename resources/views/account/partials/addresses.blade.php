@@ -22,7 +22,7 @@
                     <form method="POST" action="{{ route('profile.addresses.default', $a['id']) }}">@csrf<button class="text-gray-500 hover:underline">Set default</button></form>
                 @endif
                 @if ($all->count() > 1)
-                    <form method="POST" action="{{ route('profile.addresses.destroy', $a['id']) }}" onsubmit="return confirm('Delete this address?')">@csrf @method('DELETE')<button class="text-red-500 hover:underline">Delete</button></form>
+                    <form method="POST" action="{{ route('profile.addresses.destroy', $a['id']) }}" data-confirm="Delete this address?">@csrf @method('DELETE')<button class="text-red-500 hover:underline">Delete</button></form>
                 @endif
             </div>
         </div>

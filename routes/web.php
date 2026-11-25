@@ -4,9 +4,13 @@ use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('privacy');
-Route::get('/terms', [PageController::class, 'terms'])->name('terms');
+Route::get('/terms-and-conditions', [PageController::class, 'terms'])->name('terms');
+Route::redirect('/terms', '/terms-and-conditions', 301);
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/refund-policy', [PageController::class, 'refund'])->name('refund');
+Route::get('/shipping-policy', [PageController::class, 'shipping'])->name('shipping');
+Route::get('/contact-us', [PageController::class, 'contact'])->name('contact');
+Route::get('/delete-account', [PageController::class, 'deleteAccount'])->name('delete-account');
 
 // Customer auth API (OTP login, session, profile)
 require __DIR__.'/auth.php';

@@ -7,11 +7,12 @@
 
     @php
         $icons = ['offer' => '🏷️', 'promotion' => '🎁', 'order' => '📦', 'delivery' => '🚚', 'payment' => '💳', 'review' => '⭐', 'app' => '🔔'];
-        $tabs = ['all' => 'All Notifications', 'offers' => 'Offers & Sales', 'orders' => 'Order Updates', 'unread' => 'Unread'];
+        // the same options, labels and order as the app's notifications screen: All / Unread / Offers / Orders
+        $tabs = ['all' => 'All', 'unread' => 'Unread ('.($unread ?? 0).')', 'offers' => 'Offers', 'orders' => 'Orders'];
     @endphp
     <div class="max-w-4xl mx-auto space-y-6">
         <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-extrabold text-gray-900">Notifications Hub</h1>
+            <h1 class="text-2xl font-extrabold text-gray-900">Notifications</h1>
             @if ($notifications && $unread > 0)
                 <form method="POST" action="{{ route('notifications.mark-all-read') }}">@csrf<button class="text-xs font-bold text-brand-600 hover:underline">Mark all as read</button></form>
             @endif

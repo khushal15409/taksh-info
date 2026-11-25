@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Route;
 // Same endpoints and payloads as the Taksh API (/auth/*), served on the web guard (session + CSRF).
 Route::prefix('auth')->name('auth.')->group(function () {
     // Public
-    Route::post('send-otp', [AuthController::class, 'sendOtp'])->name('send-otp');
-    Route::post('verify-otp', [AuthController::class, 'verifyOtp'])->name('verify-otp');
+    Route::post('send-otp', [AuthController::class, 'sendOtp'])->middleware('throttle:20,1')->name('send-otp');
+    Route::post('verify-otp', [AuthController::class, 'verifyOtp'])->middleware('throttle:30,1')->name('verify-otp');
     Route::get('session', [AuthController::class, 'session'])->name('session');
 
     // Logged-in customers only

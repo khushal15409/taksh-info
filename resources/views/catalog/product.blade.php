@@ -68,7 +68,7 @@
                         <div class="text-sm text-gray-400 line-through">@rupee2($v['price'])</div>
                         <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-lg">You save @rupee($v['price'] - $v['sale_price'])</span>
                     @endif
-                    <div class="flex items-center gap-1 bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-lg"><i data-lucide="star" class="w-3.5 h-3.5 fill-current text-amber-500"></i>@if ($rs['total_reviews']){{ $rs['average_rating'] }} ({{ $rs['total_reviews'] }} reviews)@else 3.5 @endif</div>
+                    @if ($rs['total_reviews'])<div class="flex items-center gap-1 bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-lg"><i data-lucide="star" class="w-3.5 h-3.5 fill-current text-amber-500"></i>{{ $rs['average_rating'] }} ({{ $rs['total_reviews'] }} reviews)</div>@endif
                 </div>
                 <p class="text-xs text-gray-500">Inclusive of all taxes.</p>
 
@@ -145,6 +145,6 @@
 
 @push('scripts')
 
-    <script src="{{ asset('assets/js/modules/product.js') }}"></script>
+    <script src="{{ \App\Helpers\Asset::v('assets/js/modules/product.js') }}"></script>
 
 @endpush

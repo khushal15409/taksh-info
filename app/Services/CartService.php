@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\CartProblemException;
 use App\Helpers\AppCharges;
+use App\Helpers\ExtraCharge;
 use App\Http\Resources\Cart\CartItemResource;
 use App\Http\Resources\Cart\CartResource;
 use App\Models\Cart;
@@ -278,6 +279,12 @@ class CartService
         })->all();
 
         [$charges, $coupon] = $this->charges($cart, $total, DeliveryBucket::isQuick($deliveryType));
+
+        // the admin's labelled charges (Settings > App Charges). Worked out per vendor, exactly as each order will be billed at
+        // checkout, then joined by label - so the cart total and the amount charged agree to the paisa.
+        foreach ($this->extraCharges($items, DeliveryBucket::isQuick($deliveryType)) as $line) {
+            $charges[] = $line + ['sort_order' => 7];
+        }
         $fees = collect($charges)->sum('amount');
 
         $type = DeliveryBucket::given($deliveryType) ? $this->catalog->deliveryType($deliveryType) : null;
@@ -291,6 +298,32 @@ class CartService
             'coupon' => $coupon,
             'total_with_delivery' => round($total + $fees, 2),
         ])->resolve();
+    }
+
+    /**
+     * The admin's labelled charges for these cart lines, one bill line per charge label.
+     *
+     * @return list<array{type: string, label: string, amount: float, is_discount: bool}>
+     */
+    private function extraCharges(\Illuminate\Support\Collection $items, bool $isQuick): array
+    {
+        $merged = [];
+
+        foreach ($items->filter(fn ($i) => $i->productVariant?->product)->groupBy(fn ($i) => $i->productVariant->product->vendor_id) as $group) {
+            $inputs = $group->map(fn ($i) => [
+                $i->productVariant->product,
+                (int) $i->qty,
+                (float) $this->pricing->calculateCheckoutPrice($i->productVariant->product, $i->productVariant)['final_sell_price'],
+            ])->all();
+
+            foreach (ExtraCharge::linesFor($inputs, $isQuick) as $line) {
+                $merged[$line['label']] = isset($merged[$line['label']])
+                    ? array_replace($line, ['amount' => round($merged[$line['label']]['amount'] + $line['amount'], 2)])
+                    : $line;
+            }
+        }
+
+        return array_values($merged);
     }
 
     /**

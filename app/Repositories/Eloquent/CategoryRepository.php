@@ -11,10 +11,11 @@ class CategoryRepository implements CategoryRepositoryInterface
     public function activeTree(?string $type = null, bool $untypedOnly = false): Collection
     {
         return Category::where('status', 'active')
-            ->with(['children' => fn ($q) => $q->where('status', 'active')])
+            ->with(['children' => fn ($q) => $q->where('status', 'active')->ordered()])
             ->whereNull('parent_id')
             ->when($untypedOnly, fn ($q) => $q->whereNull('delivery_types'))
             ->when($type, fn ($q) => $q->forDeliveryType($type))
+            ->ordered()
             ->get();
     }
 
@@ -24,7 +25,7 @@ class CategoryRepository implements CategoryRepositoryInterface
             ->whereNull('parent_id')
             ->when($type, fn ($q) => $q->forDeliveryType($type))
             ->select('id', 'name')
-            ->orderBy('name', 'asc')
+            ->ordered()
             ->get();
     }
 
@@ -41,7 +42,7 @@ class CategoryRepository implements CategoryRepositoryInterface
         return Category::where('status', 'active')
             ->where('parent_id', $parentId)
             ->select('id', 'name')
-            ->orderBy('name', 'asc')
+            ->ordered()
             ->get();
     }
 

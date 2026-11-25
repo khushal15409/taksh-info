@@ -21,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // `urlkey:scope[,param]` / `hidefilters:scope` on a route: opaque keys and hidden search terms in its URL (see App\Support\UrlKey, FilterToken)
         $middleware->alias(['urlkey' => \App\Http\Middleware\ResolveUrlKey::class, 'hidefilters' => \App\Http\Middleware\HideFilters::class]);
 
+        // security headers + Content-Security-Policy on every response
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
         $middleware->redirectGuestsTo(fn (Request $request) => route('login', ['next' => $request->getRequestUri()]));
     })
     ->withExceptions(function (Exceptions $exceptions): void {

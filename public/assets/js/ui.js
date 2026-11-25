@@ -180,6 +180,15 @@ function initSearch() {
 }
 
 // ---------- Location + address modals ----------
+// Reload after the place changed. A ?pincode= / ?location=saved in the address bar wins over the new place (QuickLocation), so drop them first.
+function reloadForNewPlace() {
+    const u = new URL(location.href);
+    const had = u.searchParams.has("pincode") || u.searchParams.has("location");
+    u.searchParams.delete("pincode");
+    u.searchParams.delete("location");
+    if (had) location.replace(u.toString()); else location.reload();
+}
+
 function openLocationModal() {
     if (Auth.loggedIn) return openAddressPicker();
     openPincodeForm();
@@ -210,7 +219,7 @@ async function openAddressPicker() {
         try {
             await Api.addressDefault(Number(b.dataset.pick));
             document.cookie = "taksh_loc=; max-age=0; path=/";   // a saved address replaces a pincode typed earlier
-            location.reload();
+            reloadForNewPlace();
         } catch (err) { b.disabled = false; toast(err.message || "Couldn't change the address", "error"); }
     });
 }
@@ -240,7 +249,7 @@ function openPincodeForm() {
         document.cookie = `taksh_loc=${f.get("pincode")},${here}; path=/; max-age=31536000; SameSite=Lax`;
         Modal.close();
         toast("📍 Delivery location updated");
-        setTimeout(() => location.reload(), 400);   // the header and Quick products follow the new place
+        setTimeout(reloadForNewPlace, 400);   // the header and Quick products follow the new place
     });
 }
 
@@ -287,6 +296,12 @@ function openPrefsModal() {
     });
 }
 
+// A form with data-confirm="..." asks first (replaces inline onsubmit handlers, which the Content-Security-Policy does not allow)
+document.addEventListener("submit", e => {
+    const f = e.target.closest && e.target.closest("form[data-confirm]");
+    if (f && !confirm(f.dataset.confirm)) e.preventDefault();
+});
+
 // ---------- Global event delegation ----------
 document.addEventListener("click", e => {
     const t = e.target.closest("[data-open-location], [data-close-banner], [data-open-prefs]");
@@ -294,13 +309,13 @@ document.addEventListener("click", e => {
     if (t.matches("[data-open-location]")) return openLocationModal();
     if (t.matches("[data-open-prefs]")) return openPrefsModal();
     if (t.matches("[data-close-banner]")) {
-        qs("#coming-soon").classList.add("hidden");
+        qs("#coming-soon")?.classList.add("hidden");
         try { sessionStorage.setItem("taksh_banner_closed", "1"); } catch (err) { /* ignore */ }
     }
 });
 
 ready(() => {
-    try { if (sessionStorage.getItem("taksh_banner_closed") === "1") qs("#coming-soon").classList.add("hidden"); } catch (e) { /* ignore */ }
+    try { if (sessionStorage.getItem("taksh_banner_closed") === "1") qs("#coming-soon")?.classList.add("hidden"); } catch (e) { /* ignore */ }
     initSearch();
     updateHeader();
     Wishlist.paint();

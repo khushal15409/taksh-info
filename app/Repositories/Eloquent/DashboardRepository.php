@@ -60,7 +60,7 @@ class DashboardRepository implements DashboardRepositoryInterface
             ->where('categories.status', 'active')
             ->whereHas('sectionMappings', fn ($q) => $q->where('section_id', $section->id))
             ->where(fn ($q) => $this->hasStandardProducts($q))
-            ->orderBy('name', 'asc')
+            ->ordered()
             ->get();
     }
 
@@ -73,7 +73,7 @@ class DashboardRepository implements DashboardRepositoryInterface
             ->whereNull('categories.parent_id')
             ->where(fn ($q) => $this->hasStandardProducts($q))
             ->withCount(['products' => fn ($q) => $q->where('status', 'active')->where('is_express_30', false)])
-            ->orderBy('categories.name', 'asc')
+            ->ordered()
             ->get();
     }
 

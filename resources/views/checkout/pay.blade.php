@@ -33,7 +33,7 @@
 
 @push('scripts')
 
-    <script src="{{ asset('assets/js/pay.js') }}"></script>
-    <script src="{{ asset('assets/js/modules/pay.js') }}"></script>
+    <script src="{{ \App\Helpers\Asset::v('assets/js/pay.js') }}"></script>
+    <script src="{{ \App\Helpers\Asset::v('assets/js/modules/pay.js') }}"></script>
 
 @endpush

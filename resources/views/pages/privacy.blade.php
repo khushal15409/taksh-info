@@ -43,7 +43,7 @@
                 <p class="text-sm text-gray-600 leading-relaxed">We may update this Privacy Policy from time to time. We will notify you of any significant changes by posting the new policy on this page and updating the "Last Updated" date.</p></section>
             <section class="space-y-2"><h2 class="font-extrabold text-gray-900 text-base">12. Contact Us</h2>
                 <p class="text-sm text-gray-600 leading-relaxed">If you have any questions about this Privacy Policy or our data practices, please contact us:</p>
-                <p class="text-sm text-gray-600 leading-relaxed">Email: privacy@taksh-ecommerce.com<br>Phone: +91 1800-123-4567<br>Address: Mumbai, Maharashtra, India</p></section>
+                <p class="text-sm text-gray-600 leading-relaxed">Email: {{ config('taksh.support_email') }}<br>Phone: {{ config('taksh.support_phone') }}<br>Address: {{ config('taksh.support_address') }}</p></section>
             <div class="rounded-2xl border bg-orange-50 border-orange-200 p-5"><h3 class="font-extrabold text-gray-900 mb-1">Your Privacy Matters</h3><p class="text-sm text-gray-700 leading-relaxed">We are committed to protecting your privacy and handling your data responsibly.</p></div>
         </article>
 @endsection

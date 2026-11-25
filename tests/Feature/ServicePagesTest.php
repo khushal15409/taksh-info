@@ -100,7 +100,7 @@ class ServicePagesTest extends OrderTestCase
     {
         $this->banners->banners = collect([Make::banner(1, ['type' => 'service', 'title' => 'AC Offer', 'image_url' => 'https://cdn.test/ac.jpg'])]);
 
-        $this->get('/services')->assertSee('https://cdn.test/ac.jpg', false)->assertSee('How are service professionals verified?')->assertSee('care@takshallinone.com');
+        $this->get('/services')->assertSee('https://cdn.test/ac.jpg', false)->assertSee('How are service professionals verified?')->assertSee('customersupport@takshallinone.in');
     }
 
     public function test_my_bookings_are_the_customers_own_with_tabs_and_status(): void

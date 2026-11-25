@@ -174,7 +174,7 @@ class OrdersTest extends OrderTestCase
 
     public function test_the_invoice_is_the_customers_own_and_comes_from_taksh_admin(): void
     {
-        config(['taksh.admin_url' => 'https://admin.test']);
+        config(['taksh.admin_url' => 'https://admin.test', 'taksh.site_api_key' => 'site-secret']);
         \Illuminate\Support\Facades\Http::fake(['admin.test/*' => \Illuminate\Support\Facades\Http::response('%PDF-1.4 fake', 200, ['Content-Type' => 'application/pdf'])]);
         $o = $this->order(['order_number' => 'ORDABC12345']);
 
@@ -182,13 +182,15 @@ class OrdersTest extends OrderTestCase
         $this->assertSame('application/pdf', $res->headers->get('Content-Type'));
         $this->assertStringContainsString('invoice-ORDABC12345.pdf', $res->headers->get('Content-Disposition'));
         $this->assertSame('%PDF-1.4 fake', $res->getContent());
-        \Illuminate\Support\Facades\Http::assertSent(fn ($r) => str_starts_with($r->url(), 'https://admin.test/api/orders/ORDABC12345/invoice') && $r['part'] === 'tax');
+        \Illuminate\Support\Facades\Http::assertSent(fn ($r) => str_starts_with($r->url(), 'https://admin.test/api/site/orders/ORDABC12345/invoice')
+            && $r['part'] === 'tax' && (int) $r['user_id'] === 5 && ($r->header('X-Site-Key')[0] ?? '') !== '');   // the shared secret rides along (kept in business_settings, falls back to the .env one)
 
         $this->actingAs($this->user(9))->get('/orders/ORDABC12345/invoice')->assertStatus(404);          // someone else's order looks like no order
         $this->actingAs($this->user())->get('/orders/NOPE/invoice')->assertStatus(404);
 
         \Illuminate\Support\Facades\Http::swap(new \Illuminate\Http\Client\Factory);
         \Illuminate\Support\Facades\Http::fake(['admin.test/*' => \Illuminate\Support\Facades\Http::response('oops', 500)]);
-        $this->actingAs($this->user())->get('/orders/ORDABC12345/invoice')->assertStatus(503);
+        $this->actingAs($this->user())->from('/tracking')->get('/orders/ORDABC12345/invoice')->assertRedirect('/tracking')
+            ->assertSessionHas('toast.message', fn ($m) => str_contains($m, 'code: admin-5xx'));
     }
 }

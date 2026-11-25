@@ -32,7 +32,7 @@ table { width: 100%; border-collapse: collapse; }
 </style>
 </head>
 <body>
-<div class="print-bar"><button onclick="window.print()">Print / Save as PDF</button></div>
+<div class="print-bar"><button id="print-btn" type="button">Print / Save as PDF</button></div>
 <table class="head">
     <tr>
         <td>
@@ -94,5 +94,6 @@ table { width: 100%; border-collapse: collapse; }
 </table>
 
 <div class="foot">This is a computer generated invoice and does not require a signature.</div>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">document.getElementById('print-btn').addEventListener('click', function () { window.print(); });</script>
 </body>
 </html>

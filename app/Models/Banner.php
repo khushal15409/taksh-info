@@ -18,6 +18,22 @@ class Banner extends Model
     public const TYPE_SERVICE = 'service';
     public const TYPES = [self::TYPE_STANDARD, self::TYPE_QUICK, self::TYPE_SERVICE];
 
+    public const DEVICE_DESKTOP = 'desktop';
+    public const DEVICE_MOBILE = 'mobile';
+    public const DEVICES = [self::DEVICE_DESKTOP, self::DEVICE_MOBILE];
+
+    /** Image size (px) set per device in taksh-admin. */
+    public const SIZES = [
+        self::DEVICE_DESKTOP => ['width' => 1920, 'height' => 410],
+        self::DEVICE_MOBILE => ['width' => 1080, 'height' => 540],
+    ];
+
+    /** {width, height} the image of this banner should have. */
+    public function recommendedSize(): array
+    {
+        return self::SIZES[in_array($this->device_type, self::DEVICES, true) ? $this->device_type : self::DEVICE_MOBILE];
+    }
+
     protected function casts(): array
     {
         return [

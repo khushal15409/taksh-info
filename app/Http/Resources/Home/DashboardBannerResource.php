@@ -18,6 +18,8 @@ class DashboardBannerResource extends ApiResource
             'image_url' => $this->image_url,
             'position' => $this->position,
             'type' => $this->type,
+            'device_type' => $this->device_type,
+            'recommended_size' => $this->recommendedSize(),
             // Middle banners: the (active) section to show below; null = default place.
             'after_section_id' => $after ? $this->after_section_id : null,
             'after_section_name' => $after?->section_name,

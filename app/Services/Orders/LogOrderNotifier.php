@@ -20,6 +20,12 @@ class LogOrderNotifier implements OrderNotifier
 
         if ($orders->isNotEmpty()) {
             Log::info('Order placed from the website', ['order_ids' => $orders->pluck('id')->all()]);
+
+            // the same words as the app's push: one message for a whole checkout
+            $first = $orders->first();
+            OrderInbox::add((int) $first->user_id, 'Order placed', $orders->count() > 1
+                ? "Your {$orders->count()} orders have been placed."
+                : "Your order {$first->order_number} has been placed.");
         }
     }
 
@@ -27,12 +33,14 @@ class LogOrderNotifier implements OrderNotifier
     {
         $this->forgetCounts();
         Log::info('Order payment confirmed from the website', ['order_id' => $order->id]);
+        OrderInbox::add((int) $order->user_id, 'Payment received', "We received your payment for order {$order->order_number}.");
     }
 
     public function cancelled(Order $order): void
     {
         $this->forgetCounts();
         Log::info('Order cancelled from the website', ['order_id' => $order->id]);
+        OrderInbox::add((int) $order->user_id, 'Order cancelled', "Your order {$order->order_number} has been cancelled.");
     }
 
     private function forgetCounts(): void

@@ -29,6 +29,6 @@
 
 @push('scripts')
 
-    <script src="{{ asset('assets/js/modules/account.js') }}"></script>
+    <script src="{{ \App\Helpers\Asset::v('assets/js/modules/account.js') }}"></script>
 
 @endpush

@@ -46,5 +46,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('assets/js/modules/support.js') }}"></script>
+    <script src="{{ \App\Helpers\Asset::v('assets/js/modules/support.js') }}"></script>
 @endpush

@@ -9,7 +9,7 @@
             <div class="space-y-1.5 text-gray-400">
                 <p class="flex items-center gap-2"><i data-lucide="phone" class="w-3.5 h-3.5 text-brand-500"></i>{{ config('taksh.support_phone') }}</p>
                 <p class="flex items-center gap-2"><i data-lucide="mail" class="w-3.5 h-3.5 text-brand-500"></i>{{ config('taksh.support_email') }}</p>
-                <p class="flex items-center gap-2"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-500"></i>Ghatlodiya, Ahmedabad 380061</p>
+                <p class="flex items-center gap-2"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-500"></i>{{ config('taksh.support_address') }}</p>
             </div>
         </div>
         <div>
@@ -42,14 +42,14 @@
             <ul class="space-y-2 text-gray-400">
                 <li><a href="{{ route('help') }}" class="hover:text-brand-500">Help &amp; Support</a></li>
                 <li><a href="{{ route('services') }}#help" class="hover:text-brand-500">Help Centre &amp; FAQs</a></li>
-                <li><a href="{{ route('about') }}" class="hover:text-brand-500">About Us</a></li>
-                <li><a href="{{ route('privacy') }}" class="hover:text-brand-500">Privacy Policy</a></li>
-                <li><a href="{{ route('terms') }}" class="hover:text-brand-500">Terms &amp; Conditions</a></li>
-                <li><a href="{{ route('refund') }}" class="hover:text-brand-500">Refund Policy</a></li>
+                <li><a href="{{ route('about') }}" target="_blank" rel="noopener" class="hover:text-brand-500">About Us</a></li>
+                <li><a href="{{ route('privacy') }}" target="_blank" rel="noopener" class="hover:text-brand-500">Privacy Policy</a></li>
+                <li><a href="{{ route('terms') }}" target="_blank" rel="noopener" class="hover:text-brand-500">Terms &amp; Conditions</a></li>
+                <li><a href="{{ route('refund') }}" target="_blank" rel="noopener" class="hover:text-brand-500">Refund Policy</a></li>
+                <li><a href="{{ route('shipping') }}" target="_blank" rel="noopener" class="hover:text-brand-500">Shipping Policy</a></li>
+                <li><a href="{{ route('contact') }}" target="_blank" rel="noopener" class="hover:text-brand-500">Contact Us</a></li>
+                <li><a href="{{ route('delete-account') }}" target="_blank" rel="noopener" class="hover:text-brand-500">Delete Account</a></li>
             </ul>
-            <h4 class="font-bold mt-5 mb-3 uppercase tracking-wider">Download App</h4>
-            <a href="{{ route('home') }}#app" class="inline-block" aria-label="Taksh app coming soon on Google Play"><span data-play-badge></span></a>
-            <p class="text-[11px] text-gray-500 mt-2">Android app launching soon - <a href="{{ route('home') }}#app" class="text-brand-500 hover:underline">notify me</a></p>
         </div>
     </div>
     <div class="border-t border-white/10 bg-[#0F172A]/80 backdrop-blur-sm">
