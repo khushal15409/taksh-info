@@ -67,6 +67,7 @@ ready(() => {
             }
         };
         input.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(run, 300); });
+        qsa("select", form).forEach(sel => sel.addEventListener("change", () => { clearTimeout(timer); run(); }));   // category / location pick: update at once
         form.addEventListener("submit", e => { e.preventDefault(); clearTimeout(timer); run(); });
     }
 

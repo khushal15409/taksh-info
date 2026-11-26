@@ -82,10 +82,10 @@
     </div>
 
     <nav id="main-nav" class="nav-tab-row border-t border-orange-100/70" aria-label="Main">
-        <div class="max-w-7xl mx-auto px-4 lg:px-8 py-3 grid grid-cols-5 gap-1.5 sm:gap-4">
+        <div id="main-nav-row" class="max-w-7xl mx-auto px-4 lg:px-8 py-3 flex md:grid md:grid-cols-5 gap-2 md:gap-4 overflow-x-auto md:overflow-visible no-scrollbar snap-x scroll-smooth">
             @foreach ($tabs as [$href, $icon, $label, $active, $tint])
-                <a href="{{ $href }}" @if ($active) aria-current="page" @endif class="nav-tab group flex items-center justify-center gap-2 sm:gap-3 px-2 sm:px-4 py-2.5 rounded-2xl text-xs min-[400px]:text-sm leading-tight text-center transition {{ $label === 'Shops' && $active ? 'nav-tab-shops font-bold' : ($active ? 'text-brand-600 font-bold' : 'text-gray-700 hover:bg-white/70 font-semibold') }}">
-                    <span class="hidden min-[400px]:flex w-8 h-8 shrink-0 rounded-xl items-center justify-center transition {{ $tint.' group-hover:scale-110' }}"><i data-lucide="{{ $icon }}" class="w-4 h-4"></i></span>
+                <a href="{{ $href }}" @if ($active) aria-current="page" @endif class="nav-tab group flex items-center justify-center gap-2 sm:gap-3 shrink-0 md:shrink snap-start whitespace-nowrap px-3 md:px-4 py-2 md:py-2.5 rounded-2xl text-[13px] sm:text-sm leading-tight text-center transition {{ $label === 'Shops' && $active ? 'nav-tab-shops font-bold' : ($active ? 'text-brand-600 font-bold' : 'text-gray-700 hover:bg-white/70 font-semibold') }}">
+                    <span class="flex w-7 h-7 md:w-8 md:h-8 shrink-0 rounded-xl items-center justify-center transition {{ $tint.' group-hover:scale-110' }}"><i data-lucide="{{ $icon }}" class="w-4 h-4"></i></span>
                     <span>{{ $label }}</span>
                 </a>
             @endforeach

@@ -20,7 +20,7 @@
                 @if ($service['short_description'])<p class="text-sm text-gray-500 mt-1">{{ $service['short_description'] }}</p>@endif
                 <p class="text-sm mt-2">Service charge <b class="text-brand-600">@rupee($service['service_charge'])</b>, paid online to confirm your booking.</p>
             </div>
-            <form method="POST" action="{{ route('services.book.store', $service['id']) }}" data-lock class="grid grid-cols-2 gap-4 text-xs" novalidate>
+            <form method="POST" action="{{ route('services.book.store', $service['id']) }}" data-lock class="grid grid-cols-2 form-stack gap-4 text-xs" novalidate>
                 @csrf
                 <input type="hidden" name="idempotency_key" value="{{ old('idempotency_key', $key) }}">
                 @php($rows = [

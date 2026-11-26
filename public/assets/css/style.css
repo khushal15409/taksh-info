@@ -225,3 +225,63 @@ html.h-full { background: #FFF9EC; }
 .shop-products.is-list .pcard-media { width: 190px; flex: none; padding: 16px; }
 .shop-products.is-list .pcard > div.flex-1 { justify-content: center; padding-top: 1rem; }
 @media (max-width: 520px) { .shop-products.is-list .pcard-media { width: 130px; padding: 10px; } }
+
+/* ---------------------------------------------------------------------------------------------------------------------------------
+   Responsive layer (every page): phones, tablets and wide screens
+   --------------------------------------------------------------------------------------------------------------------------------- */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { overflow-x: clip; overflow-wrap: break-word; }          /* a stray wide element can never make the whole page scroll sideways */
+a, button, summary, label, [role="button"] { -webkit-tap-highlight-color: transparent; }
+button, [role="button"], summary { touch-action: manipulation; }   /* no 300ms tap delay / double-tap zoom on controls */
+
+/* iOS zooms the page when a field under 16px is focused: keep fields at 16px on phones */
+@media (max-width: 639px) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not([type="color"]),
+    select, textarea { font-size: 16px; }
+}
+
+/* a finger has no hover: do not leave cards lifted / zoomed after a tap */
+@media (hover: none) {
+    .pcard:hover, .shop-card:hover, .cat-tile:hover { transform: none; }
+    .pcard:hover { box-shadow: 0 14px 28px -20px rgba(230, 81, 0, .5); }
+}
+
+/* long names, emails and URLs wrap inside their box instead of pushing it wider */
+h1, h2, h3, h4, p, li, td, label, .truncate-safe { overflow-wrap: anywhere; }
+.truncate, .line-clamp-1, .line-clamp-2, .line-clamp-3 { overflow-wrap: normal; }
+
+/* very small phones (320-359px): tighter page gutters and header text so nothing is cramped */
+@media (max-width: 359px) {
+    .nav-tab { font-size: 11px; padding-left: .25rem; padding-right: .25rem; }
+    .pcard .text-lg { font-size: 1rem; }
+}
+
+/* wide screens: keep line lengths readable and the page centred (the containers are max-w-7xl) */
+@media (min-width: 1536px) {
+    .max-w-7xl { max-width: 84rem; }
+}
+
+/* landscape phones: the sticky header must not eat the screen */
+@media (max-height: 480px) and (orientation: landscape) {
+    .site-header { position: static; }
+}
+
+/* dialogs: 90vh is taller than the visible screen on phones whose address bar shows - use the dynamic viewport where supported */
+@supports (height: 1dvh) {
+    [class*="max-h-[90vh]"] { max-height: 90dvh; }
+}
+
+/* two-column forms become one column on small phones (a field pair of 130px each is too tight to type in) */
+@media (max-width: 479px) {
+    .form-stack { grid-template-columns: minmax(0, 1fr) !important; }
+    .form-stack > * { grid-column: 1 / -1 !important; }
+}
+
+/* the picked category tile (same tile as the home page, with an orange ring) */
+.cat-tile.is-active { border-color: #FF7A00; background: linear-gradient(180deg, #FFF3E3, #FFE6C7); box-shadow: 0 0 0 2px rgba(255, 122, 0, .35), 0 14px 24px -16px rgba(230, 81, 0, .6); }
+
+/* phones: the main menu is a swipe row, the open page's tab is scrolled into view by ui.js */
+@media (max-width: 767px) {
+    #main-nav-row { scroll-padding-inline: 1rem; }
+    #main-nav-row .nav-tab[aria-current="page"] { scroll-margin-inline: 1rem; }
+}

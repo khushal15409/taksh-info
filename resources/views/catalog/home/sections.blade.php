@@ -27,7 +27,7 @@
     {{-- Shop by Store: the approved shops (vendors); each opens that shop's own products page --}}
     @if (! empty($shops))
         <section aria-label="Shop by Store">
-            <div class="flex flex-wrap items-center gap-3 bg-white/80 border border-orange-100 rounded-3xl shadow-sm px-4 py-4 mb-8 text-xs font-bold text-gray-700 justify-around">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-3 gap-y-3 bg-white/80 border border-orange-100 rounded-3xl shadow-sm px-4 py-4 mb-8 text-[11px] sm:text-xs font-bold text-gray-700 [&>span]:justify-center">
                 <span class="flex items-center gap-2"><i data-lucide="store" class="w-5 h-5 text-brand-500"></i>Wide Range of Shops</span>
                 <span class="flex items-center gap-2"><i data-lucide="badge-check" class="w-5 h-5 text-brand-500"></i>Trusted Local &amp; Brand Stores</span>
                 <span class="flex items-center gap-2"><i data-lucide="heart" class="w-5 h-5 text-brand-500"></i>Shop by Your Favorite Store</span>

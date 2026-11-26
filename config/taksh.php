@@ -9,7 +9,7 @@ return [
         'enabled' => (bool) env('TAKSH_HIDE_FILTERS', true),
         'scopes' => [
             'listing' => ['q', 'category', 'max', 'pincode', 'location'],
-            'shops' => ['q'],
+            'shops' => ['q', 'category', 'location'],
             'shop' => ['q', 'category', 'min', 'max'],
             'orders' => ['status', 'mode', 'from', 'to'],
             'notifications' => ['filter'],

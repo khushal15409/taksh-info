@@ -14,18 +14,18 @@
 
     {{-- Banner: dark tone on the left, the photo fading in from the right; logo card, name, categories, rating / products, Share --}}
     <section class="relative overflow-hidden rounded-[28px] shadow-xl mb-4" style="background: {{ $tone }}">
-        <div class="absolute inset-y-0 right-0 w-full md:w-[54%]">
+        <div class="absolute inset-y-0 right-0 w-full md:w-[40%] lg:w-[54%]">
             <img src="{{ $banner }}" alt="" class="w-full h-full object-cover" style="-webkit-mask-image: linear-gradient(to right, transparent 0%, #000 55%); mask-image: linear-gradient(to right, transparent 0%, #000 55%);">
         </div>
         <div class="absolute inset-0 md:hidden" style="background: linear-gradient(90deg, {{ $tone }} 30%, transparent)"></div>
-        <svg class="absolute inset-y-0 left-[41%] h-full w-24 hidden md:block" viewBox="0 0 100 300" preserveAspectRatio="none" aria-hidden="true"><path d="M70 0 C 20 90, 20 210, 70 300" fill="none" stroke="#FF8A1F" stroke-width="5" stroke-linecap="round" opacity=".9"/></svg>
+        <svg class="absolute inset-y-0 left-[28%] lg:left-[41%] h-full w-24 hidden md:block" viewBox="0 0 100 300" preserveAspectRatio="none" aria-hidden="true"><path d="M70 0 C 20 90, 20 210, 70 300" fill="none" stroke="#FF8A1F" stroke-width="5" stroke-linecap="round" opacity=".9"/></svg>
         <div class="relative z-10 flex flex-wrap items-center gap-x-6 gap-y-4 px-5 sm:px-8 py-6 sm:py-8 min-h-[220px]">
             <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-[28px] bg-white shadow-2xl flex items-center justify-center overflow-hidden shrink-0">
                 @if ($shop['logo_url'])<img src="{{ $shop['logo_url'] }}" alt="{{ $shop['name'] }}" class="w-full h-full object-cover">
                 @else<span class="relative text-brand-500"><i data-lucide="store" class="w-20 h-20 sm:w-24 sm:h-24"></i><b class="absolute inset-x-0 bottom-2 text-center text-2xl sm:text-3xl text-brand-600 font-extrabold leading-none">{{ $shop['initial'] }}</b></span>@endif
             </div>
-            <div class="min-w-0 basis-72 flex-1 max-w-xl text-white">
-                <h1 class="flex items-center gap-2 font-festive font-extrabold text-3xl sm:text-5xl leading-tight"><span class="truncate">{{ $shop['name'] }}</span><i data-lucide="badge-check" class="w-7 h-7 sm:w-9 sm:h-9 text-sky-400 shrink-0"></i></h1>
+            <div class="min-w-0 basis-72 flex-1 md:max-w-[19rem] lg:max-w-xl text-white">
+                <h1 class="flex items-center gap-2 font-festive font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight"><span class="truncate">{{ $shop['name'] }}</span><i data-lucide="badge-check" class="w-7 h-7 sm:w-9 sm:h-9 text-sky-400 shrink-0"></i></h1>
                 @if ($categories)<div class="flex flex-wrap items-center text-xs sm:text-sm mt-2 text-white/90">@foreach (array_slice($categories, 0, 3) as $c)<span class="{{ $loop->first ? 'pr-3' : 'px-3 border-l border-white/40' }}">{{ $c['name'] }}</span>@endforeach</div>@endif
                 <div class="flex flex-wrap items-center gap-2.5 mt-4 text-xs sm:text-sm">
                     @if ($rating['total'])<span class="inline-flex items-center gap-2 rounded-xl bg-black/25 ring-1 ring-white/15 backdrop-blur px-3.5 py-2"><i data-lucide="star" class="w-4 h-4 text-amber-400 fill-current"></i><b>{{ number_format($rating['average'], 1) }}</b><span class="text-white/80">({{ number_format($rating['total']) }} Reviews)</span></span>@endif
@@ -48,23 +48,25 @@
         @endforeach
     </div>
 
-    {{-- Category tiles with pictures and counts --}}
-    <div class="mb-6 overflow-x-auto no-scrollbar -mx-1 px-1 py-1">
-        <div class="flex min-w-max gap-3">
-            <a href="{{ route('shop', ['id' => $shop['id']] + $keep) }}" class="w-[122px] sm:w-[138px] shrink-0 rounded-2xl border-2 px-2 py-3 text-center transition {{ ! $picked ? 'border-brand-500 bg-orange-50 shadow-md' : 'border-orange-100 bg-white hover:border-brand-500' }}">
-                <span class="mx-auto w-12 h-12 flex items-center justify-center text-brand-500"><i data-lucide="layout-grid" class="w-10 h-10" stroke-width="1.6"></i></span>
-                <span class="block mt-1.5 text-xs font-extrabold text-gray-900 leading-tight">All Products</span>
-                <span class="block text-[11px] text-gray-500">({{ number_format($total) }})</span>
+    {{-- Category tiles: the same round-picture tiles as the home page's "Shop by Category" (with the shop's product count) --}}
+    @php($tile = 'group snap-start flex-none w-[92px] sm:w-[104px] lg:w-[112px] cat-tile p-2.5 text-center')
+    <section aria-label="Categories" class="mb-6">
+        <div id="shop-cats" class="cat-track flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth py-1">
+            <a href="{{ route('shop', ['id' => $shop['id']] + $keep) }}" class="{{ $tile }} {{ ! $picked ? 'is-active' : '' }}" @if (! $picked) aria-current="true" @endif>
+                <div class="w-11 h-11 sm:w-12 sm:h-12 mx-auto rounded-full bg-orange-100/70 flex items-center justify-center overflow-hidden mb-1.5 group-hover:scale-110 transition text-brand-500"><i data-lucide="layout-grid" class="w-5 h-5 sm:w-6 sm:h-6"></i></div>
+                <div class="text-[11px] font-bold text-gray-800 leading-tight line-clamp-2">All Products</div>
+                <div class="text-[10px] text-gray-400 font-semibold mt-0.5">({{ number_format($total) }})</div>
             </a>
             @foreach ($categories as $c)
-                <a href="{{ route('shop', ['id' => $shop['id'], 'category' => [$c['id']]] + $keep) }}" class="w-[122px] sm:w-[138px] shrink-0 rounded-2xl border-2 px-2 py-3 text-center transition {{ $picked === [$c['id']] ? 'border-brand-500 bg-orange-50 shadow-md' : 'border-orange-100 bg-white hover:border-brand-500' }}">
-                    <span class="mx-auto w-12 h-12 flex items-center justify-center">@if ($c['image_url'])<img src="{{ $c['image_url'] }}" alt="" loading="lazy" class="max-w-full max-h-full object-contain">@else<i data-lucide="package" class="w-9 h-9 text-brand-500" stroke-width="1.6"></i>@endif</span>
-                    <span class="block mt-1.5 text-xs font-bold text-gray-900 leading-tight line-clamp-2 min-h-[2rem]">{{ $c['name'] }}</span>
-                    <span class="block text-[11px] text-gray-500">({{ number_format($c['count']) }})</span>
+                @php($on = $picked === [$c['id']])
+                <a href="{{ route('shop', ['id' => $shop['id'], 'category' => [$c['id']]] + $keep) }}" class="{{ $tile }} {{ $on ? 'is-active' : '' }}" @if ($on) aria-current="true" @endif>
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 mx-auto rounded-full bg-orange-100/70 flex items-center justify-center overflow-hidden mb-1.5 group-hover:scale-110 transition">@if ($c['image_url'])<img src="{{ $c['image_url'] }}" alt="" loading="lazy" class="w-full h-full object-cover">@else<i data-lucide="package" class="w-5 h-5 text-brand-500"></i>@endif</div>
+                    <div class="text-[11px] font-bold text-gray-800 leading-tight line-clamp-2">{{ $c['name'] }}</div>
+                    <div class="text-[10px] text-gray-400 font-semibold mt-0.5">({{ number_format($c['count']) }})</div>
                 </a>
             @endforeach
         </div>
-    </div>
+    </section>
 
     <div class="flex justify-end mb-3 lg:hidden"><button type="button" id="filter-toggle" class="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 text-xs font-bold"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i>Filters</button></div>
 

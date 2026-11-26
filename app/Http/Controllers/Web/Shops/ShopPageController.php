@@ -26,10 +26,13 @@ class ShopPageController extends WebController
     {
         $q = $this->term($request);
 
-        $data = $this->shops->index($q);
+        $category = is_numeric($request->query('category')) && (int) $request->query('category') > 0 ? (int) $request->query('category') : null;
+        $location = is_string($request->query('location')) && trim($request->query('location')) !== '' ? mb_substr(trim($request->query('location')), 0, 80) : null;
+
+        $data = $this->shops->index($q, $category, $location);
         $data['page']->withPath(route('shops'))->appends(FilterToken::pageQuery('shops', $request));
 
-        return $this->page('shops.index', $data + ['q' => $q]);
+        return $this->page('shops.index', $data + ['q' => $q, 'category' => $category, 'location' => $location]);
     }
 
     public function show(Request $request, int $id)

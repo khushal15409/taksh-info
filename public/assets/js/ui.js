@@ -129,6 +129,10 @@ function initSearch() {
     if (!form) return;
     const input = qs("#search-input");
     const popup = qs("#search-popup");
+    // a long placeholder is cut off on a phone: use a short one there
+    const longHint = input.placeholder, phone = matchMedia("(max-width: 639px)");
+    const hint = () => { input.placeholder = phone.matches ? "Search products & shops" : longHint; };
+    hint(); if (phone.addEventListener) phone.addEventListener("change", hint);
     const initial = new URLSearchParams(location.search).get("q");
 
     // The search is a POST form (the words never go into the address bar): remember the search, then let the form submit.
@@ -325,4 +329,12 @@ ready(() => {
     if (typeof startHindiPage === "function") startHindiPage();
     qsa("[data-play-badge]").forEach(el => { el.innerHTML = playBadge(); });
     refreshIcons();
+});
+
+// On a phone the main menu and the shop's category row scroll sideways: bring the open tab / picked tile into view.
+ready(() => {
+    [["#main-nav-row", '[aria-current="page"]'], ["#shop-cats", '[aria-current="true"]']].forEach(([row, cur]) => {
+        const r = qs(row), c = r && qs(cur, r);
+        if (r && c && r.scrollWidth > r.clientWidth) r.scrollLeft = Math.max(0, c.offsetLeft - (r.clientWidth - c.offsetWidth) / 2);
+    });
 });

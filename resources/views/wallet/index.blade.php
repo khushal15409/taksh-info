@@ -72,7 +72,7 @@
                         <div class="flex-1 min-w-0"><div class="font-bold text-gray-800">{{ $b['account_holder_name'] }}</div><div class="text-gray-400">{{ $b['bank_name'] }} • {{ $b['account_number'] }} • {{ $b['ifsc_code'] }}@if ($b['upi']) • {{ $b['upi'] }}@endif</div></div>
                     </div>
                 @endforeach
-                <form method="POST" action="{{ route('wallet.bank.store') }}" data-lock class="grid grid-cols-2 gap-3 text-xs" novalidate>
+                <form method="POST" action="{{ route('wallet.bank.store') }}" data-lock class="grid grid-cols-2 form-stack gap-3 text-xs" novalidate>
                     @csrf
                     <div class="col-span-2"><label class="font-bold text-gray-500">Account holder name</label><input name="account_holder_name" value="{{ old('account_holder_name') }}" class="field mt-1" required></div>
                     <div><label class="font-bold text-gray-500">Account number</label><input name="account_number" value="{{ old('account_number') }}" inputmode="numeric" maxlength="34" class="field mt-1" required></div>

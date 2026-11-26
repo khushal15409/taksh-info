@@ -19,7 +19,7 @@
             @if ($done)
                 @include('support.partials.thanks', ['done' => $done])
             @else
-                <form method="POST" action="{{ route($form['route']) }}" data-lock class="grid grid-cols-2 gap-4 text-xs" novalidate>
+                <form method="POST" action="{{ route($form['route']) }}" data-lock class="grid grid-cols-2 form-stack gap-4 text-xs" novalidate>
                     @csrf
                     @foreach ($form['fields'] as $f)
                         @include('support.partials.field', ['f' => $f])

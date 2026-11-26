@@ -10,7 +10,7 @@
         ['delivery_address', 'Delivery address', ['wide' => true]], ['delivery_pincode', 'Delivery pincode', ['maxlength' => 6, 'inputmode' => 'numeric']],
     ];
 @endphp
-<form id="courier-form" method="POST" action="{{ route('services.courier.store') }}" enctype="multipart/form-data" data-lock class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 grid grid-cols-2 gap-4 text-xs" novalidate>
+<form id="courier-form" method="POST" action="{{ route('services.courier.store') }}" enctype="multipart/form-data" data-lock class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 grid grid-cols-2 form-stack gap-4 text-xs" novalidate>
     @csrf
     @if (! auth()->check())
         <p class="col-span-2 bg-orange-50/70 rounded-2xl p-3 text-gray-600">Log in to book a courier. <a class="font-bold text-brand-600 underline" href="{{ route('login', ['next' => route('services').'#courier']) }}">Login with OTP</a></p>

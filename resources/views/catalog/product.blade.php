@@ -34,7 +34,7 @@
     </nav>
 
     <div id="product-page" data-delivery="{{ ! empty($product['is_express_30']) ? '30_min' : 'normal' }}" data-product-id="{{ $product['id'] }}" data-variant-id="{{ $v['id'] }}" data-max-qty="{{ max(1, (int) ($v['available_stock'] ?? 1)) }}">
-        <div class="bg-white rounded-3xl p-6 lg:p-10 border border-orange-100 shadow-sm grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div class="bg-white rounded-3xl p-4 sm:p-6 lg:p-10 border border-orange-100 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10">
             <div class="space-y-4">
                 <div class="relative bg-gradient-to-b from-orange-50/70 to-white rounded-2xl p-6 border border-orange-100 flex items-center justify-center overflow-hidden">
                     @if ($main)<img id="lp-main" src="{{ $main }}" alt="{{ $product['name'] }}" class="w-full max-w-md aspect-square object-contain">@else<div class="w-full aspect-square flex items-center justify-center text-5xl bg-orange-50/60">🛍️</div>@endif
@@ -109,9 +109,9 @@
         </div>
 
         <div class="bg-white rounded-3xl border border-orange-100 shadow-sm mt-8">
-            <div class="flex gap-6 px-6 pt-4 border-b border-gray-100 text-sm font-bold" id="lp-tabs" role="tablist">
+            <div class="flex gap-5 sm:gap-6 px-4 sm:px-6 pt-4 border-b border-gray-100 text-sm font-bold overflow-x-auto no-scrollbar" id="lp-tabs" role="tablist">
                 @foreach (['Description', 'Details', 'Reviews ('.$rs['total_reviews'].')', 'Q&A'] as $i => $t)
-                    <button type="button" role="tab" data-lp-tab="{{ $i }}" class="pb-3 border-b-2 {{ $i === 0 ? 'border-brand-500 text-brand-600' : 'border-transparent text-gray-400 hover:text-gray-700' }}">{{ $t }}</button>
+                    <button type="button" role="tab" data-lp-tab="{{ $i }}" class="pb-3 border-b-2 whitespace-nowrap shrink-0 {{ $i === 0 ? 'border-brand-500 text-brand-600' : 'border-transparent text-gray-400 hover:text-gray-700' }}">{{ $t }}</button>
                 @endforeach
             </div>
             <div class="p-6 text-sm text-gray-600 leading-relaxed">
