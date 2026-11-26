@@ -30,6 +30,7 @@
                 <div class="flex flex-wrap items-center gap-2.5 mt-4 text-xs sm:text-sm">
                     @if ($rating['total'])<span class="inline-flex items-center gap-2 rounded-xl bg-black/25 ring-1 ring-white/15 backdrop-blur px-3.5 py-2"><i data-lucide="star" class="w-4 h-4 text-amber-400 fill-current"></i><b>{{ number_format($rating['average'], 1) }}</b><span class="text-white/80">({{ number_format($rating['total']) }} Reviews)</span></span>@endif
                     <span class="inline-flex items-center gap-2 rounded-xl bg-black/25 ring-1 ring-white/15 backdrop-blur px-3.5 py-2"><i data-lucide="shopping-bag" class="w-4 h-4 text-amber-400"></i><b>{{ number_format($total) }}</b>{{ $total === 1 ? 'Product' : 'Products' }}</span>
+                    @if ($shop['location'])<span class="inline-flex items-center gap-2 rounded-xl bg-black/25 ring-1 ring-white/15 backdrop-blur px-3.5 py-2"><i data-lucide="map-pin" class="w-4 h-4 text-amber-400 shrink-0"></i><span>{{ $shop['location'] }}</span></span>@endif
                 </div>
                 <div class="flex flex-wrap items-center gap-3 mt-4">
                     <button type="button" id="shop-share" data-url="{{ $shareUrl }}" data-title="{{ $shop['name'] }}" class="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-orange-50 text-gray-900 font-bold text-sm px-5 py-3 shadow-lg transition active:scale-95"><i data-lucide="share-2" class="w-4 h-4 text-brand-500"></i><span data-label>Share</span></button>
