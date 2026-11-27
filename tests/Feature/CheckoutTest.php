@@ -13,7 +13,7 @@ class CheckoutTest extends OrderTestCase
 
     public function test_a_cod_order_is_placed_reserves_stock_and_empties_the_cart(): void
     {
-        $this->settings->values = ['platform_fee_enabled' => '1', 'platform_fee_amount' => '5'];
+        $this->settings->values = ['platform_fee_enabled' => '1', 'platform_fee_amount' => '5'] + $this->settings->values;
         $v1 = $this->sold(1, 100, 10);
         $v2 = $this->sold(2, 60, 10);
         $this->inCart($v1, 2);
@@ -87,7 +87,7 @@ class CheckoutTest extends OrderTestCase
 
     public function test_a_basket_from_two_shops_becomes_two_orders_with_one_fee_and_a_shared_coupon(): void
     {
-        $this->settings->values = ['platform_fee_enabled' => '1', 'platform_fee_amount' => '5'];
+        $this->settings->values = ['platform_fee_enabled' => '1', 'platform_fee_amount' => '5'] + $this->settings->values;
         $this->checkoutStore->vendors[8] = (new FakeVendor)->forceFill(['id' => 8, 'status' => 'approved', 'shop_name' => 'Dairy Hub']);
         $this->cartCatalog->approved = [7, 8];
         $this->inCart($this->sold(1, 100), 2);                                 // shop 7: 200
@@ -176,7 +176,7 @@ class CheckoutTest extends OrderTestCase
     public function test_a_way_of_paying_admin_switched_off_is_refused(): void
     {
         $this->inCart($this->sold(1, 100), 1);
-        $this->settings->values = ['payment_option_standard_cod' => '0'];
+        $this->settings->values = ['payment_option_standard_cod' => '0'] + $this->settings->values;
 
         $this->place()->assertStatus(400)->assertJsonPath('data.errors.payment_method.0', 'This payment method is not available for this order.');
         $this->place(['payment_method' => 'online'])->assertOk();
@@ -256,7 +256,7 @@ class CheckoutTest extends OrderTestCase
     {
         $this->getJson('/payment-options')->assertOk()->assertJsonPath('data.standard.available', ['cod', 'online']);
 
-        $this->settings->values = ['payment_option_standard_online' => '0', 'payment_option_quick_cod' => '0'];
+        $this->settings->values = ['payment_option_standard_online' => '0', 'payment_option_quick_cod' => '0'] + $this->settings->values;
         $this->getJson('/payment-options')->assertJsonPath('data.standard.available', ['cod'])->assertJsonPath('data.quick.available', ['online'])->assertJsonPath('data.standard.online', false);
     }
 }

@@ -19,27 +19,47 @@ class PricingServiceTest extends HomeTestCase
     {
         $pricing = app(PricingService::class);
 
-        // below the Rs 100 break: charge 49; at/above: 79 (shipped defaults)
-        $this->assertSame(99.0, $pricing->finalPrice(Make::product(1), Make::variant(['price' => 60, 'sale_price' => 50])));
-        $this->assertSame(229.0, $pricing->finalPrice(Make::product(1), Make::variant(['price' => 200, 'sale_price' => 150])));
-        // no sale price: the MRP is the selling price
-        $this->assertSame(279.0, $pricing->finalPrice(Make::product(1), Make::variant(['price' => 200])));
+        // shipped default bands: below Rs 200 -> 20, Rs 200 and above -> 59
+        $this->assertSame(70.0, $pricing->finalPrice(Make::product(1), Make::variant(['price' => 60, 'sale_price' => 50])));
+        $this->assertSame(309.0, $pricing->finalPrice(Make::product(1), Make::variant(['price' => 300, 'sale_price' => 250])));
+        // no sale price: the MRP is the selling price, and exactly Rs 200 is in the upper band
+        $this->assertSame(259.0, $pricing->finalPrice(Make::product(1), Make::variant(['price' => 200])));
     }
 
-    public function test_admin_changed_band_and_product_charge_are_respected(): void
+    public function test_admin_changed_bands_and_product_charge_are_respected(): void
     {
-        $this->settings->values = ['taksh_charge_threshold' => '500', 'taksh_charge_below' => '10', 'taksh_charge_above' => '20'];
+        $this->useTakshBands([
+            ['from' => 0, 'to' => 500, 'charge' => 10],
+            ['from' => 500, 'to' => null, 'charge' => 20],
+        ]);
         $pricing = app(PricingService::class);
 
         $this->assertSame(160.0, $pricing->finalPrice(Make::product(1), Make::variant(['price' => 200, 'sale_price' => 150])));
+        $this->assertSame(520.0, $pricing->finalPrice(Make::product(1), Make::variant(['price' => 500])));
+        // a charge saved on the product beats the band
         $this->assertSame(155.0, $pricing->finalPrice(Make::product(1, ['taksh_charge' => 5]), Make::variant(['price' => 200, 'sale_price' => 150])));
+    }
+
+    public function test_a_price_in_a_middle_band_gets_that_bands_charge(): void
+    {
+        $this->useTakshBands([
+            ['from' => 0, 'to' => 100, 'charge' => 10],
+            ['from' => 100, 'to' => 500, 'charge' => 30],
+            ['from' => 500, 'to' => null, 'charge' => 50],
+        ]);
+        $pricing = app(PricingService::class);
+
+        $this->assertSame(109.0, $pricing->finalPrice(Make::product(1), Make::variant(['price' => 99])));
+        $this->assertSame(130.0, $pricing->finalPrice(Make::product(1), Make::variant(['price' => 100])));
+        $this->assertSame(529.0, $pricing->finalPrice(Make::product(1), Make::variant(['price' => 499])));
+        $this->assertSame(550.0, $pricing->finalPrice(Make::product(1), Make::variant(['price' => 500])));
     }
 
     public function test_a_sale_price_passed_in_wins_and_discount_percent_is_rounded(): void
     {
         $pricing = app(PricingService::class);
 
-        $this->assertSame(139.0, $pricing->finalPrice(Make::product(1), Make::variant(['customer_price' => 500]), 90));
+        $this->assertSame(110.0, $pricing->finalPrice(Make::product(1), Make::variant(['customer_price' => 500]), 90));
         $this->assertSame(25, $pricing->discountPercent(200, 150));
         $this->assertSame(0, $pricing->discountPercent(100, 120));
         $this->assertSame(0, $pricing->discountPercent(0, 50));

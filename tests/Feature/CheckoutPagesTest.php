@@ -88,7 +88,7 @@ class CheckoutPagesTest extends OrderTestCase
 
     public function test_the_page_lists_the_address_the_ways_to_pay_and_the_bill(): void
     {
-        $this->settings->values = ['platform_fee_enabled' => '1', 'platform_fee_amount' => '5'];
+        $this->settings->values = ['platform_fee_enabled' => '1', 'platform_fee_amount' => '5'] + $this->settings->values;
         $this->cartWith(2, 100);
 
         $this->me()->get('/checkout')->assertOk()
@@ -114,12 +114,12 @@ class CheckoutPagesTest extends OrderTestCase
 
     public function test_a_way_of_paying_the_admin_switched_off_is_not_offered(): void
     {
-        $this->settings->values = ['payment_option_standard_cod' => '0'];
+        $this->settings->values = ['payment_option_standard_cod' => '0'] + $this->settings->values;
         $this->cartWith();
 
         $this->me()->get('/checkout')->assertOk()->assertDontSee('Cash on Delivery (COD)')->assertSee('Pay Online (Razorpay)');
 
-        $this->settings->values = ['payment_option_standard_cod' => '0', 'payment_option_standard_online' => '0'];
+        $this->settings->values = ['payment_option_standard_cod' => '0', 'payment_option_standard_online' => '0'] + $this->settings->values;
         $this->me()->get('/checkout')->assertSee('No payment method is available right now')->assertSee('disabled', false);
     }
 
@@ -254,7 +254,7 @@ class CheckoutPagesTest extends OrderTestCase
     public function test_a_way_of_paying_switched_off_after_the_page_was_opened_is_refused(): void
     {
         $this->cartWith();
-        $this->settings->values = ['payment_option_standard_cod' => '0'];
+        $this->settings->values = ['payment_option_standard_cod' => '0'] + $this->settings->values;
 
         $this->submit()->assertRedirect('/checkout');
         $this->get('/checkout')->assertSee('This payment method is not available for this order.');

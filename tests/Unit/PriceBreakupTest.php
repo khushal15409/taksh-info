@@ -20,7 +20,11 @@ class PriceBreakupTest extends HomeTestCase
 
     public function test_the_split_of_a_price_takes_gst_out_and_keeps_the_settlement(): void
     {
-        // selling price 105 with a 5% slab and the shipped Taksh charge band (49 below 100, 79 from 100)
+        // selling price 105 with a 5% slab, in the upper of two Taksh charge bands (49 below 100, 79 from 100)
+        $this->useTakshBands([
+            ['from' => 0, 'to' => 100, 'charge' => 49],
+            ['from' => 100, 'to' => null, 'charge' => 79],
+        ]);
         $a = PriceBreakup::make(105, ['gst_slab' => 5, 'commission_percent' => 10]);
 
         $this->assertSame(100.0, $a['actual_price']);

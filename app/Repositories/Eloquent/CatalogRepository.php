@@ -85,9 +85,7 @@ class CatalogRepository implements CatalogRepositoryInterface
         $selling = '(CASE WHEN product_variants.sale_price IS NOT NULL AND product_variants.sale_price > 0 '
             .'THEN product_variants.sale_price ELSE product_variants.price END)';
 
-        $band = '(CASE WHEN '.$selling.' < '.VendorCharges::value('taksh_charge_threshold')
-            .' THEN '.VendorCharges::value('taksh_charge_below')
-            .' ELSE '.VendorCharges::value('taksh_charge_above').' END)';
+        $band = VendorCharges::takshChargeSql($selling);
 
         return '('.$selling.' + COALESCE((SELECT p.taksh_charge FROM products p WHERE p.id = product_variants.product_id), '.$band.'))';
     }

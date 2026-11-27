@@ -12,7 +12,8 @@ class VendorCharges
 {
     /** key => shipped default (same keys and defaults as Settings > Vendor Charges in taksh-admin) */
     public const RATES = [
-        // The Taksh charge depends on how much the item sells for.
+        // The old single price break. Still read by CatalogRepository's price filter until it
+        // moves to takshChargeSql(); the charge itself comes from the bands.
         'taksh_charge_threshold' => 100,
         'taksh_charge_below' => 49,
         'taksh_charge_above' => 79,
@@ -29,12 +30,57 @@ class VendorCharges
         'default_return_days' => 7,
     ];
 
-    /** Cheap items carry the smaller charge, so the fee never swallows the item. */
+    /** Settings key holding the Taksh charge price bands (JSON), set in taksh-admin. */
+    public const BANDS_KEY = 'taksh_charge_bands';
+
+    /** Bands used until admin saves their own: under ₹200 -> ₹20, ₹200 and above -> ₹59. */
+    public const DEFAULT_BANDS = [
+        ['from' => 0, 'to' => 200, 'charge' => 20],
+        ['from' => 200, 'to' => null, 'charge' => 59],
+    ];
+
+    /** Bands read once per request. */
+    private static ?array $bands = null;
+
+    /**
+     * The Taksh charge for one selling price, from the price band it falls in.
+     * Same rule as taksh-admin's VendorCharges::takshChargeFor().
+     */
     public static function takshChargeFor(float $sellingPrice): float
     {
-        return $sellingPrice < self::value('taksh_charge_threshold')
-            ? self::value('taksh_charge_below')
-            : self::value('taksh_charge_above');
+        foreach (self::takshBands() as $band) {
+            if ($band['to'] === null || $sellingPrice < $band['to']) {
+                return (float) $band['charge'];
+            }
+        }
+
+        return 0;
+    }
+
+    /** The price bands admin set, lowest first; DEFAULT_BANDS when none are saved. */
+    public static function takshBands(): array
+    {
+        if (self::$bands !== null) {
+            return self::$bands;
+        }
+
+        $saved = json_decode((string) app(SettingRepositoryInterface::class)->value(self::BANDS_KEY), true);
+
+        return self::$bands = is_array($saved) && $saved !== [] && end($saved)['to'] === null ? $saved : self::DEFAULT_BANDS;
+    }
+
+    /** SQL CASE giving the band charge for a selling price SQL expression (for price filters in queries). */
+    public static function takshChargeSql(string $sellingSql): string
+    {
+        $sql = '(CASE';
+
+        foreach (self::takshBands() as $band) {
+            $sql .= $band['to'] === null
+                ? ' ELSE '.(float) $band['charge']
+                : ' WHEN '.$sellingSql.' < '.(float) $band['to'].' THEN '.(float) $band['charge'];
+        }
+
+        return $sql.' END)';
     }
 
     /** One rate, falling back to the value we ship with. */

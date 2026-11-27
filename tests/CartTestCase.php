@@ -29,6 +29,12 @@ abstract class CartTestCase extends CatalogTestCase
         $this->app->instance(CartRepositoryInterface::class, $this->cartStore = new FakeCartRepository);
         $this->app->instance(CartCatalogRepositoryInterface::class, $this->cartCatalog = new FakeCartCatalogRepository);
         $this->app->instance(CouponRepositoryInterface::class, $this->couponStore = new FakeCouponRepository);
+
+        // 49 below Rs 100, 79 from Rs 100: the band sellable() prices against
+        $this->useTakshBands([
+            ['from' => 0, 'to' => 100, 'charge' => 49],
+            ['from' => 100, 'to' => null, 'charge' => 79],
+        ]);
     }
 
     /** A variant on sale at the fake vendor (id 7) with `$free` pieces in stock; price is what the customer pays. */

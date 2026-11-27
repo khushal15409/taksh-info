@@ -2,12 +2,14 @@
 
 namespace Tests;
 
+use App\Helpers\VendorCharges;
 use App\Repositories\Contracts\BannerRepositoryInterface;
 use App\Repositories\Contracts\DashboardRepositoryInterface;
 use App\Repositories\Contracts\ProductRepositoryInterface;
 use App\Repositories\Contracts\RecentViewRepositoryInterface;
 use App\Repositories\Contracts\SaleRepositoryInterface;
 use App\Repositories\Contracts\SettingRepositoryInterface;
+use Closure;
 use Tests\Support\FakeBannerRepository;
 use Tests\Support\FakeDashboardRepository;
 use Tests\Support\FakeProductRepository;
@@ -43,5 +45,16 @@ abstract class HomeTestCase extends TestCase
         $this->app->instance(ProductRepositoryInterface::class, $this->products = new FakeProductRepository);
         $this->app->instance(SaleRepositoryInterface::class, $this->sales = new FakeSaleRepository);
         $this->app->instance(RecentViewRepositoryInterface::class, $this->recent = new FakeRecentViewRepository);
+
+        // VendorCharges keeps the bands for the whole request; clear them so each test reads its own settings.
+        Closure::bind(static function () {
+            self::$bands = null;
+        }, null, VendorCharges::class)();
+    }
+
+    /** Save the Taksh charge bands the way admin does (JSON in settings). */
+    protected function useTakshBands(array $bands): void
+    {
+        $this->settings->values[VendorCharges::BANDS_KEY] = json_encode($bands);
     }
 }

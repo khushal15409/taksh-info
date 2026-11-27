@@ -136,7 +136,7 @@ class CartTest extends CartTestCase
 
     public function test_an_empty_cart_has_no_charges_and_free_delivery(): void
     {
-        $this->settings->values = ['platform_fee_enabled' => '1', 'platform_fee_amount' => '5'];
+        $this->settings->values = ['platform_fee_enabled' => '1', 'platform_fee_amount' => '5'] + $this->settings->values;
 
         $this->cart('normal')->assertOk()
             ->assertJsonPath('message', 'Cart fetched successfully')
@@ -149,7 +149,7 @@ class CartTest extends CartTestCase
     {
         $this->sellable(1, 100);
         $this->sellable(2, 60);
-        $this->settings->values = ['platform_fee_enabled' => '1', 'platform_fee_amount' => '5', 'quick_delivery_fee_enabled' => '1', 'quick_delivery_fee_amount' => '30'];
+        $this->settings->values = ['platform_fee_enabled' => '1', 'platform_fee_amount' => '5', 'quick_delivery_fee_enabled' => '1', 'quick_delivery_fee_amount' => '30'] + $this->settings->values;
         $this->add(1, 2);
         $this->add(2, 1);
 
@@ -172,7 +172,7 @@ class CartTest extends CartTestCase
         $cart = $this->cartStore->firstOrCreateForUser(5);
         $this->cartStore->addLine($cart, $quick, 1, fn () => null);
         $this->cartStore->addLine($cart, $this->cartCatalog->variants[1], 2, fn () => null);
-        $this->settings->values = ['quick_delivery_fee_enabled' => '1', 'quick_delivery_fee_amount' => '30'];
+        $this->settings->values = ['quick_delivery_fee_enabled' => '1', 'quick_delivery_fee_amount' => '30'] + $this->settings->values;
 
         $std = $this->actingAs($user)->cart('normal')->json('data.cart');
         $qk = $this->actingAs($user)->cart('30_min')->json('data.cart');
